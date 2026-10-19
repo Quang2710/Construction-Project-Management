@@ -1,0 +1,300 @@
+<app-page-header [title]="title()" subtitle="Báo cáo thi công trong ngày — các trường có dấu * là bắt buộc" />
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error() && !store.diary() && !store.loading() && id()) {
+  <app-error-state [message]="store.error() ?? ''" (retry)="retry()" />
+} @else if (locked()) {
+  <app-empty-state
+    icon="lock"
+    title="Nhật ký đã bị khoá"
+    message="Nhật ký đã gửi duyệt hoặc đã được duyệt nên không thể chỉnh sửa."
+  >
+    <a mat-stroked-button [routerLink]="['/site-diaries', id()]">Xem nhật ký</a>
+  </app-empty-state>
+} @else if (!store.loading()) {
+  <form class="form" [formGroup]="form" novalidate (ngSubmit)="save(false)">
+    @if (submitError(); as error) {
+      <div class="submit-error" role="alert"><mat-icon>error</mat-icon> {{ error }}</div>
+    }
+
+    <!-- Thông tin chung -->
+    <section class="section">
+      <h2 class="section__title"><mat-icon>event</mat-icon> Thông tin chung</h2>
+      <div class="grid">
+        <mat-form-field>
+          <mat-label>Dự án</mat-label>
+          <mat-select formControlName="projectId" required>
+            @for (project of store.projects(); track project.id) {
+              <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.projectId.hasError('required')) {
+            <mat-error>Vui lòng chọn dự án.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Ngày báo cáo</mat-label>
+          <input matInput [matDatepicker]="datePicker" [max]="today" formControlName="date" placeholder="dd/MM/yyyy" required />
+          <mat-datepicker-toggle matIconSuffix [for]="datePicker" />
+          <mat-datepicker #datePicker />
+          @if (form.controls.date.hasError('matDatepickerParse')) {
+            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
+          } @else if (form.controls.date.hasError('required')) {
+            <mat-error>Vui lòng chọn ngày báo cáo.</mat-error>
+          } @else if (form.controls.date.hasError('matDatepickerMax')) {
+            <mat-error>Không lập nhật ký cho ngày trong tương lai.</mat-error>
+          } @else if (form.controls.date.hasError('duplicate')) {
+            <mat-error>Dự án đã có nhật ký cho ngày này.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- Thời tiết -->
+    <section class="section">
+      <h2 class="section__title"><mat-icon>partly_cloudy_day</mat-icon> Thời tiết</h2>
+      <div class="grid grid--4">
+        <mat-form-field>
+          <mat-label>Buổi sáng</mat-label>
+          <mat-select formControlName="morning">
+            @for (option of weatherOptions; track option) {
+              <mat-option [value]="option">{{ weatherLabels[option] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Buổi chiều</mat-label>
+          <mat-select formControlName="afternoon">
+            @for (option of weatherOptions; track option) {
+              <mat-option [value]="option">{{ weatherLabels[option] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Nhiệt độ thấp nhất</mat-label>
+          <input matInput type="number" formControlName="minTemp" />
+          <span matTextSuffix>°C</span>
+          @if (form.controls.minTemp.invalid) {
+            <mat-error>Từ -10 đến 50 °C.</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Nhiệt độ cao nhất</mat-label>
+          <input matInput type="number" formControlName="maxTemp" />
+          <span matTextSuffix>°C</span>
+          @if (form.controls.maxTemp.hasError('belowMin')) {
+            <mat-error>Phải ≥ nhiệt độ thấp nhất.</mat-error>
+          } @else if (form.controls.maxTemp.invalid) {
+            <mat-error>Từ -10 đến 50 °C.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </section>
+
+    <!-- Nhân công -->
+    <section class="section" formArrayName="labor">
+      <h2 class="section__title">
+        <mat-icon>groups</mat-icon> Nhân công theo tổ đội
+        <span class="badge">Tổng {{ totalWorkers() }} người</span>
+      </h2>
+      @for (group of form.controls.labor.controls; track group; let index = $index) {
+        <div class="row" [formGroupName]="index">
+          <mat-form-field class="row__main">
+            <mat-label>Tổ đội</mat-label>
+            <input matInput formControlName="crew" [matAutocomplete]="crewAuto" />
+            <mat-autocomplete #crewAuto="matAutocomplete">
+              @for (option of crewOptions(index); track option) {
+                <mat-option [value]="option">{{ option }}</mat-option>
+              }
+            </mat-autocomplete>
+            @if (group.controls.crew.hasError('required')) {
+              <mat-error>Nhập tên tổ đội.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field class="row__num">
+            <mat-label>Số người</mat-label>
+            <input matInput type="number" min="0" formControlName="headcount" />
+            @if (group.controls.headcount.invalid) {
+              <mat-error>0–1000 người.</mat-error>
+            }
+          </mat-form-field>
+          <button mat-icon-button type="button" aria-label="Xoá dòng" (click)="removeAt(form.controls.labor, index)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      }
+      <button mat-button type="button" (click)="addLabor()"><mat-icon>add</mat-icon> Thêm tổ đội</button>
+    </section>
+
+    <!-- Máy móc -->
+    <section class="section" formArrayName="equipment">
+      <h2 class="section__title"><mat-icon>construction</mat-icon> Máy móc, thiết bị</h2>
+      @for (group of form.controls.equipment.controls; track group; let index = $index) {
+        <div class="row" [formGroupName]="index">
+          <mat-form-field class="row__main">
+            <mat-label>Thiết bị</mat-label>
+            <input matInput formControlName="name" [matAutocomplete]="equipmentAuto" />
+            <mat-autocomplete #equipmentAuto="matAutocomplete">
+              @for (option of equipmentOptions(index); track option) {
+                <mat-option [value]="option">{{ option }}</mat-option>
+              }
+            </mat-autocomplete>
+            @if (group.controls.name.hasError('required')) {
+              <mat-error>Nhập tên thiết bị.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field class="row__num">
+            <mat-label>Số lượng</mat-label>
+            <input matInput type="number" min="1" formControlName="quantity" />
+            @if (group.controls.quantity.invalid) {
+              <mat-error>1–100.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field class="row__num">
+            <mat-label>Giờ chạy</mat-label>
+            <input matInput type="number" min="0" max="24" formControlName="hours" />
+            @if (group.controls.hours.invalid) {
+              <mat-error>0–24 giờ.</mat-error>
+            }
+          </mat-form-field>
+          <button mat-icon-button type="button" aria-label="Xoá dòng" (click)="removeAt(form.controls.equipment, index)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      } @empty {
+        <p class="empty">Chưa có máy móc nào.</p>
+      }
+      <button mat-button type="button" (click)="addEquipment()"><mat-icon>add</mat-icon> Thêm thiết bị</button>
+    </section>
+
+    <!-- Khối lượng -->
+    <section class="section" formArrayName="workItems">
+      <h2 class="section__title"><mat-icon>straighten</mat-icon> Khối lượng hoàn thành</h2>
+      @for (group of form.controls.workItems.controls; track group; let index = $index) {
+        <div class="row" [formGroupName]="index">
+          <mat-form-field class="row__main">
+            <mat-label>Hạng mục công việc</mat-label>
+            <input matInput formControlName="description" maxlength="300" />
+            @if (group.controls.description.hasError('required')) {
+              <mat-error>Nhập hạng mục.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field class="row__unit">
+            <mat-label>ĐVT</mat-label>
+            <mat-select formControlName="unit">
+              @for (unit of unitOptions; track unit) {
+                <mat-option [value]="unit">{{ unit }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="row__num">
+            <mat-label>Khối lượng</mat-label>
+            <input matInput type="number" min="0" step="0.01" formControlName="quantity" />
+            @if (group.controls.quantity.invalid) {
+              <mat-error>Nhập số ≥ 0.</mat-error>
+            }
+          </mat-form-field>
+          <button mat-icon-button type="button" aria-label="Xoá dòng" (click)="removeAt(form.controls.workItems, index)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      } @empty {
+        <p class="empty">Chưa ghi nhận khối lượng.</p>
+      }
+      <button mat-button type="button" (click)="addWorkItem()"><mat-icon>add</mat-icon> Thêm hạng mục</button>
+    </section>
+
+    <!-- Sự cố -->
+    <section class="section" formArrayName="incidents">
+      <h2 class="section__title"><mat-icon>health_and_safety</mat-icon> Sự cố, an toàn lao động</h2>
+      @for (group of form.controls.incidents.controls; track group; let index = $index) {
+        <div class="incident" [formGroupName]="index">
+          <div class="grid">
+            <mat-form-field>
+              <mat-label>Loại sự cố</mat-label>
+              <mat-select formControlName="type">
+                @for (type of incidentTypes; track type) {
+                  <mat-option [value]="type">{{ incidentTypeLabels[type] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Mức độ</mat-label>
+              <mat-select formControlName="severity">
+                @for (severity of severities; track severity) {
+                  <mat-option [value]="severity">{{ severityLabels[severity] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="span-2">
+              <mat-label>Mô tả sự cố</mat-label>
+              <textarea matInput rows="2" formControlName="description" maxlength="1000"></textarea>
+              @if (group.controls.description.hasError('required')) {
+                <mat-error>Vui lòng mô tả sự cố.</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field class="span-2">
+              <mat-label>Biện pháp xử lý</mat-label>
+              <textarea matInput rows="2" formControlName="actionTaken" maxlength="1000"></textarea>
+            </mat-form-field>
+          </div>
+          <button mat-button type="button" class="danger" (click)="removeAt(form.controls.incidents, index)">
+            <mat-icon>delete</mat-icon> Bỏ sự cố này
+          </button>
+        </div>
+      } @empty {
+        <p class="empty safe"><mat-icon>verified_user</mat-icon> Không có sự cố trong ngày.</p>
+      }
+      <button mat-button type="button" (click)="addIncident()"><mat-icon>add</mat-icon> Ghi nhận sự cố</button>
+    </section>
+
+    <!-- Ghi chú -->
+    <section class="section">
+      <h2 class="section__title"><mat-icon>notes</mat-icon> Ghi chú</h2>
+      <mat-form-field class="full">
+        <mat-label>Ghi chú khác (giao ban, vật tư về, kiến nghị…)</mat-label>
+        <textarea matInput rows="3" formControlName="notes" maxlength="4000"></textarea>
+      </mat-form-field>
+    </section>
+
+    <!-- Ảnh -->
+    <section class="section">
+      <h2 class="section__title"><mat-icon>photo_library</mat-icon> Ảnh hiện trường</h2>
+      <app-photo-uploader
+        [photos]="store.photos()"
+        [locating]="store.locating()"
+        [gpsWarning]="store.gpsWarning()"
+        [canAdd]="store.canAddPhotos()"
+        [disabled]="store.saving()"
+        [maxPhotos]="maxPhotos"
+        (filesSelected)="onFiles($event)"
+        (remove)="onRemovePhoto($event)"
+        (retry)="store.retryUpload($event)"
+        (captionChange)="onCaption($event)"
+      />
+      @if (store.failedUploads()) {
+        <p class="field-error">{{ store.failedUploads() }} ảnh tải lên lỗi sẽ không được lưu.</p>
+      }
+    </section>
+
+    <div class="actions">
+      <a mat-button [routerLink]="id() ? ['/site-diaries', id()] : ['/site-diaries']">Huỷ</a>
+      <button mat-stroked-button type="submit" [disabled]="store.saving() || store.uploading()">
+        <mat-icon>save</mat-icon>
+        Lưu nháp
+      </button>
+      <button mat-flat-button type="button" [disabled]="store.saving() || store.uploading()" (click)="save(true)">
+        @if (store.saving()) {
+          <mat-spinner diameter="18" />
+        } @else {
+          <mat-icon>send</mat-icon>
+        }
+        Lưu và gửi duyệt
+      </button>
+    </div>
+  </form>
+}

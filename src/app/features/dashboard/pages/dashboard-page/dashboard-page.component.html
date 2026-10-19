@@ -1,0 +1,112 @@
+@if (auth.user(); as user) {
+  <section class="welcome">
+    <div>
+      <p class="welcome__date">{{ today | date: 'EEEE, dd/MM/yyyy' }}</p>
+      <h1 class="welcome__title">Xin chào, {{ user.fullName }}</h1>
+      <p class="welcome__role">{{ user.jobTitle }} · {{ auth.roleLabel() }}</p>
+    </div>
+  </section>
+}
+
+<div *hasRole="['CLIENT']" class="notice">
+  <mat-icon>visibility</mat-icon>
+  <span>Bạn đang ở chế độ <strong>chỉ xem</strong>. Mọi thay đổi dữ liệu cần thực hiện qua Ban quản lý dự án.</span>
+</div>
+<div *hasRole="['SITE_ENGINEER']" class="notice">
+  <mat-icon>engineering</mat-icon>
+  <span>Số liệu chỉ tính trên các dự án bạn được gán.</span>
+</div>
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" class="loading" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state title="Không tải được số liệu tổng quan" [message]="error" (retry)="store.load()" />
+} @else if (store.summary(); as summary) {
+  @if (summary.kpis.totalProjects === 0) {
+    <app-empty-state icon="apartment" title="Chưa có dự án" message="Bạn chưa được gán vào dự án nào." />
+  } @else {
+    <div class="kpis">
+      <app-kpi-card
+        label="Dự án đang thi công"
+        icon="construction"
+        [value]="summary.kpis.activeProjects"
+        [hint]="'Trên tổng ' + summary.kpis.totalProjects + ' dự án'"
+      />
+      <app-kpi-card
+        label="Chậm tiến độ"
+        icon="schedule"
+        [tone]="summary.kpis.delayedProjects ? 'warning' : 'neutral'"
+        [value]="summary.kpis.delayedProjects"
+        hint="Thực tế thấp hơn kế hoạch ≥ 10%"
+      />
+      <app-kpi-card
+        label="Vượt ngân sách"
+        icon="money_off"
+        [tone]="summary.kpis.overBudgetProjects ? 'critical' : 'neutral'"
+        [value]="summary.kpis.overBudgetProjects"
+        hint="Chi phí dự báo vượt ngân sách"
+      />
+      <app-kpi-card
+        label="Công việc trễ hạn"
+        icon="alarm"
+        [tone]="summary.kpis.overdueTasks ? 'critical' : 'neutral'"
+        [value]="summary.kpis.overdueTasks"
+        hint="Đã qua hạn, chưa hoàn thành"
+      />
+    </div>
+
+    <div class="charts">
+      <app-chart-card title="Đường cong S tiến độ" subtitle="% lũy kế toàn danh mục, trọng số theo ngân sách">
+        <app-s-curve-chart chart [series]="summary.sCurve" />
+        <table table class="data-table">
+          <thead>
+            <tr><th>Tháng</th><th>Kế hoạch</th><th>Thực tế</th></tr>
+          </thead>
+          <tbody>
+            @for (row of sCurveRows(); track row.label) {
+              <tr>
+                <td>{{ row.label }}</td>
+                <td>{{ row.planned | number: '1.0-1' }}%</td>
+                <td>{{ row.actual === null ? '—' : (row.actual | number: '1.0-1') + '%' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-chart-card>
+
+      <app-chart-card title="Chi phí theo dự án" subtitle="Ngân sách so với chi phí thực tế">
+        <app-cost-chart chart [costs]="summary.costByProject" />
+        <table table class="data-table">
+          <thead>
+            <tr><th>Dự án</th><th>Ngân sách</th><th>Đã chi</th></tr>
+          </thead>
+          <tbody>
+            @for (cost of summary.costByProject; track cost.projectId) {
+              <tr>
+                <td>{{ cost.code }}</td>
+                <td>{{ cost.budget | vnd: 'compact' }}</td>
+                <td>{{ cost.actualCost | vnd: 'compact' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </app-chart-card>
+    </div>
+
+    <section class="overdue">
+      <header class="overdue__header">
+        <h2 class="overdue__title"><mat-icon>notifications_active</mat-icon> Cảnh báo công việc trễ hạn</h2>
+        @if (summary.kpis.overdueTasks > summary.overdueTasks.length) {
+          <span class="overdue__more">Hiển thị {{ summary.overdueTasks.length }}/{{ summary.kpis.overdueTasks }} việc trễ nhất</span>
+        }
+      </header>
+      @if (summary.overdueTasks.length) {
+        <app-overdue-task-list [tasks]="summary.overdueTasks" (taskSelect)="openTask($event)" />
+      } @else {
+        <app-empty-state icon="task_alt" title="Không có công việc trễ hạn" message="Mọi công việc đều đang đúng tiến độ." />
+      }
+    </section>
+  }
+}

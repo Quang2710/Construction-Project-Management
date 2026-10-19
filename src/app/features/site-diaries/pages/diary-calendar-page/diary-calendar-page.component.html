@@ -1,0 +1,118 @@
+<app-page-header
+  title="Nhật ký công trường"
+  [subtitle]="isClient() ? 'Báo cáo thi công hằng ngày đã được phê duyệt' : 'Báo cáo thi công hằng ngày theo dự án'"
+>
+  <a
+    mat-flat-button
+    *hasRole="permissions.editDiaries"
+    routerLink="/site-diaries/new"
+    [queryParams]="{ projectId: store.projectId() }"
+  >
+    <mat-icon>add</mat-icon>
+    Lập nhật ký hôm nay
+  </a>
+</app-page-header>
+
+<div class="toolbar">
+  <div class="month-nav">
+    <button mat-icon-button type="button" aria-label="Tháng trước" (click)="store.shiftMonth(-1)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <h2 class="month-nav__label">{{ store.monthLabel() }}</h2>
+    <button mat-icon-button type="button" aria-label="Tháng sau" (click)="store.shiftMonth(1)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <button mat-stroked-button type="button" (click)="store.goToToday()">Hôm nay</button>
+  </div>
+
+  <mat-form-field class="toolbar__project" subscriptSizing="dynamic">
+    <mat-label>Dự án</mat-label>
+    <mat-select [value]="store.projectId()" (valueChange)="store.setProject($event)">
+      <mat-option [value]="null">Tất cả dự án</mat-option>
+      @for (project of store.projects(); track project.id) {
+        <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>
+
+@if (!isClient()) {
+  <mat-chip-listbox
+    class="status-filter"
+    aria-label="Lọc theo trạng thái"
+    [value]="store.status() ?? allValue"
+    [hideSingleSelectionIndicator]="true"
+    (change)="onStatusChange($event)"
+  >
+    <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
+    @for (item of store.statusCounts(); track item.status) {
+      <mat-chip-option [value]="item.status">
+        <span class="legend-dot" [class]="'legend-dot--' + item.status.toLowerCase()"></span>
+        {{ statusLabels[item.status] }} ({{ item.count }})
+      </mat-chip-option>
+    }
+  </mat-chip-listbox>
+}
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" class="loading" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state [message]="error" (retry)="store.reload()" />
+} @else {
+  <div class="layout">
+    <app-diary-calendar
+      [weeks]="store.weeks()"
+      [selectedDate]="store.selectedDate()"
+      (daySelect)="store.selectDate($event)"
+      (diaryOpen)="openDiary($event)"
+    />
+
+    <aside class="day-panel" aria-live="polite">
+      <h3 class="day-panel__title">{{ selectedDateValue() | date: 'EEEE, dd/MM/yyyy' }}</h3>
+
+      @for (diary of store.selectedDiaries(); track diary.id) {
+        <a class="diary-card" [routerLink]="['/site-diaries', diary.id]">
+          <div class="diary-card__top">
+            <span class="diary-card__code">{{ diary.project.code }}</span>
+            <app-diary-status-chip [status]="diary.status" />
+          </div>
+          <p class="diary-card__name">{{ diary.project.name }}</p>
+          <p class="diary-card__meta">
+            <mat-icon [matTooltip]="weatherLabels[diary.weather.morning]">{{ weatherIcons[diary.weather.morning] }}</mat-icon>
+            <span>{{ diary.totalWorkers }} công nhân</span>
+            <span>· {{ diary.workItems.length }} hạng mục</span>
+            <span>· {{ diary.photos.length }} ảnh</span>
+            @if (diary.incidents.length) {
+              <span class="incident"><mat-icon>warning</mat-icon>{{ diary.incidents.length }} sự cố</span>
+            }
+          </p>
+          <p class="diary-card__author">Người lập: {{ diary.createdBy.fullName }}</p>
+        </a>
+      } @empty {
+        <p class="day-panel__empty">Không có nhật ký trong ngày này.</p>
+      }
+
+      @if (canCreateForSelected() && !selectedHasProjectDiary()) {
+        <a
+          mat-stroked-button
+          class="day-panel__create"
+          *hasRole="permissions.editDiaries"
+          routerLink="/site-diaries/new"
+          [queryParams]="{ projectId: store.projectId(), date: store.selectedDate() }"
+        >
+          <mat-icon>edit_calendar</mat-icon>
+          Lập nhật ký cho ngày này
+        </a>
+      }
+    </aside>
+  </div>
+
+  @if (store.selectedProject(); as project) {
+    <p class="hint">
+      <span class="hint__swatch" aria-hidden="true"></span>
+      Ô kẻ sọc: ngày làm việc đã qua mà {{ project.code }} chưa có nhật ký.
+    </p>
+  }
+}

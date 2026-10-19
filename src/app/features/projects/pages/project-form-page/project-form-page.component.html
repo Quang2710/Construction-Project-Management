@@ -1,0 +1,197 @@
+<app-page-header [title]="title()" subtitle="Các trường có dấu * là bắt buộc" />
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state [message]="error" (retry)="retry()" />
+} @else if (!store.loading()) {
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (submitError(); as error) {
+      <div class="submit-error" role="alert"><mat-icon>error</mat-icon> {{ error }}</div>
+    }
+
+    <section class="section">
+      <h2 class="section__title">Thông tin chung</h2>
+      <div class="grid">
+        <mat-form-field>
+          <mat-label>Mã dự án</mat-label>
+          <input matInput formControlName="code" placeholder="VD: HN-GTHM" class="uppercase" required />
+          @if (form.controls.code.hasError('required')) {
+            <mat-error>Vui lòng nhập mã dự án.</mat-error>
+          } @else if (form.controls.code.hasError('pattern')) {
+            <mat-error>3–20 ký tự: chữ in hoa, số hoặc dấu gạch ngang.</mat-error>
+          } @else if (form.controls.code.hasError('duplicate')) {
+            <mat-error>Mã dự án đã tồn tại.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Trạng thái</mat-label>
+          <mat-select formControlName="status" required>
+            @for (status of statuses; track status) {
+              <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="span-2">
+          <mat-label>Tên dự án</mat-label>
+          <input matInput formControlName="name" maxlength="200" required />
+          @if (form.controls.name.hasError('required')) {
+            <mat-error>Vui lòng nhập tên dự án.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="span-2">
+          <mat-label>Chủ đầu tư</mat-label>
+          <input matInput formControlName="clientName" maxlength="200" required />
+          @if (form.controls.clientName.hasError('required')) {
+            <mat-error>Vui lòng nhập chủ đầu tư.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="span-2">
+          <mat-label>Mô tả</mat-label>
+          <textarea matInput formControlName="description" rows="3" maxlength="2000"></textarea>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section__title">Thời gian &amp; ngân sách</h2>
+      <div class="grid">
+        <mat-form-field>
+          <mat-label>Ngày bắt đầu</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="dd/MM/yyyy" required />
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker" />
+          <mat-datepicker #startPicker />
+          @if (form.controls.startDate.hasError('matDatepickerParse')) {
+            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
+          } @else if (form.controls.startDate.hasError('required')) {
+            <mat-error>Vui lòng chọn ngày bắt đầu.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Ngày kết thúc</mat-label>
+          <input
+            matInput
+            [matDatepicker]="endPicker"
+            [min]="form.controls.startDate.value"
+            formControlName="endDate"
+            placeholder="dd/MM/yyyy"
+            required
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="endPicker" />
+          <mat-datepicker #endPicker />
+          @if (form.controls.endDate.hasError('matDatepickerParse')) {
+            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
+          } @else if (form.controls.endDate.hasError('required')) {
+            <mat-error>Vui lòng chọn ngày kết thúc.</mat-error>
+          } @else if (form.controls.endDate.hasError('endBeforeStart') || form.controls.endDate.hasError('matDatepickerMin')) {
+            <mat-error>Ngày kết thúc phải sau ngày bắt đầu.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Ngân sách (VND)</mat-label>
+          <input matInput type="number" formControlName="budget" min="0" step="1000000" required />
+          <span matTextSuffix>₫</span>
+          @if (budgetPreview(); as budget) {
+            <mat-hint>{{ budget | vnd: 'compact' }}</mat-hint>
+          }
+          @if (form.controls.budget.hasError('required')) {
+            <mat-error>Vui lòng nhập ngân sách.</mat-error>
+          } @else if (form.controls.budget.hasError('min')) {
+            <mat-error>Ngân sách tối thiểu 1.000.000 ₫.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section__title">Nhân sự</h2>
+      <div class="grid">
+        <mat-form-field>
+          <mat-label>Quản lý dự án</mat-label>
+          <mat-select formControlName="managerId">
+            <mat-option [value]="null">— Chưa phân công —</mat-option>
+            @for (user of store.managers(); track user.id) {
+              <mat-option [value]="user.id">{{ user.fullName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Kỹ sư phụ trách</mat-label>
+          <mat-select formControlName="memberIds" multiple>
+            @for (user of store.engineers(); track user.id) {
+              <mat-option [value]="user.id">{{ user.fullName }} · {{ user.jobTitle }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>Kỹ sư chỉ xem được dự án mà mình được gán</mat-hint>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section__title">Địa điểm công trình</h2>
+      <div class="grid">
+        <mat-form-field class="span-2">
+          <mat-label>Địa chỉ</mat-label>
+          <input matInput formControlName="address" maxlength="300" required />
+          @if (form.controls.address.hasError('required')) {
+            <mat-error>Vui lòng nhập địa chỉ công trình.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Tỉnh/Thành phố</mat-label>
+          <mat-select formControlName="province" required>
+            @for (province of provinces; track province) {
+              <mat-option [value]="province">{{ province }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.province.hasError('required')) {
+            <mat-error>Vui lòng chọn tỉnh/thành phố.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="coords">
+          <mat-form-field>
+            <mat-label>Vĩ độ</mat-label>
+            <input matInput type="number" formControlName="lat" step="0.000001" required />
+            @if (form.controls.lat.invalid) {
+              <mat-error>Vĩ độ từ -90 đến 90.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Kinh độ</mat-label>
+            <input matInput type="number" formControlName="lng" step="0.000001" required />
+            @if (form.controls.lng.invalid) {
+              <mat-error>Kinh độ từ -180 đến 180.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+      <p class="map-hint"><mat-icon>touch_app</mat-icon> Bấm lên bản đồ để chọn vị trí công trình.</p>
+      <app-project-map class="map" [markers]="markers()" [editable]="true" (locationPick)="pickLocation($event)" />
+      @if ((form.controls.lat.touched || form.controls.lng.touched) && (form.controls.lat.hasError('required') || form.controls.lng.hasError('required'))) {
+        <p class="field-error">Vui lòng chọn vị trí công trình trên bản đồ hoặc nhập toạ độ.</p>
+      }
+    </section>
+
+    <div class="actions">
+      <a mat-button [routerLink]="id() ? ['/projects', id()] : ['/projects']">Huỷ</a>
+      <button mat-flat-button type="submit" [disabled]="store.saving()">
+        @if (store.saving()) {
+          <mat-spinner diameter="18" />
+        } @else {
+          <ng-container>{{ id() ? 'Lưu thay đổi' : 'Tạo dự án' }}</ng-container>
+        }
+      </button>
+    </div>
+  </form>
+}

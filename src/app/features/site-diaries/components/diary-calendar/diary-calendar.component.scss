@@ -1,0 +1,193 @@
+.calendar {
+  overflow: hidden;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.row + .row {
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.weekday {
+  padding: 8px;
+  font: var(--mat-sys-label-medium);
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.cell {
+  min-height: 104px;
+  padding: 6px;
+  cursor: pointer;
+  outline: none;
+  transition: background 120ms ease;
+
+  & + .cell {
+    border-left: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  &:hover {
+    background: var(--mat-sys-surface-container-low);
+  }
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--mat-sys-primary);
+  }
+}
+
+.cell--outside {
+  background: var(--mat-sys-surface-container-lowest);
+
+  .cell__day {
+    color: var(--mat-sys-outline);
+  }
+}
+
+.cell--sunday .cell__day {
+  color: var(--mat-sys-error);
+}
+
+.cell--selected {
+  background: var(--mat-sys-secondary-container);
+
+  &:hover {
+    background: var(--mat-sys-secondary-container);
+  }
+}
+
+.cell--missing {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 8px,
+    color-mix(in srgb, var(--app-warning) 12%, transparent) 8px 10px
+  );
+}
+
+.cell__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cell__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  font: var(--mat-sys-label-large);
+}
+
+.cell--today .cell__day {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+.cell__missing {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: var(--app-warning);
+}
+
+.entries {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 1px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-label-small);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
+}
+
+.entry__dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mat-sys-outline);
+}
+
+.entry--submitted .entry__dot {
+  background: var(--mat-sys-tertiary);
+}
+
+.entry--approved .entry__dot {
+  background: var(--app-success);
+}
+
+.entry--rejected .entry__dot {
+  background: var(--mat-sys-error);
+}
+
+.entry__code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.more {
+  padding-left: 6px;
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// Điện thoại: chỉ hiện chấm trạng thái, xem chi tiết ở danh sách ngày bên dưới.
+@media (max-width: 719.98px) {
+  .cell {
+    min-height: 64px;
+    padding: 4px 2px;
+  }
+
+  .cell__head {
+    justify-content: center;
+  }
+
+  .cell__missing {
+    display: none;
+  }
+
+  .entries {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .entry {
+    width: auto;
+    padding: 2px;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .entry__code,
+  .more {
+    display: none;
+  }
+}

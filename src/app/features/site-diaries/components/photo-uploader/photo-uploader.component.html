@@ -1,0 +1,68 @@
+<div class="actions">
+  <input #cameraInput type="file" accept="image/*" capture="environment" hidden (change)="onFiles(cameraInput)" />
+  <input #galleryInput type="file" accept="image/*" multiple hidden (change)="onFiles(galleryInput)" />
+  <button mat-flat-button type="button" [disabled]="disabled() || !canAdd()" (click)="cameraInput.click()">
+    <mat-icon>photo_camera</mat-icon>
+    Chụp ảnh
+  </button>
+  <button mat-stroked-button type="button" [disabled]="disabled() || !canAdd()" (click)="galleryInput.click()">
+    <mat-icon>add_photo_alternate</mat-icon>
+    Chọn từ thư viện
+  </button>
+  <span class="actions__count">{{ photos().length }}/{{ maxPhotos() }} ảnh</span>
+</div>
+
+@if (locating()) {
+  <p class="info"><mat-spinner diameter="16" /> Đang lấy vị trí GPS để gắn vào ảnh…</p>
+} @else if (gpsWarning(); as warning) {
+  <p class="info info--warning"><mat-icon>location_off</mat-icon> {{ warning }} Ảnh sẽ không có toạ độ.</p>
+}
+
+@if (photos().length) {
+  <ul class="grid">
+    @for (photo of photos(); track photo.localId) {
+      <li class="item" [class.item--error]="photo.status === 'error'">
+        <div class="preview">
+          <img [src]="photo.previewUrl" [alt]="photo.caption || photo.fileName" />
+          @if (photo.status === 'uploading') {
+            <div class="overlay"><mat-spinner diameter="28" /><span>Đang tải lên…</span></div>
+          } @else if (photo.status === 'error') {
+            <div class="overlay overlay--error">
+              <mat-icon>error</mat-icon>
+              <span>{{ photo.error }}</span>
+              <button mat-stroked-button type="button" (click)="retry.emit(photo.localId)">Thử lại</button>
+            </div>
+          }
+          <button
+            mat-icon-button
+            class="remove"
+            type="button"
+            aria-label="Bỏ ảnh"
+            [disabled]="disabled()"
+            (click)="remove.emit(photo.localId)"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          <span class="gps" [matTooltip]="photo.location ? 'Đã gắn toạ độ GPS' : 'Chưa có toạ độ'">
+            <mat-icon>{{ photo.location ? 'location_on' : 'location_off' }}</mat-icon>
+            @if (photo.location?.accuracy; as accuracy) {
+              ±{{ accuracy }} m
+            }
+          </span>
+        </div>
+        <mat-form-field class="caption" subscriptSizing="dynamic">
+          <mat-label>Chú thích</mat-label>
+          <input
+            matInput
+            maxlength="200"
+            [value]="photo.caption"
+            [disabled]="disabled()"
+            (input)="onCaption(photo.localId, $event)"
+          />
+        </mat-form-field>
+      </li>
+    }
+  </ul>
+} @else {
+  <p class="empty">Chưa có ảnh. Ảnh được nén còn tối đa 1600px trước khi tải lên.</p>
+}

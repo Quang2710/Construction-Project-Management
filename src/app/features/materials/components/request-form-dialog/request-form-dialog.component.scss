@@ -1,0 +1,54 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  min-width: min(560px, 100%);
+  padding-top: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  button {
+    margin-top: 8px;
+  }
+}
+
+.row__material {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__qty {
+  width: 150px;
+}
+
+.add {
+  align-self: flex-start;
+  margin-bottom: 12px;
+}
+
+.error {
+  margin: 0 0 8px;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-error);
+}
+
+.total {
+  margin: 0;
+}
+
+@media (max-width: 599.98px) {
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .row__material {
+    flex-basis: 100%;
+  }
+
+  .row__qty {
+    flex: 1;
+  }
+}

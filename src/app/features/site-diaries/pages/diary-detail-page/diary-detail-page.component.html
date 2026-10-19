@@ -1,0 +1,208 @@
+@if (store.loading() && !store.diary()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state title="Không tải được nhật ký" [message]="error" (retry)="reload()" />
+} @else if (store.diary(); as diary) {
+  <header class="header">
+    <div>
+      <div class="header__meta">
+        <a class="header__project" [routerLink]="['/projects', diary.projectId]">{{ diary.project.code }}</a>
+        <app-diary-status-chip [status]="diary.status" />
+      </div>
+      <h1 class="header__title">Nhật ký {{ dateValue() | date: 'EEEE, dd/MM/yyyy' }}</h1>
+      <p class="header__sub">
+        {{ diary.project.name }} · Người lập: {{ diary.createdBy.fullName }} ({{ diary.createdBy.role | roleLabel }})
+      </p>
+    </div>
+
+    <div class="header__actions">
+      <button mat-stroked-button type="button" [disabled]="exporting()" (click)="exportPdf()">
+        @if (exporting()) {
+          <mat-spinner diameter="18" />
+        } @else {
+          <mat-icon>picture_as_pdf</mat-icon>
+        }
+        Xuất PDF
+      </button>
+      @if (store.canDelete()) {
+        <button mat-stroked-button type="button" class="danger" [disabled]="store.acting() !== null" (click)="remove()">
+          <mat-icon>delete</mat-icon>
+          Xoá
+        </button>
+      }
+      @if (store.canEdit()) {
+        <a mat-stroked-button [routerLink]="['/site-diaries', diary.id, 'edit']">
+          <mat-icon>edit</mat-icon>
+          Chỉnh sửa
+        </a>
+      }
+      @if (store.canSubmit()) {
+        <button mat-flat-button type="button" [disabled]="store.acting() !== null" (click)="submit()">
+          <mat-icon>send</mat-icon>
+          Gửi duyệt
+        </button>
+      }
+      @if (store.canReview()) {
+        <button mat-stroked-button type="button" class="danger" [disabled]="store.acting() !== null" (click)="review('reject')">
+          <mat-icon>undo</mat-icon>
+          Trả lại
+        </button>
+        <button mat-flat-button type="button" [disabled]="store.acting() !== null" (click)="review('approve')">
+          <mat-icon>verified</mat-icon>
+          Phê duyệt
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (diary.status === 'REJECTED' && diary.reviewNote) {
+    <div class="banner banner--error" role="status">
+      <mat-icon>undo</mat-icon>
+      <div><strong>Bị trả lại:</strong> {{ diary.reviewNote }}</div>
+    </div>
+  } @else if (diary.status === 'SUBMITTED') {
+    <div class="banner banner--info" role="status">
+      <mat-icon>hourglass_top</mat-icon>
+      <div>Đang chờ quản lý dự án duyệt. Nhật ký bị khoá chỉnh sửa.</div>
+    </div>
+  }
+
+  <div class="grid">
+    <section class="card">
+      <h2 class="card__title">Thời tiết</h2>
+      <div class="weather">
+        <div class="weather__slot">
+          <mat-icon>{{ weatherIcons[diary.weather.morning] }}</mat-icon>
+          <span>Sáng: {{ weatherLabels[diary.weather.morning] }}</span>
+        </div>
+        <div class="weather__slot">
+          <mat-icon>{{ weatherIcons[diary.weather.afternoon] }}</mat-icon>
+          <span>Chiều: {{ weatherLabels[diary.weather.afternoon] }}</span>
+        </div>
+        @if (diary.weather.minTemp !== null && diary.weather.maxTemp !== null) {
+          <div class="weather__slot">
+            <mat-icon>thermostat</mat-icon>
+            <span>{{ diary.weather.minTemp }}–{{ diary.weather.maxTemp }} °C</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Nhân công <span class="card__badge">{{ diary.totalWorkers }} người</span></h2>
+      @if (diary.labor.length) {
+        <table class="table">
+          <thead><tr><th>Tổ đội</th><th class="num">Số người</th></tr></thead>
+          <tbody>
+            @for (entry of diary.labor; track $index) {
+              <tr><td>{{ entry.crew }}</td><td class="num">{{ entry.headcount }}</td></tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="muted">Không có nhân công.</p>
+      }
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Máy móc, thiết bị</h2>
+      @if (diary.equipment.length) {
+        <table class="table">
+          <thead><tr><th>Thiết bị</th><th class="num">SL</th><th class="num">Giờ</th></tr></thead>
+          <tbody>
+            @for (entry of diary.equipment; track $index) {
+              <tr>
+                <td>{{ entry.name }}</td>
+                <td class="num">{{ entry.quantity }}</td>
+                <td class="num">{{ entry.hours ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="muted">Không sử dụng máy móc.</p>
+      }
+    </section>
+
+    <section class="card">
+      <h2 class="card__title">Khối lượng hoàn thành</h2>
+      @if (diary.workItems.length) {
+        <table class="table">
+          <thead><tr><th>Hạng mục</th><th>ĐVT</th><th class="num">Khối lượng</th></tr></thead>
+          <tbody>
+            @for (item of diary.workItems; track $index) {
+              <tr>
+                <td>{{ item.description }}</td>
+                <td>{{ item.unit }}</td>
+                <td class="num">{{ item.quantity | number: '1.0-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="muted">Không ghi nhận khối lượng.</p>
+      }
+    </section>
+  </div>
+
+  <section class="card card--wide">
+    <h2 class="card__title">
+      Sự cố, an toàn lao động
+      @if (diary.incidents.length) {
+        <span class="card__badge card__badge--error">{{ diary.incidents.length }}</span>
+      }
+    </h2>
+    @for (incident of diary.incidents; track $index) {
+      <div class="incident" [class]="'incident--' + incident.severity.toLowerCase()">
+        <mat-icon>{{ incident.type === 'SAFETY' ? 'health_and_safety' : 'report' }}</mat-icon>
+        <div>
+          <p class="incident__title">
+            {{ incidentTypeLabels[incident.type] }} · Mức độ: {{ severityLabels[incident.severity] }}
+          </p>
+          <p class="incident__text">{{ incident.description }}</p>
+          @if (incident.actionTaken) {
+            <p class="incident__action"><strong>Xử lý:</strong> {{ incident.actionTaken }}</p>
+          }
+        </div>
+      </div>
+    } @empty {
+      <p class="muted safe"><mat-icon>verified_user</mat-icon> Không có sự cố, đảm bảo an toàn lao động.</p>
+    }
+  </section>
+
+  @if (diary.notes) {
+    <section class="card card--wide">
+      <h2 class="card__title">Ghi chú</h2>
+      <p class="notes">{{ diary.notes }}</p>
+    </section>
+  }
+
+  <section class="card card--wide">
+    <h2 class="card__title">Ảnh hiện trường <span class="card__badge">{{ diary.photos.length }}</span></h2>
+    @if (diary.photos.length) {
+      <app-photo-gallery [photos]="diary.photos" [site]="site()" />
+    } @else {
+      <app-empty-state icon="photo_library" title="Chưa có ảnh" />
+    }
+  </section>
+
+  <section class="card card--wide">
+    <h2 class="card__title">Lịch sử</h2>
+    <ol class="timeline">
+      @for (entry of history(); track $index) {
+        <li class="timeline__item" [class]="'timeline__item--' + entry.action.toLowerCase()">
+          <span class="timeline__dot" aria-hidden="true"></span>
+          <div>
+            <p class="timeline__title">{{ actionLabels[entry.action] }} · {{ entry.by.fullName }}</p>
+            <p class="timeline__time">{{ entry.at | date: 'HH:mm dd/MM/yyyy' }}</p>
+            @if (entry.note) {
+              <p class="timeline__note">“{{ entry.note }}”</p>
+            }
+          </div>
+        </li>
+      }
+    </ol>
+  </section>
+}

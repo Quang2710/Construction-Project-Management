@@ -1,0 +1,251 @@
+<header class="dialog-header">
+  <div class="dialog-header__text">
+    @if (store.task(); as task) {
+      <a class="dialog-header__project" [routerLink]="['/projects', task.projectId]" mat-dialog-close>
+        {{ task.project.code }} · {{ task.project.name }}
+      </a>
+      <h2 class="dialog-header__title">{{ task.title }}</h2>
+    } @else {
+      <h2 class="dialog-header__title">Thêm công việc</h2>
+    }
+  </div>
+  <button mat-icon-button type="button" mat-dialog-close aria-label="Đóng">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<mat-dialog-content class="dialog-content">
+  @if (!canEdit()) {
+    <p class="readonly-note"><mat-icon>visibility</mat-icon> Bạn đang xem ở chế độ chỉ đọc.</p>
+  }
+  @if (isOverdue()) {
+    <p class="overdue-note"><mat-icon>alarm</mat-icon> Công việc đã quá hạn hoàn thành.</p>
+  }
+  @if (store.error(); as error) {
+    <p class="error-note" role="alert"><mat-icon>error</mat-icon> {{ error }}</p>
+  }
+
+  <form class="task-form" [formGroup]="form" (ngSubmit)="save()" id="task-form">
+    <div class="task-form__main">
+      @if (!store.isEdit()) {
+        <mat-form-field>
+          <mat-label>Dự án</mat-label>
+          <mat-select formControlName="projectId">
+            @for (project of store.projects(); track project.id) {
+              <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
+            }
+          </mat-select>
+          @if (form.controls.projectId.hasError('required')) {
+            <mat-error>Vui lòng chọn dự án.</mat-error>
+          }
+        </mat-form-field>
+      }
+
+      <mat-form-field>
+        <mat-label>Tiêu đề</mat-label>
+        <input matInput formControlName="title" maxlength="200" />
+        @if (form.controls.title.hasError('required')) {
+          <mat-error>Vui lòng nhập tiêu đề công việc.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Mô tả</mat-label>
+        <textarea matInput formControlName="description" rows="4"></textarea>
+        @if (form.controls.description.hasError('maxlength')) {
+          <mat-error>Mô tả tối đa 4000 ký tự.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Nhãn</mat-label>
+        <mat-chip-grid #chipGrid aria-label="Nhãn công việc" [disabled]="form.controls.labels.disabled">
+          @for (label of form.controls.labels.value; track label) {
+            <mat-chip-row (removed)="removeLabel(label)">
+              {{ label }}
+              <button matChipRemove type="button" [attr.aria-label]="'Bỏ nhãn ' + label">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+          }
+          <input
+            placeholder="Thêm nhãn…"
+            [formControl]="labelInput"
+            [matChipInputFor]="chipGrid"
+            [matAutocomplete]="labelAuto"
+            [matChipInputSeparatorKeyCodes]="separatorKeys"
+            (matChipInputTokenEnd)="addLabel($event)"
+          />
+        </mat-chip-grid>
+        <mat-autocomplete #labelAuto="matAutocomplete" (optionSelected)="selectLabel($event)">
+          @for (label of labelSuggestions(); track label) {
+            <mat-option [value]="label">{{ label }}</mat-option>
+          }
+        </mat-autocomplete>
+        <mat-hint>Nhấn Enter hoặc dấu phẩy để thêm nhãn mới</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <div class="task-form__side">
+      <mat-form-field>
+        <mat-label>Trạng thái</mat-label>
+        <mat-select formControlName="status">
+          @for (status of statuses; track status) {
+            <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Mức ưu tiên</mat-label>
+        <mat-select formControlName="priority">
+          @for (priority of priorities; track priority) {
+            <mat-option [value]="priority">{{ priorityLabels[priority] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Người phụ trách</mat-label>
+        <mat-select formControlName="assigneeId">
+          <mat-option [value]="null">— Chưa giao —</mat-option>
+          @for (member of store.assigneeOptions(); track member.id) {
+            <mat-option [value]="member.id">{{ member.fullName }} · {{ member.role | roleLabel }}</mat-option>
+          }
+        </mat-select>
+        @if (store.loadingMembers()) {
+          <mat-hint>Đang tải thành viên dự án…</mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Hạng mục WBS</mat-label>
+        <mat-select formControlName="wbsId">
+          <mat-option [value]="null">— Không thuộc hạng mục —</mat-option>
+          @for (node of store.wbs(); track node.id) {
+            <mat-option [value]="node.id">{{ node.code }}. {{ node.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Ngày bắt đầu</mat-label>
+        <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="dd/MM/yyyy" />
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker" />
+        <mat-datepicker #startPicker />
+        @if (form.controls.startDate.hasError('matDatepickerParse')) {
+          <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
+        } @else if (form.controls.startDate.hasError('required')) {
+          <mat-error>Vui lòng chọn ngày bắt đầu.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Hạn hoàn thành</mat-label>
+        <input matInput [matDatepicker]="duePicker" formControlName="dueDate" placeholder="dd/MM/yyyy" />
+        <mat-datepicker-toggle matIconSuffix [for]="duePicker" />
+        <mat-datepicker #duePicker />
+        @if (form.controls.dueDate.hasError('matDatepickerParse')) {
+          <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
+        } @else if (form.controls.dueDate.hasError('required')) {
+          <mat-error>Vui lòng chọn hạn hoàn thành.</mat-error>
+        } @else if (form.controls.dueDate.hasError('dueBeforeStart')) {
+          <mat-error>Hạn hoàn thành phải sau ngày bắt đầu.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-checkbox formControlName="isMilestone" class="milestone">Mốc tiến độ (không có thời lượng)</mat-checkbox>
+
+      <div class="percent">
+        <label class="percent__label" for="percent-slider">
+          Hoàn thành <strong>{{ form.controls.percentComplete.value }}%</strong>
+        </label>
+        <mat-slider min="0" max="100" step="5" discrete [displayWith]="formatPercent" class="percent__slider">
+          <input matSliderThumb id="percent-slider" formControlName="percentComplete" />
+        </mat-slider>
+      </div>
+    </div>
+  </form>
+
+  @if (store.isEdit()) {
+    <section class="comments" aria-labelledby="comments-title">
+      <h3 id="comments-title" class="comments__title">
+        Bình luận
+        @if (store.comments().length) {
+          <span class="comments__count">{{ store.comments().length }}</span>
+        }
+      </h3>
+
+      @if (store.loadingComments()) {
+        <div class="comments__loading"><mat-spinner diameter="24" /></div>
+      } @else if (store.commentsError(); as error) {
+        <p class="error-note">
+          <mat-icon>error</mat-icon> {{ error }}
+          <button mat-button type="button" (click)="retryComments()">Thử lại</button>
+        </p>
+      } @else {
+        <ul class="comments__list">
+          @for (comment of store.comments(); track comment.id) {
+            <li class="comment">
+              <app-user-avatar [name]="comment.author.fullName" [size]="32" />
+              <div class="comment__body">
+                <div class="comment__meta">
+                  <strong>{{ comment.author.fullName }}</strong>
+                  <span>{{ comment.author.role | roleLabel }} · {{ comment.createdAt | relativeTime }}</span>
+                </div>
+                <p class="comment__content">{{ comment.content }}</p>
+              </div>
+            </li>
+          } @empty {
+            <li class="comments__empty">Chưa có bình luận nào.</li>
+          }
+        </ul>
+      }
+
+      @if (canComment()) {
+        <div class="comment-form">
+          <mat-form-field class="comment-form__field" subscriptSizing="dynamic">
+            <mat-label>Viết bình luận</mat-label>
+            <textarea
+              matInput
+              [formControl]="commentControl"
+              rows="2"
+              maxlength="2000"
+              (keydown.control.enter)="sendComment()"
+            ></textarea>
+            <mat-hint>Ctrl + Enter để gửi</mat-hint>
+          </mat-form-field>
+          <button
+            mat-flat-button
+            type="button"
+            [disabled]="commentControl.invalid || store.sendingComment()"
+            (click)="sendComment()"
+          >
+            <mat-icon>send</mat-icon>
+            Gửi
+          </button>
+        </div>
+      }
+    </section>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  @if (store.isEdit() && canDelete()) {
+    <button mat-button type="button" class="danger" [disabled]="store.deleting()" (click)="remove()">
+      <mat-icon>delete</mat-icon>
+      Xoá
+    </button>
+  }
+  <span class="dialog-actions__spacer"></span>
+  <button mat-button type="button" mat-dialog-close>{{ canEdit() ? 'Huỷ' : 'Đóng' }}</button>
+  @if (canEdit()) {
+    <button mat-flat-button type="submit" form="task-form" [disabled]="store.saving()">
+      @if (store.saving()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        {{ store.isEdit() ? 'Lưu thay đổi' : 'Tạo công việc' }}
+      }
+    </button>
+  }
+</mat-dialog-actions>

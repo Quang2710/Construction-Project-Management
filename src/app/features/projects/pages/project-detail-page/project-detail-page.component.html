@@ -1,0 +1,154 @@
+@if (store.loading() && !store.project()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state title="Không tải được dự án" [message]="error" (retry)="reload()" />
+} @else if (store.project(); as project) {
+  <header class="header">
+    <div class="header__text">
+      <div class="header__meta">
+        <span class="header__code">{{ project.code }}</span>
+        <app-project-status-chip [status]="project.status" />
+      </div>
+      <h1 class="header__title">{{ project.name }}</h1>
+      <p class="header__client">
+        <mat-icon>business</mat-icon>{{ project.clientName }}
+        <span class="dot">·</span>
+        <mat-icon>location_on</mat-icon>{{ project.location.province }}
+      </p>
+    </div>
+    <div class="header__actions" *hasRole="permissions.manageProjects">
+      <button mat-stroked-button type="button" class="danger" [disabled]="store.deleting()" (click)="remove()">
+        <mat-icon>delete</mat-icon>
+        Xoá
+      </button>
+      <a mat-flat-button [routerLink]="['/projects', project.id, 'edit']">
+        <mat-icon>edit</mat-icon>
+        Chỉnh sửa
+      </a>
+    </div>
+  </header>
+
+  @if (project.isDelayed || project.isOverBudget) {
+    <div class="alerts">
+      @if (project.isDelayed) {
+        <div class="alert alert--warning">
+          <mat-icon>schedule</mat-icon>
+          <span>
+            Chậm tiến độ: thực tế {{ project.progress }}% so với kế hoạch {{ project.plannedProgress }}%
+            @if (project.taskStats.overdue) {
+              — {{ project.taskStats.overdue }} công việc trễ hạn
+            }
+          </span>
+        </div>
+      }
+      @if (project.isOverBudget) {
+        <div class="alert alert--error">
+          <mat-icon>money_off</mat-icon>
+          <span>Vượt ngân sách: đã chi {{ budgetUsage() }}% ngân sách khi mới hoàn thành {{ project.progress }}% khối lượng.</span>
+        </div>
+      }
+    </div>
+  }
+
+  <mat-tab-group class="tabs" mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="150ms">
+    <mat-tab label="Tổng quan">
+      <ng-template matTabContent>
+        <div class="overview">
+          <section class="card card--progress">
+            <h2 class="card__title">Tiến độ</h2>
+            <app-progress-compare [actual]="project.progress" [planned]="project.plannedProgress" />
+            <dl class="stats">
+              <div>
+                <dt>Công việc</dt>
+                <dd>{{ project.taskStats.done }}/{{ project.taskStats.total }} hoàn thành</dd>
+              </div>
+              <div>
+                <dt>Trễ hạn</dt>
+                <dd [class.text-error]="project.taskStats.overdue > 0">{{ project.taskStats.overdue }}</dd>
+              </div>
+              <div>
+                <dt>Bắt đầu</dt>
+                <dd>{{ project.startDate | date: 'dd/MM/yyyy' }}</dd>
+              </div>
+              <div>
+                <dt>Kết thúc</dt>
+                <dd>{{ project.endDate | date: 'dd/MM/yyyy' }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="card card--budget">
+            <h2 class="card__title">Ngân sách</h2>
+            <p class="budget__amount">{{ project.budget | vnd }}</p>
+            <div class="budget__bar" [class.budget__bar--over]="project.isOverBudget">
+              <div class="budget__fill" [style.width.%]="budgetUsage() > 100 ? 100 : budgetUsage()"></div>
+            </div>
+            <dl class="stats">
+              <div>
+                <dt>Đã chi</dt>
+                <dd>{{ project.actualCost | vnd: 'compact' }} ({{ budgetUsage() | number: '1.0-0' }}%)</dd>
+              </div>
+              <div>
+                <dt>Còn lại</dt>
+                <dd [class.text-error]="project.actualCost > project.budget">
+                  {{ project.budget - project.actualCost | vnd: 'compact' }}
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="card card--info">
+            <h2 class="card__title">Thông tin chung</h2>
+            <dl class="info">
+              <dt>Chủ đầu tư</dt>
+              <dd>{{ project.clientName }}</dd>
+              <dt>Địa điểm</dt>
+              <dd>{{ project.location.address }}, {{ project.location.province }}</dd>
+              <dt>Quản lý dự án</dt>
+              <dd>{{ project.manager?.fullName ?? 'Chưa phân công' }}</dd>
+              <dt>Kỹ sư phụ trách</dt>
+              <dd>{{ project.memberIds.length }} người</dd>
+              <dt>Mô tả</dt>
+              <dd>{{ project.description || '—' }}</dd>
+            </dl>
+          </section>
+
+          <section class="card card--map">
+            <h2 class="card__title">Vị trí công trình</h2>
+            <app-project-map class="map" [markers]="markers()" [selectedId]="project.id" />
+            <p class="map__coords">{{ project.location.lat | number: '1.4-4' }}, {{ project.location.lng | number: '1.4-4' }}</p>
+          </section>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <mat-tab label="Công việc">
+      <ng-template matTabContent>
+        <div class="tab-body">
+          <app-project-tasks-panel [projectId]="project.id" (changed)="onTasksChanged()" />
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    @for (tab of placeholderTabs; track tab.label) {
+      @if (tab.label === 'Tài liệu') {
+        <mat-tab label="Nhật ký">
+          <ng-template matTabContent>
+            <app-project-diaries-panel [projectId]="project.id" />
+          </ng-template>
+        </mat-tab>
+      }
+      <mat-tab [label]="tab.label">
+        <ng-template matTabContent>
+          <app-empty-state
+            [icon]="tab.icon"
+            [title]="tab.label + ' — đang phát triển'"
+            [message]="tab.description + ' Chức năng sẽ có ở giai đoạn sau.'"
+          />
+        </ng-template>
+      </mat-tab>
+    }
+  </mat-tab-group>
+}

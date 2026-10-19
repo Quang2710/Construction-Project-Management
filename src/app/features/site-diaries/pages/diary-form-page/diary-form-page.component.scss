@@ -1,0 +1,154 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1000px;
+}
+
+.submit-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.section {
+  padding: 16px 20px 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface);
+}
+
+.section__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  font: var(--mat-sys-title-medium);
+
+  mat-icon {
+    color: var(--mat-sys-primary);
+  }
+}
+
+.badge {
+  margin-left: auto;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  font: var(--mat-sys-label-medium);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.full {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  button {
+    margin-top: 8px;
+  }
+}
+
+.row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__num {
+  width: 120px;
+}
+
+.row__unit {
+  width: 100px;
+}
+
+.incident {
+  margin-bottom: 12px;
+  padding: 12px 12px 4px;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.empty {
+  margin: 0 0 8px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.safe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    color: var(--app-success);
+  }
+}
+
+.danger {
+  color: var(--mat-sys-error);
+}
+
+.field-error {
+  margin: 8px 0 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-error);
+}
+
+.actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 0 16px;
+  background: var(--mat-sys-surface);
+}
+
+@media (max-width: 719.98px) {
+  .grid,
+  .grid--4 {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2 {
+    grid-column: auto;
+  }
+
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .row__main {
+    flex-basis: 100%;
+  }
+
+  .row__num,
+  .row__unit {
+    flex: 1;
+    width: auto;
+  }
+}

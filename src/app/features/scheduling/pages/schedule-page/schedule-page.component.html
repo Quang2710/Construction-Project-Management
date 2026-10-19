@@ -1,0 +1,163 @@
+<app-page-header title="Tiến độ thi công" subtitle="Biểu đồ Gantt theo WBS — kéo thanh để đổi ngày, kéo nối hai thanh để tạo phụ thuộc">
+  @if (store.canManageWbs()) {
+    <button mat-stroked-button type="button" [disabled]="!store.projectId()" (click)="createWbs()">
+      <mat-icon>account_tree</mat-icon>
+      Thêm hạng mục WBS
+    </button>
+  }
+  @if (store.canEdit()) {
+    <button mat-flat-button type="button" [disabled]="!store.projectId()" (click)="createTask()">
+      <mat-icon>add</mat-icon>
+      Thêm công việc
+    </button>
+  }
+</app-page-header>
+
+<div class="toolbar">
+  <mat-form-field class="toolbar__project" subscriptSizing="dynamic">
+    <mat-label>Dự án</mat-label>
+    <mat-select [value]="store.projectId()" (valueChange)="store.setProject($event)">
+      @for (project of store.projects(); track project.id) {
+        <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-button-toggle-group
+    hideSingleSelectionIndicator
+    aria-label="Đơn vị thời gian"
+    [value]="store.viewType()"
+    (change)="store.setViewType($event.value)"
+  >
+    @for (view of viewTypes; track view.value) {
+      <mat-button-toggle [value]="view.value">{{ view.label }}</mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+
+  <button mat-stroked-button type="button" (click)="scrollToToday()">
+    <mat-icon>today</mat-icon>
+    Hôm nay
+  </button>
+</div>
+
+@if (store.projectId()) {
+  <div class="summary">
+    <span class="summary__item">
+      <mat-icon>flag</mat-icon>
+      Hoàn thành dự kiến:
+      <strong [class.late]="lateFinish()">{{ finishDate() | date: 'dd/MM/yyyy' }}</strong>
+      @if (lateFinish()) {
+        <span class="late">(trễ so với kế hoạch {{ store.project()?.endDate | date: 'dd/MM/yyyy' }})</span>
+      }
+    </span>
+    <span class="summary__item"><mat-icon>route</mat-icon> {{ store.stats().critical }} việc trên đường găng</span>
+    <span class="summary__item"><mat-icon>diamond</mat-icon> {{ store.stats().milestones }} mốc</span>
+    @if (store.stats().violations) {
+      <span class="summary__item summary__item--warn">
+        <mat-icon>warning</mat-icon> {{ store.stats().violations }} liên kết bị vi phạm
+      </span>
+    }
+  </div>
+
+  <div class="legend" aria-label="Chú giải">
+    <span><i class="swatch" [style.background]="colors.critical"></i> Đường găng</span>
+    <span><i class="swatch" [style.background]="colors.normal"></i> Có dự trữ</span>
+    <span><i class="swatch" [style.background]="colors.done"></i> Đã hoàn thành</span>
+    <span><i class="swatch swatch--diamond"></i> Mốc tiến độ</span>
+    <span><i class="swatch swatch--range"></i> Hạng mục WBS</span>
+  </div>
+}
+
+@if (store.loading() || store.saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state [message]="error" (retry)="store.loadSchedule()" />
+} @else if (!store.loading() && store.projects().length === 0) {
+  <app-empty-state icon="view_timeline" title="Chưa có dự án" message="Bạn chưa được gán vào dự án nào." />
+} @else if (store.projectId() && !store.loading() && store.items().length === 0) {
+  <app-empty-state icon="view_timeline" title="Chưa có kế hoạch" message="Dự án chưa có công việc hoặc hạng mục WBS nào." />
+} @else if (store.items().length) {
+  <div class="gantt-wrapper">
+    <ngx-gantt
+      #gantt
+      [items]="store.items()"
+      [viewType]="ganttViewType()"
+      [draggable]="store.canEdit()"
+      [linkable]="store.canEdit()"
+      [showToolbar]="false"
+      [showTodayLine]="true"
+      [styles]="ganttStyles()"
+      (dragEnded)="onDragEnded($event)"
+      (linkDragEnded)="onLinkDragEnded($event)"
+      (lineClick)="onLineClick($event)"
+      (barClick)="onBarClick($event)"
+    >
+      <ngx-gantt-table [width]="520">
+        <ngx-gantt-column name="Công việc" width="260px" [showExpandIcon]="true">
+          <ng-template #cell let-item="item">
+            @if (asOrigin(item); as origin) {
+              @if (origin.kind === 'wbs') {
+                <span class="cell-wbs">{{ item.title }}</span>
+              } @else {
+                <button type="button" class="cell-task" [class.cell-task--critical]="origin.critical" (click)="openTask(origin.task.id)">
+                  @if (origin.task.isMilestone) {
+                    <mat-icon class="cell-task__icon">diamond</mat-icon>
+                  }
+                  <span class="cell-task__title" [matTooltip]="origin.task.title">{{ origin.task.title }}</span>
+                </button>
+              }
+            }
+          </ng-template>
+        </ngx-gantt-column>
+        <ngx-gantt-column name="Bắt đầu" width="88px">
+          <ng-template #cell let-item="item">
+            @if (asOrigin(item); as origin) {
+              @if (origin.kind === 'task') {
+                {{ origin.task.startDate | date: 'dd/MM/yy' }}
+              }
+            }
+          </ng-template>
+        </ngx-gantt-column>
+        <ngx-gantt-column name="Kết thúc" width="88px">
+          <ng-template #cell let-item="item">
+            @if (asOrigin(item); as origin) {
+              @if (origin.kind === 'task') {
+                {{ origin.task.dueDate | date: 'dd/MM/yy' }}
+              }
+            }
+          </ng-template>
+        </ngx-gantt-column>
+        <ngx-gantt-column name="Dự trữ" width="64px">
+          <ng-template #cell let-item="item">
+            @if (asOrigin(item); as origin) {
+              @if (origin.kind === 'task') {
+                <span [class.late]="origin.critical">{{ origin.floatDays }}n</span>
+              }
+            }
+          </ng-template>
+        </ngx-gantt-column>
+        <ngx-gantt-column name="%" width="56px">
+          <ng-template #cell let-item="item">
+            @if (asOrigin(item); as origin) {
+              {{ origin.kind === 'task' ? origin.task.percentComplete : origin.progress }}%
+            }
+          </ng-template>
+        </ngx-gantt-column>
+      </ngx-gantt-table>
+
+      <ng-template #bar let-item="item">
+        @if (asOrigin(item); as origin) {
+          @if (origin.kind === 'task' && origin.task.isMilestone) {
+            <span class="milestone" [style.background]="item.color" [matTooltip]="origin.task.title"></span>
+          }
+        }
+      </ng-template>
+    </ngx-gantt>
+  </div>
+  <p class="hint">
+    <mat-icon>info</mat-icon>
+    Dự trữ = số ngày một công việc có thể trễ mà không làm chậm ngày hoàn thành. Bấm vào đường nối để xoá phụ thuộc.
+  </p>
+}

@@ -1,0 +1,47 @@
+<header class="topbar">
+  <button mat-icon-button type="button" aria-label="Ẩn/hiện menu" (click)="menuToggle.emit()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span class="topbar__spacer"></span>
+
+  <button
+    mat-icon-button
+    type="button"
+    [attr.aria-label]="theme.mode() === 'dark' ? 'Chuyển giao diện sáng' : 'Chuyển giao diện tối'"
+    [matTooltip]="theme.mode() === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'"
+    (click)="theme.toggle()"
+  >
+    <mat-icon>{{ theme.mode() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+
+  @if (auth.user(); as user) {
+    <button class="user" type="button" [matMenuTriggerFor]="userMenu" aria-label="Tài khoản">
+      <app-user-avatar [name]="user.fullName" />
+      <span class="user__info">
+        <span class="user__name">{{ user.fullName }}</span>
+        <span class="user__role">{{ auth.roleLabel() }}</span>
+      </span>
+      <mat-icon class="user__caret">expand_more</mat-icon>
+    </button>
+
+    <mat-menu #userMenu="matMenu" xPosition="before">
+      <div class="menu-header">
+        <span class="menu-header__name">{{ user.fullName }}</span>
+        <span class="menu-header__email">{{ user.email }}</span>
+        <span class="menu-header__role">{{ auth.roleLabel() }}</span>
+      </div>
+      <mat-divider />
+      @if (demoData.enabled) {
+        <button mat-menu-item type="button" [disabled]="resetting()" (click)="resetDemoData()">
+          <mat-icon>restart_alt</mat-icon>
+          <span>Reset dữ liệu demo</span>
+        </button>
+      }
+      <button mat-menu-item type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Đăng xuất</span>
+      </button>
+    </mat-menu>
+  }
+</header>

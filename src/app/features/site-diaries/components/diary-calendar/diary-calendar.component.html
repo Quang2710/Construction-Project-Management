@@ -1,0 +1,55 @@
+<div class="calendar" role="grid" aria-label="Lịch nhật ký theo tháng">
+  <div class="row row--head" role="row">
+    @for (weekday of weekdays; track weekday) {
+      <div class="weekday" role="columnheader">{{ weekday }}</div>
+    }
+  </div>
+
+  @for (week of weeks(); track week[0].date) {
+    <div class="row" role="row">
+      @for (day of week; track day.date) {
+        <div
+          class="cell"
+          role="gridcell"
+          tabindex="0"
+          [class.cell--outside]="!day.inMonth"
+          [class.cell--today]="day.isToday"
+          [class.cell--sunday]="day.isSunday"
+          [class.cell--selected]="day.date === selectedDate()"
+          [class.cell--missing]="day.missing"
+          [attr.aria-selected]="day.date === selectedDate()"
+          [attr.aria-label]="day.date + (day.diaries.length ? ', ' + day.diaries.length + ' nhật ký' : '') + (day.missing ? ', chưa có nhật ký' : '')"
+          (click)="daySelect.emit(day.date)"
+          (keydown.enter)="daySelect.emit(day.date)"
+        >
+          <div class="cell__head">
+            <span class="cell__day">{{ day.dayOfMonth }}</span>
+            @if (day.missing) {
+              <mat-icon class="cell__missing" matTooltip="Chưa có nhật ký">priority_high</mat-icon>
+            }
+          </div>
+
+          <ul class="entries">
+            @for (diary of visible(day.diaries); track diary.id) {
+              <li>
+                <button
+                  type="button"
+                  class="entry"
+                  [class]="'entry--' + diary.status.toLowerCase()"
+                  [matTooltip]="diary.project.name + ' · ' + statusLabels[diary.status]"
+                  (click)="openDiary($event, diary.id)"
+                >
+                  <span class="entry__dot" aria-hidden="true"></span>
+                  <span class="entry__code">{{ diary.project.code }}</span>
+                </button>
+              </li>
+            }
+            @if (day.diaries.length > maxVisible) {
+              <li class="more">+{{ day.diaries.length - maxVisible }}</li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,111 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: var(--mat-sys-surface);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--mat-sys-primary);
+    outline: none;
+  }
+}
+
+:host(.overdue) {
+  border-left: 4px solid var(--mat-sys-error);
+}
+
+:host(.pending) {
+  opacity: 0.6;
+}
+
+.card__top,
+.card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.card__project {
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-primary);
+  letter-spacing: 0.04em;
+}
+
+.card__title {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.card__milestone {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  vertical-align: -3px;
+  color: var(--mat-sys-primary);
+}
+
+.card__labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.label {
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--mat-sys-surface-container-high);
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--mat-sys-surface-container-highest);
+}
+
+.progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--mat-sys-primary);
+}
+
+.due,
+.comments {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+:host(.overdue) .due {
+  color: var(--mat-sys-error);
+  font-weight: 600;
+}
+
+.card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.percent {
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+}

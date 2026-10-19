@@ -1,0 +1,79 @@
+<app-page-header title="Công việc" subtitle="Bảng Kanban — kéo thả thẻ để cập nhật trạng thái">
+  <button mat-flat-button type="button" *hasRole="permissions.editTasks" (click)="createTask()">
+    <mat-icon>add</mat-icon>
+    Thêm công việc
+  </button>
+</app-page-header>
+
+<div class="toolbar">
+  <mat-form-field class="toolbar__project" subscriptSizing="dynamic">
+    <mat-label>Dự án</mat-label>
+    <mat-select [value]="store.projectId()" (valueChange)="store.setProject($event)">
+      <mat-option [value]="null">Tất cả dự án</mat-option>
+      @for (project of store.projects(); track project.id) {
+        <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
+    <mat-label>Lọc nhanh</mat-label>
+    <mat-icon matPrefix>filter_list</mat-icon>
+    <input
+      #quickFilter
+      matInput
+      placeholder="Tiêu đề, nhãn, người phụ trách"
+      [value]="store.q()"
+      (input)="store.setSearch(quickFilter.value)"
+    />
+  </mat-form-field>
+
+  <mat-slide-toggle [checked]="store.onlyMine()" (change)="store.setOnlyMine($event.checked)">
+    Chỉ việc của tôi
+  </mat-slide-toggle>
+</div>
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" class="loading" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state [message]="error" (retry)="store.reload()" />
+} @else if (store.isEmpty()) {
+  <app-empty-state
+    icon="view_kanban"
+    title="Chưa có công việc"
+    message="Không có công việc nào khớp với bộ lọc hiện tại."
+  />
+} @else {
+  <div class="board" cdkDropListGroup>
+    @for (status of statuses; track status) {
+      <section class="column" [attr.aria-label]="statusLabels[status]">
+        <header class="column__header" [class]="'column__header--' + status.toLowerCase()">
+          <span>{{ statusLabels[status] }}</span>
+          <span class="column__count">{{ store.columns()[status].length }}</span>
+        </header>
+        <div
+          class="column__list"
+          cdkDropList
+          [cdkDropListData]="status"
+          [cdkDropListDisabled]="!canEdit()"
+          (cdkDropListDropped)="onDrop($event)"
+        >
+          @for (task of store.columns()[status]; track task.id) {
+            <app-task-card
+              cdkDrag
+              [cdkDragData]="task"
+              [cdkDragStartDelay]="dragDelay"
+              [task]="task"
+              [pending]="isPending(task.id)"
+              (open)="openTask(task)"
+            />
+          } @empty {
+            <p class="column__empty">{{ canEdit() ? 'Kéo công việc vào đây' : 'Không có công việc' }}</p>
+          }
+        </div>
+      </section>
+    }
+  </div>
+}

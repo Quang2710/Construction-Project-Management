@@ -1,0 +1,36 @@
+<div class="brand">
+  <span class="brand__logo" aria-hidden="true"><mat-icon>foundation</mat-icon></span>
+  @if (!collapsed()) {
+    <span class="brand__name">{{ appName }}</span>
+  }
+</div>
+
+<nav class="nav" aria-label="Menu chính">
+  @for (section of sections(); track section.title) {
+    @if (!collapsed()) {
+      <h3 class="nav__section">{{ section.title }}</h3>
+    } @else {
+      <hr class="nav__divider" />
+    }
+    <mat-nav-list>
+      @for (item of section.items; track item.path) {
+        <a
+          mat-list-item
+          [routerLink]="'/' + item.path"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [activated]="rla.isActive"
+          [matTooltip]="item.label"
+          [matTooltipDisabled]="!collapsed()"
+          matTooltipPosition="right"
+          (click)="navigated.emit()"
+        >
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          @if (!collapsed()) {
+            <span matListItemTitle>{{ item.label }}</span>
+          }
+        </a>
+      }
+    </mat-nav-list>
+  }
+</nav>

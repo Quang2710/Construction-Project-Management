@@ -1,0 +1,58 @@
+<div class="panel-header">
+  <div class="status-summary">
+    @for (item of store.countByStatus(); track item.status) {
+      <span class="status-summary__item" [class]="'status-summary__item--' + item.status.toLowerCase()">
+        {{ statusLabels[item.status] }} <strong>{{ item.count }}</strong>
+      </span>
+    }
+  </div>
+  <div class="panel-header__actions">
+    <a mat-stroked-button [routerLink]="['/tasks']" [queryParams]="{ projectId: projectId() }" *hasRole="permissions.editTasks">
+      <mat-icon>view_kanban</mat-icon>
+      Mở bảng Kanban
+    </a>
+    <button mat-flat-button type="button" *hasRole="permissions.editTasks" (click)="createTask()">
+      <mat-icon>add</mat-icon>
+      Thêm công việc
+    </button>
+  </div>
+</div>
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state [message]="error" (retry)="reload()" />
+} @else if (store.isEmpty()) {
+  <app-empty-state icon="task" title="Chưa có công việc" message="Dự án này chưa có công việc nào." />
+} @else {
+  <ul class="task-list">
+    @for (task of store.sortedTasks(); track task.id) {
+      <li>
+        <button class="task-row" type="button" [class.task-row--overdue]="isOverdue(task)" (click)="openTask(task)">
+          <span class="task-row__status" [class]="'task-row__status--' + task.status.toLowerCase()">
+            {{ statusLabels[task.status] }}
+          </span>
+          <span class="task-row__main">
+            <span class="task-row__title">{{ task.title }}</span>
+            <span class="task-row__sub">
+              <span [class.text-error]="isOverdue(task)">Hạn {{ task.dueDate | date: 'dd/MM/yyyy' }}</span>
+              · {{ task.percentComplete }}%
+              @if (task.commentCount) {
+                · {{ task.commentCount }} bình luận
+              }
+            </span>
+          </span>
+          <app-task-priority-badge [priority]="task.priority" />
+          @if (task.assignee; as assignee) {
+            <span class="task-row__assignee">
+              <app-user-avatar [name]="assignee.fullName" [size]="28" />
+              <span class="task-row__assignee-name">{{ assignee.fullName }}</span>
+            </span>
+          }
+        </button>
+      </li>
+    }
+  </ul>
+}

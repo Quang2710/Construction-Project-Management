@@ -1,0 +1,76 @@
+<app-page-header title="Bản đồ công trình" subtitle="Vị trí các dự án trên toàn quốc" />
+
+<mat-chip-listbox
+  class="filters"
+  aria-label="Lọc theo trạng thái"
+  [value]="store.statusFilter() ?? allValue"
+  [hideSingleSelectionIndicator]="true"
+  (change)="onStatusChange($event)"
+>
+  <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
+  @for (status of statuses; track status) {
+    <mat-chip-option [value]="status">
+      <span class="legend-dot" [style.background]="statusColors[status]"></span>
+      {{ statusLabels[status] }}
+    </mat-chip-option>
+  }
+</mat-chip-listbox>
+
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state [message]="error" (retry)="store.load()" />
+} @else {
+  <div class="layout">
+    <app-project-map
+      class="map"
+      [markers]="markers()"
+      [selectedId]="store.selectedId()"
+      (markerClick)="store.select($event)"
+    />
+
+    <aside class="side">
+      @if (store.selected(); as project) {
+        <section class="selected">
+          <div class="selected__top">
+            <span class="selected__code">{{ project.code }}</span>
+            <app-project-status-chip [status]="project.status" />
+          </div>
+          <h2 class="selected__name">{{ project.name }}</h2>
+          <p class="selected__address">{{ project.location.address }}, {{ project.location.province }}</p>
+          <app-progress-compare [actual]="project.progress" [planned]="project.plannedProgress" />
+          <p class="selected__budget">Ngân sách {{ project.budget | vnd: 'compact' }}</p>
+          <a mat-flat-button [routerLink]="['/projects', project.id]">
+            Xem chi tiết
+            <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </a>
+        </section>
+      }
+
+      <ul class="list">
+        @for (project of store.filtered(); track project.id) {
+          <li>
+            <button
+              type="button"
+              class="list__item"
+              [class.list__item--active]="project.id === store.selectedId()"
+              (click)="store.select(project.id)"
+            >
+              <span class="legend-dot" [style.background]="statusColors[project.status]"></span>
+              <span class="list__text">
+                <span class="list__name">{{ project.name }}</span>
+                <span class="list__sub">{{ project.code }} · {{ project.location.province }}</span>
+              </span>
+            </button>
+          </li>
+        } @empty {
+          @if (!store.loading()) {
+            <li><app-empty-state icon="map" title="Không có công trình" /></li>
+          }
+        }
+      </ul>
+    </aside>
+  </div>
+}

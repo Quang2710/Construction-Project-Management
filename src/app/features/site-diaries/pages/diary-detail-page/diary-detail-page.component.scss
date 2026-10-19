@@ -1,0 +1,246 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.header__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header__project {
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+}
+
+.header__title {
+  margin: 4px 0;
+  font: var(--mat-sys-headline-small);
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.header__sub {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.danger {
+  color: var(--mat-sys-error);
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
+.banner--error {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.banner--info {
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  padding: 16px 20px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface);
+}
+
+.card--wide {
+  margin-top: 16px;
+}
+
+.card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font: var(--mat-sys-title-medium);
+}
+
+.card__badge {
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  font: var(--mat-sys-label-medium);
+}
+
+.card__badge--error {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.weather {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.weather__slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--mat-sys-body-medium);
+
+  th,
+  td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    text-align: left;
+  }
+
+  th {
+    font: var(--mat-sys-label-large);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.muted {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.safe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    color: var(--app-success);
+  }
+}
+
+.incident {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--app-warning-container);
+  color: var(--app-on-warning-container);
+
+  & + & {
+    margin-top: 8px;
+  }
+}
+
+.incident--high {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.incident__title {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.incident__text,
+.incident__action {
+  margin: 2px 0 0;
+}
+
+.notes {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline__item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 16px;
+
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    bottom: 0;
+    left: 5px;
+    width: 2px;
+    background: var(--mat-sys-outline-variant);
+  }
+}
+
+.timeline__dot {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--mat-sys-outline);
+}
+
+.timeline__item--submitted .timeline__dot {
+  background: var(--mat-sys-tertiary);
+}
+
+.timeline__item--approved .timeline__dot {
+  background: var(--app-success);
+}
+
+.timeline__item--rejected .timeline__dot {
+  background: var(--mat-sys-error);
+}
+
+.timeline__title {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.timeline__time,
+.timeline__note {
+  margin: 2px 0 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 899.98px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

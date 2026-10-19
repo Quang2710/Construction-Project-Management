@@ -1,0 +1,105 @@
+<div class="login">
+  <aside class="hero">
+    <div class="hero__brand">
+      <span class="hero__logo"><mat-icon>foundation</mat-icon></span>
+      <span>{{ appName }}</span>
+    </div>
+    <div class="hero__body">
+      <h1 class="hero__title">Quản lý dự án xây dựng tập trung</h1>
+      <p class="hero__text">
+        Theo dõi tiến độ, vật tư, nhân sự và nhật ký công trường mọi lúc — ngay cả khi đang ở hiện trường.
+      </p>
+    </div>
+    <ul class="hero__features">
+      <li><mat-icon>view_timeline</mat-icon> Tiến độ Gantt &amp; Kanban</li>
+      <li><mat-icon>inventory_2</mat-icon> Vật tư &amp; ngân sách</li>
+      <li><mat-icon>menu_book</mat-icon> Nhật ký công trường</li>
+    </ul>
+  </aside>
+
+  <main class="panel">
+    <div class="card">
+      <h2 class="card__title">Đăng nhập</h2>
+      <p class="card__subtitle">Sử dụng tài khoản được cấp để truy cập hệ thống.</p>
+
+      @if (auth.error(); as error) {
+        <div class="alert" role="alert">
+          <mat-icon>error</mat-icon>
+          <span>{{ error }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" autocomplete="username" (input)="auth.clearError()" />
+          <mat-icon matPrefix>mail</mat-icon>
+          @if (form.controls.email.hasError('required')) {
+            <mat-error>Vui lòng nhập email.</mat-error>
+          } @else if (form.controls.email.hasError('email')) {
+            <mat-error>Email không đúng định dạng.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Mật khẩu</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            autocomplete="current-password"
+            (input)="auth.clearError()"
+          />
+          <mat-icon matPrefix>lock</mat-icon>
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            [attr.aria-label]="hidePassword() ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'"
+            (click)="hidePassword.set(!hidePassword())"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>Vui lòng nhập mật khẩu.</mat-error>
+          } @else if (form.controls.password.hasError('minlength')) {
+            <mat-error>Mật khẩu phải có ít nhất 6 ký tự.</mat-error>
+          }
+        </mat-form-field>
+
+        <button mat-flat-button class="submit" type="submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Đăng nhập
+          }
+        </button>
+      </form>
+
+      @if (demoAccounts.length > 0) {
+        <section class="demo" aria-labelledby="demo-title">
+          <h3 id="demo-title" class="demo__title">Tài khoản demo — bấm để đăng nhập nhanh</h3>
+          <ul class="demo__list">
+            @for (account of demoAccounts; track account.id) {
+              <li>
+                <button class="demo__item" type="button" [disabled]="submitting()" (click)="loginAs(account)">
+                  <mat-icon class="demo__icon">{{ demoRoleIcons[account.role] }}</mat-icon>
+                  <span class="demo__info">
+                    <span class="demo__role">{{ account.role | roleLabel }}</span>
+                    <span class="demo__email">{{ account.email }}</span>
+                  </span>
+                  <mat-icon class="demo__go">arrow_forward</mat-icon>
+                </button>
+              </li>
+            }
+          </ul>
+          <p class="demo__hint">Mật khẩu chung: <code>{{ demoAccounts[0].password }}</code></p>
+          <button mat-stroked-button type="button" class="demo__reset" [disabled]="resetting()" (click)="resetDemoData()">
+            <mat-icon>restart_alt</mat-icon>
+            Reset dữ liệu demo
+          </button>
+        </section>
+      }
+    </div>
+  </main>
+</div>

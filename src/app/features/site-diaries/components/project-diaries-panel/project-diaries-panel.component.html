@@ -1,0 +1,53 @@
+<div class="header">
+  <p class="header__summary">
+    @if (total()) {
+      {{ total() }} nhật ký · hiển thị {{ diaries().length }} gần nhất
+    }
+  </p>
+  <div class="header__actions">
+    <a mat-stroked-button routerLink="/site-diaries" [queryParams]="{ projectId: projectId() }">
+      <mat-icon>calendar_month</mat-icon>
+      Xem lịch nhật ký
+    </a>
+    <a mat-flat-button *hasRole="permissions.editDiaries" routerLink="/site-diaries/new" [queryParams]="{ projectId: projectId() }">
+      <mat-icon>add</mat-icon>
+      Lập nhật ký hôm nay
+    </a>
+  </div>
+</div>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (error(); as message) {
+  <app-error-state [message]="message" (retry)="load()" />
+} @else if (!loading() && diaries().length === 0) {
+  <app-empty-state icon="menu_book" title="Chưa có nhật ký" message="Dự án chưa có nhật ký thi công nào." />
+} @else {
+  <ul class="list">
+    @for (diary of diaries(); track diary.id) {
+      <li>
+        <a class="item" [routerLink]="['/site-diaries', diary.id]">
+          <span class="item__date">
+            <strong>{{ dateOf(diary) | date: 'dd/MM' }}</strong>
+            <span>{{ dateOf(diary) | date: 'EEE' }}</span>
+          </span>
+          <mat-icon class="item__weather" [attr.aria-label]="weatherLabels[diary.weather.morning]">
+            {{ weatherIcons[diary.weather.morning] }}
+          </mat-icon>
+          <span class="item__main">
+            <span>{{ diary.totalWorkers }} công nhân · {{ diary.workItems.length }} hạng mục · {{ diary.photos.length }} ảnh</span>
+            <span class="item__sub">
+              {{ diary.createdBy.fullName }}
+              @if (diary.incidents.length) {
+                · <span class="incident">{{ diary.incidents.length }} sự cố</span>
+              }
+            </span>
+          </span>
+          <app-diary-status-chip [status]="diary.status" />
+        </a>
+      </li>
+    }
+  </ul>
+}

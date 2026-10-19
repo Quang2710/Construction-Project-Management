@@ -1,0 +1,100 @@
+@if (store.lowStock().length) {
+  <div class="alert" role="status">
+    <mat-icon>warning</mat-icon>
+    <span>
+      <strong>{{ store.lowStock().length }} vật tư dưới mức tồn tối thiểu</strong>:
+      @for (item of store.lowStock().slice(0, 4); track item.id; let last = $last) {
+        {{ item.material.name }}{{ last ? '' : ', ' }}
+      }
+      @if (store.lowStock().length > 4) {
+        và {{ store.lowStock().length - 4 }} vật tư khác
+      }
+    </span>
+    @if (store.canHandle()) {
+      <button mat-stroked-button type="button" class="alert__action" (click)="requestLowStock()">
+        <mat-icon>playlist_add</mat-icon> Lập phiếu bổ sung
+      </button>
+    }
+  </div>
+}
+
+<div class="toolbar">
+  <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
+    <mat-label>Tìm vật tư</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input #search matInput [value]="query()" (input)="query.set(search.value)" placeholder="Mã hoặc tên" />
+  </mat-form-field>
+  <mat-slide-toggle [checked]="lowOnly()" (change)="lowOnly.set($event.checked)">Chỉ vật tư thiếu</mat-slide-toggle>
+  <span class="toolbar__spacer"></span>
+  <span class="toolbar__summary">Giá trị tồn: <strong>{{ store.stockValue() | vnd: 'compact' }}</strong></span>
+  @if (store.canHandle()) {
+    <button mat-stroked-button type="button" (click)="move('OUT')"><mat-icon>north</mat-icon> Xuất kho</button>
+    <button mat-flat-button type="button" (click)="move('IN')"><mat-icon>south</mat-icon> Nhập kho</button>
+  }
+</div>
+
+@if (store.stockLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.stockError(); as error) {
+  <app-error-state [message]="error" (retry)="store.loadStock()" />
+} @else if (!store.stockLoading() && items().length === 0) {
+  <app-empty-state icon="inventory_2" title="Không có vật tư" message="Công trường chưa có tồn kho phù hợp bộ lọc." />
+} @else {
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Vật tư</th>
+          <th class="hide-sm">Nhóm</th>
+          <th class="num">Tồn kho</th>
+          <th class="num hide-sm">Tối thiểu</th>
+          <th class="num hide-sm">Giá trị</th>
+          <th><span class="cdk-visually-hidden">Thao tác</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.id) {
+          <tr [class.row--low]="item.isLow">
+            <td>
+              <div class="name">{{ item.material.name }}</div>
+              <div class="sub">{{ item.material.code }}</div>
+            </td>
+            <td class="hide-sm">{{ categoryLabels[item.material.category] }}</td>
+            <td class="num">
+              <div class="qty">
+                @if (item.isLow) {
+                  <mat-icon class="qty__warn" matTooltip="Dưới mức tồn tối thiểu">warning</mat-icon>
+                }
+                <strong>{{ item.quantity | number: '1.0-2' }}</strong> {{ item.material.unit }}
+              </div>
+              <div class="level" [class.level--low]="item.isLow">
+                <div class="level__fill" [style.width.%]="level(item)"></div>
+              </div>
+            </td>
+            <td class="num hide-sm">{{ item.minQuantity | number: '1.0-2' }}</td>
+            <td class="num hide-sm">{{ item.value | vnd: 'compact' }}</td>
+            <td class="actions">
+              <button mat-icon-button type="button" [matMenuTriggerFor]="menu" aria-label="Thao tác">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu" xPosition="before">
+                @if (store.canHandle()) {
+                  <button mat-menu-item type="button" (click)="move('IN', item)"><mat-icon>south</mat-icon> Nhập kho</button>
+                  <button mat-menu-item type="button" [disabled]="item.quantity <= 0" (click)="move('OUT', item)">
+                    <mat-icon>north</mat-icon> Xuất kho
+                  </button>
+                }
+                @if (store.canManage()) {
+                  <button mat-menu-item type="button" (click)="editMin(item)"><mat-icon>tune</mat-icon> Đặt mức tối thiểu</button>
+                }
+                <button mat-menu-item type="button" (click)="showQr(item)"><mat-icon>qr_code_2</mat-icon> Nhãn QR</button>
+              </mat-menu>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
