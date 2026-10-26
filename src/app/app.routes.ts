@@ -35,7 +35,7 @@ function placeholderRoute(item: NavItem): Route {
   };
 }
 
-const IMPLEMENTED_PATHS = new Set(['dashboard', 'projects', 'tasks', 'schedule', 'site-diaries', 'materials', 'map']);
+const IMPLEMENTED_PATHS = new Set(['dashboard', 'projects', 'tasks', 'schedule', 'site-diaries', 'materials', 'map', 'budget']);
 
 export const routes: Routes = [
   {
@@ -79,6 +79,9 @@ export const routes: Routes = [
           import('./features/materials/pages/materials-page/materials-page.component').then(
             (m) => m.MaterialsPageComponent,
           ),
+      }),
+      moduleRoute('budget', {
+        loadComponent: () => import('./features/cost/pages/cost-page/cost-page.component').then((m) => m.CostPageComponent),
       }),
       moduleRoute('map', {
         loadComponent: () =>

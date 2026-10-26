@@ -140,5 +140,10 @@ export interface PaymentMilestone {
   readonly isOverdue: boolean;
 }
 
+/** Chuyển trạng thái đợt: PLANNED → INVOICED → PAID (paidAmount mặc định = giá trị đợt). */
+export type PaymentUpdateRequest =
+  | { readonly status: 'INVOICED' }
+  | { readonly status: 'PAID'; readonly paidAmount: number };
+
 /** Một dòng báo cáo lãi/lỗ toàn danh mục. */
 export type ProfitLossRow = Omit<CostSummary, 'items' | 'byCategory' | 'monthly'> & { readonly status: string };
