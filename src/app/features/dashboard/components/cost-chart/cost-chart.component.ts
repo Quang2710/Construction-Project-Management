@@ -4,7 +4,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ThemeService } from '../../../../core/theme/theme.service';
 import { formatVnd, formatVndCompact } from '../../../../shared/utils/currency.utils';
 import { ProjectCost } from '../../models/dashboard.model';
-import { chartTheme } from '../../utils/chart-theme';
+import { chartTheme } from '../../../../shared/utils/chart-theme';
 
 const ROW_HEIGHT = 44;
 

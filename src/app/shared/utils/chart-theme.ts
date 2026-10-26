@@ -1,4 +1,4 @@
-import { ThemeMode } from '../../../core/theme/theme.service';
+import { ThemeMode } from '../../core/theme/theme.service';
 
 export interface ChartTheme {
   /** Series 1 (kế hoạch / ngân sách) và series 2 (thực tế / đã chi). */

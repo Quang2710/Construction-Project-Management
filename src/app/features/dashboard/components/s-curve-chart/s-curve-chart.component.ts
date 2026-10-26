@@ -3,7 +3,7 @@ import { ChartData, ChartOptions, TooltipItem } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { ThemeService } from '../../../../core/theme/theme.service';
 import { SCurveSeries } from '../../models/dashboard.model';
-import { chartTheme } from '../../utils/chart-theme';
+import { chartTheme } from '../../../../shared/utils/chart-theme';
 
 /** Đường cong S lũy kế: kế hoạch vs thực tế (%). */
 @Component({
