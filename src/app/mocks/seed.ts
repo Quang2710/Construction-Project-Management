@@ -3,6 +3,7 @@ import { DEMO_ACCOUNTS } from '../core/config/demo-accounts';
 import { UserRole } from '../shared/models/user.model';
 import { createProjectRecord, PROJECT_BLUEPRINTS } from './factories/project.factory';
 import { createCostSeed } from './factories/cost.factory';
+import { createDrawingSeed } from './factories/document.factory';
 import { createMaterialSeed, MATERIAL_CATALOG } from './factories/material.factory';
 import { createQualitySeed } from './factories/quality.factory';
 import { createProjectDiaries } from './factories/site-diary.factory';
@@ -83,6 +84,7 @@ export function createSeedData(today: Date = new Date()): DbSchema {
   // Sinh sau cùng để không làm đổi chuỗi ngẫu nhiên của các seed phía trên.
   const floorsOf = (projectId: string): number => PROJECT_BLUEPRINTS.find((blueprint) => blueprint.id === projectId)?.floors ?? 0;
   const qualitySeed = createQualitySeed(finalProjects, wbs, floorsOf, today);
+  const drawings = createDrawingSeed(finalProjects, floorsOf, today);
 
   return {
     users,
@@ -95,5 +97,6 @@ export function createSeedData(today: Date = new Date()): DbSchema {
     ...materialSeed,
     ...costSeed,
     ...qualitySeed,
+    drawings,
   };
 }

@@ -5,6 +5,7 @@ import {
   MaterialRequestStatus,
   StockTransactionType,
 } from '../../features/materials/models/material.model';
+import { Drawing, DrawingRevision } from '../../features/documents/models/document.model';
 import { Project } from '../../features/projects/models/project.model';
 import {
   ApprovalDecision,
@@ -175,6 +176,12 @@ export type PunchRecord = Omit<
   readonly history: readonly PunchHistoryRecord[];
 };
 
+export type DrawingRevisionRecord = Omit<DrawingRevision, 'uploadedBy'> & { readonly uploadedById: string };
+
+export type DrawingRecord = Omit<Drawing, 'projectCode' | 'revisions' | 'currentRevision'> & {
+  readonly revisions: readonly DrawingRevisionRecord[];
+};
+
 export interface DbSchema {
   readonly users: UserRecord[];
   readonly projects: ProjectRecord[];
@@ -193,4 +200,5 @@ export interface DbSchema {
   readonly payments: PaymentRecord[];
   readonly inspections: InspectionRecord[];
   readonly punchItems: PunchRecord[];
+  readonly drawings: DrawingRecord[];
 }

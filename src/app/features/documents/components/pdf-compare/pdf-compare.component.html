@@ -1,0 +1,66 @@
+<div class="toolbar" role="toolbar" aria-label="Điều khiển so sánh phiên bản">
+  <mat-button-toggle-group
+    [value]="mode()"
+    [hideSingleSelectionIndicator]="true"
+    aria-label="Chế độ so sánh"
+    (change)="setMode($event.value)"
+  >
+    <mat-button-toggle value="overlay"><mat-icon>layers</mat-icon> Chồng lớp</mat-button-toggle>
+    <mat-button-toggle value="side"><mat-icon>view_column_2</mat-icon> Cạnh nhau</mat-button-toggle>
+  </mat-button-toggle-group>
+  @if (pageCount() > 1) {
+    <button mat-icon-button type="button" aria-label="Trang trước" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <span class="toolbar__label">Trang {{ page() }}/{{ pageCount() }}</span>
+    <button mat-icon-button type="button" aria-label="Trang sau" [disabled]="page() >= pageCount()" (click)="goTo(page() + 1)">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  }
+  <span class="toolbar__spacer"></span>
+  <button mat-icon-button type="button" aria-label="Thu nhỏ" matTooltip="Thu nhỏ" (click)="zoom(1 / zoomStep)"><mat-icon>zoom_out</mat-icon></button>
+  <span class="toolbar__label">{{ percent() }}%</span>
+  <button mat-icon-button type="button" aria-label="Phóng to" matTooltip="Phóng to" (click)="zoom(zoomStep)"><mat-icon>zoom_in</mat-icon></button>
+  <button mat-icon-button type="button" aria-label="Vừa khung" matTooltip="Vừa chiều rộng" (click)="fit()"><mat-icon>fit_screen</mat-icon></button>
+</div>
+
+@if (mode() === 'overlay') {
+  <div class="legend" aria-live="polite">
+    <span class="legend__item"><i class="swatch swatch--removed"></i> Chỉ có ở Rev {{ olderLabel() }} (đã bỏ)</span>
+    <span class="legend__item"><i class="swatch swatch--added"></i> Chỉ có ở Rev {{ newerLabel() }} (thêm mới)</span>
+    <span class="legend__item"><i class="swatch swatch--same"></i> Không đổi</span>
+    @if (stats(); as stats) {
+      <span class="legend__stats">{{ stats.changedPercent }}% nét vẽ thay đổi</span>
+    }
+  </div>
+}
+
+@if (busy()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+
+<div #frame class="frame">
+  @if (mode() === 'overlay') {
+    <div class="viewport">
+      <canvas #overlay class="page" [attr.aria-label]="'Khác biệt giữa Rev ' + olderLabel() + ' và Rev ' + newerLabel()"></canvas>
+    </div>
+  } @else {
+    <div class="side">
+      <div class="side__col">
+        <p class="side__label">Rev {{ olderLabel() }} (cũ)</p>
+        <div #leftViewport class="viewport" (scroll)="syncScroll(leftViewport, rightViewport)">
+          <canvas #left class="page" [attr.aria-label]="'Rev ' + olderLabel()"></canvas>
+        </div>
+      </div>
+      <div class="side__col">
+        <p class="side__label">Rev {{ newerLabel() }} (mới)</p>
+        <div #rightViewport class="viewport" (scroll)="syncScroll(rightViewport, leftViewport)">
+          <canvas #right class="page" [attr.aria-label]="'Rev ' + newerLabel()"></canvas>
+        </div>
+      </div>
+    </div>
+  }
+</div>

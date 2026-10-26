@@ -1,0 +1,99 @@
+<app-page-header title="Hồ sơ bản vẽ" subtitle="Quản lý bản vẽ theo phiên bản, xem PDF trực tiếp và so sánh thay đổi">
+  @if (store.canManage() && store.projectId()) {
+    <button mat-flat-button type="button" [disabled]="store.uploading()" (click)="upload()">
+      @if (store.uploading()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        <mat-icon>upload_file</mat-icon>
+      }
+      Phát hành bản vẽ mới
+    </button>
+  }
+</app-page-header>
+
+@if (store.projectsLoading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (store.projectsError(); as error) {
+  <app-error-state [message]="error" (retry)="reload()" />
+} @else if (!store.projectsLoading() && store.projects().length === 0) {
+  <app-empty-state icon="folder_open" title="Chưa có dự án" message="Bạn chưa được gán vào dự án nào." />
+} @else if (store.projectId()) {
+  <div class="toolbar">
+    <mat-form-field class="toolbar__project" subscriptSizing="dynamic">
+      <mat-label>Dự án</mat-label>
+      <mat-select [value]="store.projectId()" (valueChange)="onProject($event)">
+        @for (project of store.projects(); track project.id) {
+          <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
+      <mat-label>Tìm số hiệu, tên bản vẽ</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [formControl]="search" />
+    </mat-form-field>
+  </div>
+  <mat-chip-listbox
+    class="chips"
+    aria-label="Lọc theo bộ môn"
+    [value]="store.discipline() ?? allValue"
+    [hideSingleSelectionIndicator]="true"
+    (change)="onDiscipline($event)"
+  >
+    <mat-chip-option [value]="allValue">Tất cả bộ môn</mat-chip-option>
+    @for (discipline of disciplines; track discipline) {
+      <mat-chip-option [value]="discipline">{{ disciplineLabels[discipline] }}</mat-chip-option>
+    }
+  </mat-chip-listbox>
+
+  @if (store.loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  @if (store.error(); as error) {
+    <app-error-state [message]="error" (retry)="store.load()" />
+  } @else if (!store.loading() && store.drawings().length === 0) {
+    <app-empty-state icon="draw" title="Không có bản vẽ" [message]="store.query() || store.discipline() ? 'Thử bỏ bớt bộ lọc.' : ''" />
+  } @else {
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Bản vẽ</th>
+            <th class="hide-sm">Bộ môn</th>
+            <th>Phiên bản</th>
+            <th class="hide-sm">Phát hành</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (drawing of store.drawings(); track drawing.id) {
+            <tr class="row--clickable" tabindex="0" (click)="open(drawing)" (keydown.enter)="open(drawing)">
+              <td>
+                <div class="name"><mat-icon class="pdf">picture_as_pdf</mat-icon> {{ drawing.code }} · {{ drawing.title }}</div>
+                <div class="sub">{{ drawing.currentRevision.description }}</div>
+              </td>
+              <td class="hide-sm">{{ disciplineLabels[drawing.discipline] }}</td>
+              <td>
+                <span class="rev">Rev {{ drawing.currentRevision.revision }}</span>
+                @if (drawing.revisions.length > 1) {
+                  <span class="sub"> · {{ drawing.revisions.length }} phiên bản</span>
+                }
+              </td>
+              <td class="hide-sm">
+                {{ drawing.currentRevision.issuedAt | date: 'dd/MM/yyyy' }}
+                <div class="sub">{{ drawing.currentRevision.uploadedBy.fullName }}</div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <mat-paginator
+      [length]="store.total()"
+      [pageIndex]="store.page() - 1"
+      [pageSize]="store.pageSize()"
+      [hidePageSize]="true"
+      (page)="onPage($event)"
+    />
+  }
+}

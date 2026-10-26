@@ -39,6 +39,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
       { label: 'Nhật ký công trường', icon: 'menu_book', path: 'site-diaries', description: 'Báo cáo thi công hằng ngày và ảnh hiện trường' },
       // CLIENT xem phiếu đã nghiệm thu và punch list (lọc ở BE), không ghi được.
       { label: 'Chất lượng', icon: 'fact_check', path: 'quality', description: 'Nghiệm thu, punch list và duyệt nhiều cấp' },
+      { label: 'Bản vẽ', icon: 'draw', path: 'documents', description: 'Hồ sơ bản vẽ theo phiên bản, xem và so sánh PDF' },
       { label: 'Vật tư', icon: 'inventory_2', path: 'materials', description: 'Nhập, xuất, tồn kho vật tư', roles: FIELD_TEAM },
       { label: 'Nhân sự', icon: 'engineering', path: 'workforce', description: 'Nhân công, tổ đội và chấm công', roles: MANAGERS },
     ],

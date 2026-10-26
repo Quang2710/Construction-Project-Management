@@ -2,6 +2,7 @@ import { authHandlers } from './auth.handlers';
 import { costHandlers } from './cost.handlers';
 import { dashboardHandlers } from './dashboard.handlers';
 import { demoHandlers } from './demo.handlers';
+import { documentsHandlers } from './documents.handlers';
 import { filesHandlers } from './files.handlers';
 import { materialsHandlers } from './materials.handlers';
 import { projectsHandlers } from './projects.handlers';
@@ -21,6 +22,7 @@ export const handlers = [
   ...materialsHandlers,
   ...costHandlers,
   ...qualityHandlers,
+  ...documentsHandlers,
   ...filesHandlers,
   ...dashboardHandlers,
   ...demoHandlers,

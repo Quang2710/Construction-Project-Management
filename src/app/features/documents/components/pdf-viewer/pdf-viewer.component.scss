@@ -1,0 +1,53 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  overflow: hidden;
+  background: var(--mat-sys-surface);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.toolbar__label {
+  min-width: 56px;
+  font: var(--mat-sys-label-large);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.toolbar__spacer {
+  flex: 1;
+}
+
+.viewport {
+  height: min(75vh, 900px);
+  padding: 12px;
+  overflow: auto;
+  /* Bản vẽ luôn nền trắng, kể cả giao diện tối. */
+  background: var(--mat-sys-surface-container-highest);
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+}
+
+.page {
+  display: block;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+}
+
+.error {
+  margin: 0;
+  padding: 12px 16px;
+  color: var(--mat-sys-error);
+}

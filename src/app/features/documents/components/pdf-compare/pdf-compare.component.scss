@@ -1,0 +1,129 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  overflow: hidden;
+  background: var(--mat-sys-surface);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+
+  mat-button-toggle-group {
+    --mat-standard-button-toggle-height: 36px;
+  }
+}
+
+.toolbar__label {
+  min-width: 56px;
+  font: var(--mat-sys-label-large);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.toolbar__spacer {
+  flex: 1;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  padding: 8px 12px;
+  font: var(--mat-sys-body-small);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend__stats {
+  margin-left: auto;
+  font-weight: 600;
+}
+
+/* Cùng màu với DIFF_COLORS trong image-diff.ts. */
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.swatch--removed {
+  background: rgb(220 38 38);
+}
+
+.swatch--added {
+  background: rgb(37 99 235);
+}
+
+.swatch--same {
+  background: rgb(185 185 185);
+}
+
+.frame {
+  min-width: 0;
+}
+
+.viewport {
+  height: min(75vh, 900px);
+  padding: 12px;
+  overflow: auto;
+  background: var(--mat-sys-surface-container-highest);
+  overscroll-behavior: contain;
+}
+
+.page {
+  display: block;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+}
+
+.side {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.side__col + .side__col {
+  border-left: 1px solid var(--mat-sys-outline-variant);
+}
+
+.side__label {
+  margin: 0;
+  padding: 6px 12px;
+  font: var(--mat-sys-label-large);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.error {
+  margin: 0;
+  padding: 12px 16px;
+  color: var(--mat-sys-error);
+}
+
+@media (max-width: 719.98px) {
+  .side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side__col + .side__col {
+    border-left: 0;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+  }
+
+  .viewport {
+    height: 55vh;
+  }
+}

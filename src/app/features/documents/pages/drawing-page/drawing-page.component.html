@@ -1,0 +1,114 @@
+@if (store.loading() && !store.drawing()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state title="Không tải được bản vẽ" [message]="error" (retry)="reload()" />
+} @else if (store.drawing(); as drawing) {
+  <a class="back" routerLink="/documents" [queryParams]="backQuery()"><mat-icon>arrow_back</mat-icon> Hồ sơ bản vẽ</a>
+
+  <header class="header">
+    <div>
+      <p class="header__meta">{{ drawing.projectCode }} · {{ disciplineLabels[drawing.discipline] }}</p>
+      <h1 class="header__title">{{ drawing.code }} · {{ drawing.title }}</h1>
+      @if (store.revision(); as revision) {
+        <p class="header__sub">
+          Đang xem Rev {{ revision.revision }}
+          @if (!store.isLatest()) {
+            <strong class="outdated">(không phải phiên bản mới nhất – hiện hành là Rev {{ drawing.currentRevision.revision }})</strong>
+          }
+        </p>
+      }
+    </div>
+    <div class="header__actions">
+      @if (store.revision(); as revision) {
+        <a mat-stroked-button [href]="revision.file.url" [attr.download]="revision.file.fileName" target="_blank" rel="noopener">
+          <mat-icon>download</mat-icon> Tải PDF
+        </a>
+      }
+      @if (drawing.revisions.length > 1) {
+        <button mat-stroked-button type="button" (click)="toggleCompare()">
+          <mat-icon>{{ comparing() ? 'close' : 'compare' }}</mat-icon>
+          {{ comparing() ? 'Thoát so sánh' : 'So sánh phiên bản' }}
+        </button>
+      }
+      @if (store.canManage()) {
+        <button mat-flat-button type="button" [disabled]="store.uploading()" (click)="uploadRevision()">
+          @if (store.uploading()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>upload_file</mat-icon>
+          }
+          Phiên bản mới
+        </button>
+      }
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="viewer">
+      @if (comparing()) {
+        <div class="compare-bar">
+          <span>So sánh Rev {{ store.revision()?.revision }} với</span>
+          <mat-form-field subscriptSizing="dynamic" class="compare-bar__select">
+            <mat-label>Phiên bản</mat-label>
+            <mat-select [value]="store.compareId()" (valueChange)="changeCompare($event)">
+              @for (revision of compareOptions(); track revision.id) {
+                <mat-option [value]="revision.id">Rev {{ revision.revision }} · {{ revision.issuedAt | date: 'dd/MM/yyyy' }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
+
+      @if (store.fileError(); as error) {
+        <app-error-state title="Không tải được tệp bản vẽ" [message]="error" (retry)="store.retryFile()" />
+      } @else if (comparing()) {
+        @if (store.comparePair(); as pair) {
+          <app-pdf-compare
+            [older]="pair.olderData"
+            [newer]="pair.newerData"
+            [olderLabel]="pair.older.revision"
+            [newerLabel]="pair.newer.revision"
+          />
+        } @else {
+          <mat-progress-bar mode="indeterminate" />
+        }
+      } @else if (store.viewData(); as data) {
+        <app-pdf-viewer [data]="data" />
+      } @else {
+        <mat-progress-bar mode="indeterminate" />
+      }
+    </section>
+
+    <aside class="card">
+      <h2 class="card__title">Lịch sử phát hành</h2>
+      <ol class="revisions">
+        @for (revision of store.revisionsDesc(); track revision.id; let latest = $first) {
+          <li>
+            <button
+              type="button"
+              class="revision"
+              [class.revision--active]="revision.id === store.revisionId()"
+              [class.revision--compare]="revision.id === store.compareId()"
+              [attr.aria-current]="revision.id === store.revisionId() ? 'true' : null"
+              (click)="select(revision.id)"
+            >
+              <span class="revision__label">Rev {{ revision.revision }}</span>
+              @if (latest) {
+                <span class="revision__badge">Hiện hành</span>
+              }
+              @if (revision.id === store.compareId()) {
+                <span class="revision__badge revision__badge--compare">Đang so sánh</span>
+              }
+              <span class="revision__desc">{{ revision.description }}</span>
+              <span class="revision__meta">
+                {{ revision.issuedAt | date: 'dd/MM/yyyy' }} · {{ revision.uploadedBy.fullName }} · {{ revision.file.size / 1048576 | number: '1.0-1' }} MB
+              </span>
+            </button>
+          </li>
+        }
+      </ol>
+    </aside>
+  </div>
+}

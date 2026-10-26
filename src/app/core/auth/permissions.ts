@@ -26,6 +26,8 @@ export const PERMISSIONS = {
   editQuality: ['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'],
   /** Xác nhận đóng / mở lại / giao lại punch item. */
   verifyPunch: ['ADMIN', 'PROJECT_MANAGER'],
+  /** Tải lên bản vẽ mới / phiên bản mới (mọi role đều xem được). */
+  manageDocuments: ['ADMIN', 'PROJECT_MANAGER'],
 } as const satisfies Record<string, readonly UserRole[]>;
 
 export type Permission = keyof typeof PERMISSIONS;
