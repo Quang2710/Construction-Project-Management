@@ -54,7 +54,7 @@ const ALL = 'ALL';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="toolbar">
+    <div class="toolbar app-toolbar">
       <app-field class="toolbar__search" dense>
         <label fieldLabel>Tìm mã, lỗi, vị trí</label>
         <app-icon fieldPrefix>search</app-icon>

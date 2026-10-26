@@ -13,7 +13,7 @@
   }
 </app-page-header>
 
-<div class="toolbar">
+<div class="toolbar app-toolbar">
   <app-field class="toolbar__project" dense>
     <label fieldLabel>Dự án</label>
     <p-select [ngModel]="store.projectId()" (ngModelChange)="store.setProject($event)" [options]="store.projects()" optionValue="id" placeholder="Chọn…" [filter]="true" filterBy="code,name" emptyFilterMessage="Không tìm thấy dự án" [fluid]="true">

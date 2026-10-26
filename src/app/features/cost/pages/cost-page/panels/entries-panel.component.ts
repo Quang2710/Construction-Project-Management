@@ -39,7 +39,7 @@ const ALL = 'ALL';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="toolbar">
+    <div class="toolbar app-toolbar">
       <app-field class="toolbar__search" dense>
         <label fieldLabel>Tìm nội dung, nhà cung cấp, số chứng từ</label>
         <app-icon fieldPrefix>search</app-icon>

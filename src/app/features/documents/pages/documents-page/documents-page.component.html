@@ -19,7 +19,7 @@
 } @else if (!store.projectsLoading() && store.projects().length === 0) {
   <app-empty-state icon="folder_open" title="Chưa có dự án" message="Bạn chưa được gán vào dự án nào." />
 } @else if (store.projectId()) {
-  <div class="toolbar">
+  <div class="toolbar app-toolbar">
     <app-field class="toolbar__project" dense>
       <label fieldLabel>Dự án</label>
       <p-select [ngModel]="store.projectId()" (ngModelChange)="onProject($event)" [options]="store.projects()" optionValue="id" placeholder="Chọn…" [filter]="true" filterBy="code,name" emptyFilterMessage="Không tìm thấy dự án" [fluid]="true">

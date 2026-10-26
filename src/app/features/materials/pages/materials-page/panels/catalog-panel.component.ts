@@ -38,7 +38,7 @@ import { toOptions } from '../../../../../shared/utils/options';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="toolbar">
+    <div class="toolbar app-toolbar">
       <app-field class="toolbar__search" dense>
         <label fieldLabel>Tìm vật tư</label>
         <app-icon fieldPrefix>search</app-icon>

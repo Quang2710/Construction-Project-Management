@@ -189,6 +189,20 @@ code {
 :root {
   // Khoảng từ đỉnh <app-field> tới đỉnh ô nhập (nhãn 16px + gap 6px): dùng để canh nút đặt cạnh trường.
   --app-field-control-offset: 22px;
+  // Chiều cao ô nhập / nút PrimeNG: line-height 20px + padding dọc + viền 1px hai phía.
+  --app-control-height: calc(20px + 2 * var(--p-form-field-padding-y, 0.5rem) + 2px);
+}
+
+// Hàng công cụ / bộ lọc xen trường có nhãn với nút, công tắc, chữ: canh mọi phần tử theo dòng ô nhập.
+// Container tự đặt display/gap; nếu có align-items riêng thì phải là flex-end.
+.app-toolbar {
+  align-items: flex-end;
+
+  > :where(:not(.app-field)) {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--app-control-height);
+  }
 }
 
 .app-field {
@@ -271,8 +285,9 @@ code {
   font: var(--app-body-medium);
 }
 
+// Prefix: cách trái 12px + icon 20px + khoảng 8px tới chữ.
 .app-field--prefix .app-field__control > input {
-  padding-left: 2.5rem;
+  padding-left: 40px;
 }
 
 .app-field--suffix .app-field__control > input {

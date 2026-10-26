@@ -9,6 +9,11 @@
   align-items: center;
   gap: 8px 12px;
   margin-bottom: 12px;
+
+  // Hàng có trường kèm nhãn: canh theo dòng ô nhập (xem .app-toolbar trong styles.scss).
+  &.app-toolbar {
+    align-items: flex-end;
+  }
 }
 
 .toolbar__search {

@@ -47,7 +47,7 @@ const AWAITING = 'AWAITING';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="toolbar">
+    <div class="toolbar app-toolbar">
       <app-field class="toolbar__search" dense>
         <label fieldLabel>Tìm mã, tên phiếu, vị trí</label>
         <app-icon fieldPrefix>search</app-icon>
