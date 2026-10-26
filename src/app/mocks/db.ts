@@ -8,6 +8,7 @@ import {
   DrawingRecord,
   InspectionRecord,
   MaterialRecord,
+  NotificationRecord,
   PaymentRecord,
   MaterialRequestRecord,
   ProjectRecord,
@@ -23,7 +24,7 @@ import {
 
 const STORAGE_KEY = 'cpm.mock-db';
 /** Tăng version khi đổi cấu trúc DbSchema để buộc seed lại dữ liệu cũ trong localStorage. */
-const SCHEMA_VERSION = 8;
+const SCHEMA_VERSION = 9;
 
 interface PersistedDb {
   readonly version: number;
@@ -182,6 +183,11 @@ class MockDatabase {
   readonly drawings = new Collection<DrawingRecord>(
     () => this.data.drawings,
     (drawings) => this.commit({ ...this.data, drawings }),
+  );
+
+  readonly notifications = new Collection<NotificationRecord>(
+    () => this.data.notifications,
+    (notifications) => this.commit({ ...this.data, notifications }),
   );
 
   constructor() {

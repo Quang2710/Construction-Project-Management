@@ -12,6 +12,7 @@ import { UserSummary } from '../../shared/models/user.model';
 import { db } from '../db';
 import { fileStore } from '../file-store';
 import { DrawingRecord, UserRecord } from '../models/mock-records';
+import { notificationHub, projectTeamIds } from '../realtime/notification-hub';
 import { authenticate } from '../utils/auth.utils';
 import { apiUrl, errorResponse, readJsonBody, simulateNetwork } from '../utils/http.utils';
 import { applyListQuery, parseListQuery } from '../utils/list-query';
@@ -186,6 +187,17 @@ export const documentsHandlers = [
       ],
       updatedAt: now,
     });
+    notificationHub.notify(
+      projectTeamIds(drawing.projectId),
+      {
+        type: 'DOCUMENT',
+        title: `Bản vẽ ${drawing.code} phát hành Rev ${label}`,
+        message: description,
+        link: `/documents/${drawing.id}?rev=${label}`,
+        projectId: drawing.projectId,
+      },
+      auth.user.id,
+    );
     return HttpResponse.json(toDrawingDto(updated ?? drawing), { status: 201 });
   }),
 ];

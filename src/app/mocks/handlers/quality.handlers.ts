@@ -21,6 +21,7 @@ import { db } from '../db';
 import { CHECKLIST_TEMPLATES } from '../factories/quality.factory';
 import { InspectionRecord, ProjectRecord, PunchRecord, UserRecord } from '../models/mock-records';
 import { withWbsCodes } from './wbs.handlers';
+import { notificationHub, projectManagerId, userIdsWithRole } from '../realtime/notification-hub';
 import { authenticate } from '../utils/auth.utils';
 import { apiUrl, errorResponse, readJsonBody, simulateNetwork } from '../utils/http.utils';
 import { applyListQuery, parseListQuery } from '../utils/list-query';
@@ -179,6 +180,22 @@ function parseChecklist(value: unknown, existing: readonly ChecklistItem[]): Che
 
 function emptyApprovals(): InspectionRecord['approvals'] {
   return INSPECTION_APPROVAL_LEVELS.map(({ level }) => ({ level, decision: null, byId: null, at: null, note: '' }));
+}
+
+function formatDate(iso: string): string {
+  return iso.split('-').reverse().join('/');
+}
+
+/** Người nhận "chờ duyệt": cấp có role PROJECT_MANAGER do quản lý dự án duyệt, cấp khác gửi theo role. */
+function approversOf(projectId: string, level: number): string[] {
+  const roles = INSPECTION_APPROVAL_LEVELS.find((config) => config.level === level)?.roles ?? [];
+  return roles.includes('PROJECT_MANAGER')
+    ? [projectManagerId(projectId)].filter((id): id is string => id !== null)
+    : roles.flatMap((role) => userIdsWithRole(role));
+}
+
+function notifyPunch(record: PunchRecord, userIds: readonly (string | null)[], title: string, message: string, actorId: string): void {
+  notificationHub.notify(userIds, { type: 'PUNCH', title, message, link: `/quality/punch/${record.id}`, projectId: record.projectId }, actorId);
 }
 
 export const qualityHandlers = [
@@ -376,6 +393,18 @@ export const qualityHandlers = [
       history: [...record.history, { action: 'SUBMITTED', level: null, byId: auth.user.id, at: now, note: '' }],
       updatedAt: now,
     });
+    const firstLevel = INSPECTION_APPROVAL_LEVELS[0].level;
+    notificationHub.notify(
+      approversOf(record.projectId, firstLevel),
+      {
+        type: 'QUALITY',
+        title: `Phiếu ${record.code} chờ duyệt cấp ${firstLevel}`,
+        message: record.title,
+        link: `/quality/inspections/${record.id}`,
+        projectId: record.projectId,
+      },
+      auth.user.id,
+    );
     return HttpResponse.json(toInspectionDto(updated ?? record));
   }),
 
@@ -440,6 +469,32 @@ export const qualityHandlers = [
       ],
       updatedAt: now,
     });
+    const link = `/quality/inspections/${record.id}`;
+    if (status === 'IN_REVIEW' && nextLevel) {
+      notificationHub.notify(
+        approversOf(record.projectId, nextLevel.level),
+        {
+          type: 'QUALITY',
+          title: `Phiếu ${record.code} chờ duyệt cấp ${nextLevel.level}`,
+          message: `${record.title} – đã qua cấp ${level.level}.`,
+          link,
+          projectId: record.projectId,
+        },
+        auth.user.id,
+      );
+    } else {
+      notificationHub.notify(
+        [record.createdById],
+        {
+          type: 'QUALITY',
+          title: status === 'APPROVED' ? `Phiếu ${record.code} đã nghiệm thu` : `Phiếu ${record.code} bị trả lại ở cấp ${level.level}`,
+          message: note ? `${auth.user.fullName}: “${note}”` : record.title,
+          link,
+          projectId: record.projectId,
+        },
+        auth.user.id,
+      );
+    }
     return HttpResponse.json(toInspectionDto(updated ?? record));
   }),
 
@@ -553,6 +608,7 @@ export const qualityHandlers = [
       createdAt: now,
       updatedAt: now,
     });
+    notifyPunch(record, [record.assigneeId], `Bạn được giao xử lý ${record.code}`, `${record.title} – hạn ${formatDate(record.dueDate)}.`, auth.user.id);
     return HttpResponse.json(toPunchDto(record), { status: 201 });
   }),
 
@@ -595,6 +651,7 @@ export const qualityHandlers = [
       history: [...record.history, { action: 'REASSIGNED', byId: auth.user.id, at: now, note }],
       updatedAt: now,
     });
+    notifyPunch(record, [assigneeId], `Bạn được giao xử lý ${record.code}`, `${record.title} – hạn ${formatDate(dueDate)}.`, auth.user.id);
     return HttpResponse.json(toPunchDto(updated ?? record));
   }),
 
@@ -671,6 +728,12 @@ export const qualityHandlers = [
       history: [...record.history, { action, byId: auth.user.id, at: now, note }],
       updatedAt: now,
     });
+    if (transition === 'resolve') {
+      notifyPunch(record, [projectManagerId(record.projectId)], `${record.code} chờ xác nhận khắc phục`, note || record.title, auth.user.id);
+    } else if (transition === 'reopen' || transition === 'verify') {
+      const title = transition === 'verify' ? `${record.code} đã được xác nhận đóng` : `${record.code} bị mở lại`;
+      notifyPunch(record, [record.assigneeId], title, note ? `${auth.user.fullName}: “${note}”` : record.title, auth.user.id);
+    }
     return HttpResponse.json(toPunchDto(updated ?? record));
   }),
 ];

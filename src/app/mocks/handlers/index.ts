@@ -5,6 +5,7 @@ import { demoHandlers } from './demo.handlers';
 import { documentsHandlers } from './documents.handlers';
 import { filesHandlers } from './files.handlers';
 import { materialsHandlers } from './materials.handlers';
+import { notificationsHandlers } from './notifications.handlers';
 import { projectsHandlers } from './projects.handlers';
 import { qualityHandlers } from './quality.handlers';
 import { siteDiariesHandlers } from './site-diaries.handlers';
@@ -23,6 +24,7 @@ export const handlers = [
   ...costHandlers,
   ...qualityHandlers,
   ...documentsHandlers,
+  ...notificationsHandlers,
   ...filesHandlers,
   ...dashboardHandlers,
   ...demoHandlers,

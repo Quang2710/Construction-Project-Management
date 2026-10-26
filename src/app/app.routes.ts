@@ -99,6 +99,15 @@ export const routes: Routes = [
       }),
       ...NAV_ITEMS.filter((item) => !IMPLEMENTED_PATHS.has(item.path)).map(placeholderRoute),
       {
+        path: 'notifications',
+        title: 'Thông báo',
+        data: { breadcrumb: 'Thông báo' } satisfies AppRouteData,
+        loadComponent: () =>
+          import('./features/notifications/pages/notifications-page/notifications-page.component').then(
+            (m) => m.NotificationsPageComponent,
+          ),
+      },
+      {
         path: 'forbidden',
         title: 'Không có quyền truy cập',
         data: { breadcrumb: 'Không có quyền truy cập' } satisfies AppRouteData,

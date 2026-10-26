@@ -5,6 +5,10 @@
 
   <span class="topbar__spacer"></span>
 
+  @if (auth.user()) {
+    <app-notification-bell />
+  }
+
   <button
     mat-icon-button
     type="button"

@@ -22,6 +22,7 @@ import { UserRole } from '../../shared/models/user.model';
 import { isValidIsoDate, todayIso } from '../../shared/utils/date.utils';
 import { db } from '../db';
 import { SiteDiaryRecord, UserRecord } from '../models/mock-records';
+import { notificationHub, projectManagerId } from '../realtime/notification-hub';
 import { authenticate } from '../utils/auth.utils';
 import { apiUrl, errorResponse, readJsonBody, simulateNetwork } from '../utils/http.utils';
 import { applyListQuery, parseListQuery } from '../utils/list-query';
@@ -332,7 +333,19 @@ export const siteDiariesHandlers = [
     if (!EDITABLE_DIARY_STATUSES.includes(found.value.status)) {
       return errorResponse(409, 'INVALID_STATUS', 'Chỉ gửi duyệt được bản nháp hoặc nhật ký bị trả lại.');
     }
-    return HttpResponse.json(transition(found.value, auth.user, 'SUBMITTED', 'SUBMITTED'));
+    const submitted = transition(found.value, auth.user, 'SUBMITTED', 'SUBMITTED');
+    notificationHub.notify(
+      [projectManagerId(submitted.projectId)],
+      {
+        type: 'DIARY',
+        title: `Nhật ký ngày ${submitted.date.split('-').reverse().join('/')} chờ duyệt`,
+        message: `${auth.user.fullName} đã gửi nhật ký công trường.`,
+        link: `/site-diaries/${submitted.id}`,
+        projectId: submitted.projectId,
+      },
+      auth.user.id,
+    );
+    return HttpResponse.json(submitted);
   }),
 
   http.post(apiUrl('/site-diaries/:id/approve'), async ({ request, params }) => {
@@ -356,7 +369,19 @@ export const siteDiariesHandlers = [
       return errorResponse(409, 'INVALID_STATUS', 'Chỉ duyệt được nhật ký đang chờ duyệt.');
     }
     const note = readNote(await readJsonBody(request));
-    return HttpResponse.json(transition(found.value, auth.user, 'APPROVED', 'APPROVED', note));
+    const reviewed = transition(found.value, auth.user, 'APPROVED', 'APPROVED', note);
+    notificationHub.notify(
+      [found.value.createdById],
+      {
+        type: 'DIARY',
+        title: `Nhật ký ngày ${reviewed.date.split('-').reverse().join('/')} được duyệt`,
+        message: note ? `${auth.user.fullName}: “${note}”` : `Bởi ${auth.user.fullName}.`,
+        link: `/site-diaries/${reviewed.id}`,
+        projectId: reviewed.projectId,
+      },
+      auth.user.id,
+    );
+    return HttpResponse.json(reviewed);
   }),
 
   http.post(apiUrl('/site-diaries/:id/reject'), async ({ request, params }) => {
@@ -383,6 +408,18 @@ export const siteDiariesHandlers = [
     if (!note) {
       return errorResponse(422, 'VALIDATION_ERROR', 'Vui lòng nhập lý do trả lại.');
     }
-    return HttpResponse.json(transition(found.value, auth.user, 'REJECTED', 'REJECTED', note));
+    const reviewed = transition(found.value, auth.user, 'REJECTED', 'REJECTED', note);
+    notificationHub.notify(
+      [found.value.createdById],
+      {
+        type: 'DIARY',
+        title: `Nhật ký ngày ${reviewed.date.split('-').reverse().join('/')} bị trả lại`,
+        message: note ? `${auth.user.fullName}: “${note}”` : `Bởi ${auth.user.fullName}.`,
+        link: `/site-diaries/${reviewed.id}`,
+        projectId: reviewed.projectId,
+      },
+      auth.user.id,
+    );
+    return HttpResponse.json(reviewed);
   }),
 ];

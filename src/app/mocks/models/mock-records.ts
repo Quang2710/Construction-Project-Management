@@ -17,6 +17,7 @@ import {
 import { WbsNode } from '../../features/scheduling/models/wbs.model';
 import { DiaryAction, SiteDiary } from '../../features/site-diaries/models/site-diary.model';
 import { Task } from '../../features/tasks/models/task.model';
+import { AppNotification } from '../../shared/models/notification.model';
 import { User } from '../../shared/models/user.model';
 
 /** Bản ghi user trong fake DB (có mật khẩu, không bao giờ trả ra ngoài API). */
@@ -182,6 +183,11 @@ export type DrawingRecord = Omit<Drawing, 'projectCode' | 'revisions' | 'current
   readonly revisions: readonly DrawingRevisionRecord[];
 };
 
+export type NotificationRecord = Omit<AppNotification, 'read'> & {
+  readonly userId: string;
+  readonly readAt: string | null;
+};
+
 export interface DbSchema {
   readonly users: UserRecord[];
   readonly projects: ProjectRecord[];
@@ -201,4 +207,5 @@ export interface DbSchema {
   readonly inspections: InspectionRecord[];
   readonly punchItems: PunchRecord[];
   readonly drawings: DrawingRecord[];
+  readonly notifications: NotificationRecord[];
 }

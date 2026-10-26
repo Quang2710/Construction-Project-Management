@@ -10,11 +10,20 @@ import { UserAvatarComponent } from '../../../shared/ui/user-avatar/user-avatar.
 import { AuthStore } from '../../auth/auth.store';
 import { DemoDataService } from '../../demo/demo-data.service';
 import { NotificationService } from '../../notifications/notification.service';
+import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 import { ThemeService } from '../../theme/theme.service';
 
 @Component({
   selector: 'app-topbar',
-  imports: [MatButtonModule, MatIconModule, MatMenuModule, MatDividerModule, MatTooltipModule, UserAvatarComponent],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatDividerModule,
+    MatTooltipModule,
+    UserAvatarComponent,
+    NotificationBellComponent,
+  ],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

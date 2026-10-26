@@ -15,6 +15,7 @@ import { UserSummary } from '../../shared/models/user.model';
 import { isValidIsoDate } from '../../shared/utils/date.utils';
 import { db } from '../db';
 import { MaterialRecord, MaterialRequestRecord, StockRecord, StockTransactionRecord, UserRecord } from '../models/mock-records';
+import { notificationHub, projectManagerId } from '../realtime/notification-hub';
 import { authenticate } from '../utils/auth.utils';
 import { apiUrl, errorResponse, readJsonBody, simulateNetwork } from '../utils/http.utils';
 import { applyListQuery, parseListQuery } from '../utils/list-query';
@@ -430,6 +431,17 @@ export const materialsHandlers = [
       history: [{ action: 'CREATED', byId: auth.user.id, at: now, note: '' }],
       createdAt: now,
     });
+    notificationHub.notify(
+      [projectManagerId(record.projectId)],
+      {
+        type: 'MATERIAL',
+        title: `Phiếu yêu cầu vật tư ${record.code} chờ duyệt`,
+        message: `${auth.user.fullName} đề nghị ${items.length} loại vật tư.`,
+        link: `/materials?projectId=${record.projectId}`,
+        projectId: record.projectId,
+      },
+      auth.user.id,
+    );
     return HttpResponse.json(toRequest(record), { status: 201 });
   }),
 
@@ -483,6 +495,17 @@ export const materialsHandlers = [
       reviewNote: note,
       history: [...found.history, { action: status, byId: auth.user.id, at: now, note }],
     });
+    notificationHub.notify(
+      [found.createdById],
+      {
+        type: 'MATERIAL',
+        title: `Phiếu ${found.code} ${status === 'APPROVED' ? 'đã được duyệt' : 'bị từ chối'}`,
+        message: note ? `${auth.user.fullName}: “${note}”` : `Bởi ${auth.user.fullName}.`,
+        link: `/materials?projectId=${found.projectId}`,
+        projectId: found.projectId,
+      },
+      auth.user.id,
+    );
     return HttpResponse.json(toRequest(updated ?? found));
   }),
 ];
