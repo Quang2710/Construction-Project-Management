@@ -1,21 +1,22 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipListboxChange, MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectButtonChangeEvent, SelectButtonModule } from 'primeng/selectbutton';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { VndPipe } from '../../../../../shared/pipes/vnd.pipe';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
 import { ErrorStateComponent } from '../../../../../shared/ui/state/error-state.component';
 import { CostStore } from '../../../data-access/cost.store';
 import { COST_CATEGORIES, COST_CATEGORY_LABELS, CostCategory } from '../../../models/cost.model';
 import { CostDialogsService } from '../cost-dialogs.service';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../../shared/ui/field/field.component';
+import { withAllOption } from '../../../../../shared/utils/options';
 
 const ALL = 'ALL';
 
@@ -23,49 +24,40 @@ const ALL = 'ALL';
   selector: 'app-entries-panel',
   imports: [
     DatePipe,
+    FormsModule,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
+    SelectButtonModule,
+    PaginatorModule,
     VndPipe,
     EmptyStateComponent,
     ErrorStateComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ...FIELD,
+    InputTextModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toolbar">
-      <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
-        <mat-label>Tìm nội dung, nhà cung cấp, số chứng từ</mat-label>
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput [formControl]="search" />
-      </mat-form-field>
+      <app-field class="toolbar__search" dense>
+        <label fieldLabel>Tìm nội dung, nhà cung cấp, số chứng từ</label>
+        <app-icon fieldPrefix>search</app-icon>
+        <input pInputText [formControl]="search" />
+      </app-field>
       <span class="toolbar__spacer"></span>
       @if (store.canManage()) {
-        <button mat-flat-button type="button" [disabled]="!store.costItems().length" (click)="dialogs.addEntry()">
-          <mat-icon>add</mat-icon> Ghi nhận chi phí
+        <button pButton type="button" [disabled]="!store.costItems().length" (click)="dialogs.addEntry()">
+          <app-icon>add</app-icon> Ghi nhận chi phí
         </button>
       }
     </div>
     <div class="toolbar">
-      <mat-chip-listbox
-        aria-label="Lọc theo loại chi phí"
-        [value]="store.entriesCategory() ?? allValue"
-        [hideSingleSelectionIndicator]="true"
-        (change)="onCategory($event)"
-      >
-        <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
-        @for (category of categories; track category) {
-          <mat-chip-option [value]="category">{{ categoryLabels[category] }}</mat-chip-option>
-        }
-      </mat-chip-listbox>
+      <p-selectbutton class="app-chips" [options]="categoryFilterOptions" optionLabel="label" optionValue="value" [allowEmpty]="false" [ngModel]="store.entriesCategory() ?? allValue" (onChange)="onCategory($event)" [attr.aria-label]="'Lọc theo loại chi phí'" />
     </div>
 
     @if (store.entriesLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.entriesError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadEntries()" />
@@ -108,13 +100,7 @@ const ALL = 'ALL';
           </tbody>
         </table>
       </div>
-      <mat-paginator
-        [length]="store.entriesTotal()"
-        [pageIndex]="store.entriesPage() - 1"
-        [pageSize]="store.pageSize()"
-        [hidePageSize]="true"
-        (page)="onPage($event)"
-      />
+      <p-paginator [totalRecords]="store.entriesTotal()" [first]="(store.entriesPage() - 1) * store.pageSize()" [rows]="store.pageSize()" [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} / {totalRecords}" (onPageChange)="onPage($event)" />
     }
   `,
   styleUrl: './panels.scss',
@@ -125,6 +111,7 @@ export class EntriesPanelComponent {
   protected readonly allValue = ALL;
   protected readonly categories = COST_CATEGORIES;
   protected readonly categoryLabels = COST_CATEGORY_LABELS;
+  protected readonly categoryFilterOptions = withAllOption(this.categories, this.categoryLabels, 'Tất cả');
   protected readonly search = new FormControl(this.store.entriesQuery(), { nonNullable: true });
 
   constructor() {
@@ -133,12 +120,12 @@ export class EntriesPanelComponent {
       .subscribe((q) => void this.store.setEntriesFilter({ q }));
   }
 
-  protected onCategory(event: MatChipListboxChange): void {
+  protected onCategory(event: SelectButtonChangeEvent): void {
     const value: unknown = event.value;
     void this.store.setEntriesFilter({ category: typeof value === 'string' && value !== ALL ? (value as CostCategory) : null });
   }
 
-  protected onPage(event: PageEvent): void {
-    void this.store.setEntriesFilter({ page: event.pageIndex + 1 });
+  protected onPage(event: PaginatorState): void {
+    void this.store.setEntriesFilter({ page: (event.page ?? 0) + 1 });
   }
 }

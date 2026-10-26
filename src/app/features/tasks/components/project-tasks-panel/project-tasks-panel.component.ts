@@ -1,9 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, untracked } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { PERMISSIONS } from '../../../../core/auth/permissions';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { EmptyStateComponent } from '../../../../shared/ui/state/empty-state.component';
@@ -16,6 +15,7 @@ import { isTaskOverdue } from '../../utils/task.utils';
 import { TaskDialogResult } from '../task-dialog/task-dialog.component';
 import { TaskDialogService } from '../task-dialog/task-dialog.service';
 import { TaskPriorityBadgeComponent } from '../task-priority-badge/task-priority-badge.component';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 /** Bảng công việc của một dự án, dùng trong tab "Công việc" của trang chi tiết dự án. */
 @Component({
@@ -23,14 +23,14 @@ import { TaskPriorityBadgeComponent } from '../task-priority-badge/task-priority
   imports: [
     DatePipe,
     RouterLink,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
     HasRoleDirective,
     EmptyStateComponent,
     ErrorStateComponent,
     UserAvatarComponent,
     TaskPriorityBadgeComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
   ],
   providers: [ProjectTasksStore],
   templateUrl: './project-tasks-panel.component.html',

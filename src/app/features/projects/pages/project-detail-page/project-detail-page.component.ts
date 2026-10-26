@@ -1,10 +1,9 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTabsModule } from '@angular/material/tabs';
 import { Router, RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { TabsModule } from 'primeng/tabs';
 import { PERMISSIONS } from '../../../../core/auth/permissions';
 import { BreadcrumbService } from '../../../../core/layout/breadcrumb/breadcrumb.service';
 import { NotificationService } from '../../../../core/notifications/notification.service';
@@ -20,6 +19,7 @@ import { MapMarker, ProjectMapComponent } from '../../components/project-map/pro
 import { ProjectStatusChipComponent } from '../../components/project-status-chip/project-status-chip.component';
 import { ProjectDetailStore } from '../../data-access/project-detail.store';
 import { PROJECT_STATUS_COLORS } from '../../utils/project-status.utils';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 interface PlaceholderTab {
   readonly label: string;
@@ -33,10 +33,7 @@ interface PlaceholderTab {
     RouterLink,
     DatePipe,
     DecimalPipe,
-    MatTabsModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
+    TabsModule,
     HasRoleDirective,
     VndPipe,
     EmptyStateComponent,
@@ -46,6 +43,9 @@ interface PlaceholderTab {
     ProjectMapComponent,
     ProjectTasksPanelComponent,
     ProjectDiariesPanelComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
   ],
   providers: [ProjectDetailStore],
   templateUrl: './project-detail-page.component.html',

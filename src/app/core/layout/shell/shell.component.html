@@ -1,18 +1,27 @@
-<mat-sidenav-container class="shell" autosize>
-  <mat-sidenav
-    class="shell__sidenav"
-    [mode]="isCompact() ? 'over' : 'side'"
-    [opened]="sidenavOpened()"
-    (closedStart)="layout.closeMobileNav()"
-  >
-    <app-sidebar [collapsed]="sidebarCollapsed()" (navigated)="onNavigated()" />
-  </mat-sidenav>
+<div class="shell" [class.shell--collapsed]="sidebarCollapsed()">
+  @if (!isCompact()) {
+    <aside class="shell__sidebar">
+      <app-sidebar [collapsed]="sidebarCollapsed()" (navigated)="onNavigated()" />
+    </aside>
+  }
 
-  <mat-sidenav-content class="shell__content">
+  <div class="shell__content">
     <app-topbar (menuToggle)="toggleNav()" />
     <main class="shell__main">
       <app-breadcrumb />
       <router-outlet />
     </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  </div>
+</div>
+
+@if (isCompact()) {
+  <p-drawer
+    [visible]="layout.mobileNavOpen()"
+    (onHide)="layout.closeMobileNav()"
+    position="left"
+    [showCloseIcon]="false"
+    styleClass="shell__drawer"
+  >
+    <app-sidebar (navigated)="onNavigated()" />
+  </p-drawer>
+}

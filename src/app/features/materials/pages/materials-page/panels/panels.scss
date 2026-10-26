@@ -33,38 +33,46 @@
   max-width: 320px;
 }
 
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--app-body-medium);
+  cursor: pointer;
+}
+
 .toolbar__spacer {
   flex: 1;
 }
 
 .toolbar__summary {
-  font: var(--mat-sys-body-medium);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-medium);
+  color: var(--app-on-surface-variant);
 }
 
 .table-wrap {
   overflow-x: auto;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font: var(--mat-sys-body-medium);
+  font: var(--app-body-medium);
 
   th,
   td {
     padding: 8px 12px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    border-bottom: 1px solid var(--app-outline-variant);
     text-align: left;
     vertical-align: middle;
   }
 
   th {
-    font: var(--mat-sys-label-large);
-    color: var(--mat-sys-on-surface-variant);
-    background: var(--mat-sys-surface-container-low);
+    font: var(--app-label-large);
+    color: var(--app-on-surface-variant);
+    background: var(--app-surface-container-low);
     white-space: nowrap;
   }
 
@@ -83,7 +91,7 @@
   cursor: pointer;
 
   &:hover {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
   }
 }
 
@@ -96,8 +104,8 @@
 }
 
 .sub {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .qty {
@@ -118,7 +126,7 @@
   height: 4px;
   margin: 4px 0 0 auto;
   border-radius: 999px;
-  background: var(--mat-sys-surface-container-highest);
+  background: var(--app-surface-container-highest);
 }
 
 .level__fill {
@@ -128,7 +136,7 @@
 }
 
 .level--low .level__fill {
-  background: var(--mat-sys-error);
+  background: var(--app-error);
 }
 
 .actions {
@@ -140,9 +148,9 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font: var(--mat-sys-label-medium);
+  font: var(--app-label-medium);
 
-  mat-icon {
+  app-icon {
     width: 18px;
     height: 18px;
     font-size: 18px;
@@ -154,7 +162,7 @@
 }
 
 .type--out {
-  color: var(--mat-sys-tertiary);
+  color: var(--app-tertiary);
 }
 
 @media (max-width: 719.98px) {

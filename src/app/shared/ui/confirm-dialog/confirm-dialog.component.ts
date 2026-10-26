@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ButtonModule } from 'primeng/button';
+import { DialogCloseDirective, injectDialogData } from '../dialog/app-dialog.service';
+import { IconComponent } from '../icon/icon.component';
 
 export interface ConfirmDialogData {
   readonly title: string;
@@ -13,25 +14,57 @@ export interface ConfirmDialogData {
 
 @Component({
   selector: 'app-confirm-dialog',
-  imports: [MatDialogModule, MatButtonModule],
+  imports: [ButtonModule, DialogCloseDirective, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>{{ data.title }}</h2>
-    <mat-dialog-content>{{ data.message }}</mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button [mat-dialog-close]="false">{{ data.cancelText ?? 'Huỷ' }}</button>
-      <button mat-flat-button [class.destructive]="data.destructive" [mat-dialog-close]="true" cdkFocusInitial>
+    <div class="body">
+      <span class="icon" [class.icon--danger]="data.destructive" aria-hidden="true">
+        <app-icon>{{ data.destructive ? 'warning' : 'help' }}</app-icon>
+      </span>
+      <div>
+        <h2 class="title">{{ data.title }}</h2>
+        <p class="message">{{ data.message }}</p>
+      </div>
+    </div>
+    <div dialogActions>
+      <button pButton text severity="secondary" type="button" [appDialogClose]="false">{{ data.cancelText ?? 'Huỷ' }}</button>
+      <button pButton type="button" [severity]="data.destructive ? 'danger' : undefined" [appDialogClose]="true">
         {{ data.confirmText ?? 'Xác nhận' }}
       </button>
-    </mat-dialog-actions>
+    </div>
   `,
   styles: `
-    .destructive {
-      --mat-button-filled-container-color: var(--mat-sys-error);
-      --mat-button-filled-label-text-color: var(--mat-sys-on-error);
+    .body {
+      display: flex;
+      gap: 16px;
+      padding: 24px 24px 4px;
+    }
+    .icon {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--app-primary-container);
+      color: var(--app-on-primary-container);
+    }
+    .icon--danger {
+      background: var(--app-error-container);
+      color: var(--app-error);
+    }
+    .title {
+      margin: 0;
+      font: var(--app-title-medium);
+    }
+    .message {
+      margin: 6px 0 0;
+      color: var(--app-on-surface-variant);
+      line-height: 1.5;
     }
   `,
 })
 export class ConfirmDialogComponent {
-  protected readonly data = inject<ConfirmDialogData>(MAT_DIALOG_DATA);
+  protected readonly data = injectDialogData<ConfirmDialogData>();
 }

@@ -1,14 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipListboxChange, MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { AuthStore } from '../../../../../core/auth/auth.store';
@@ -24,6 +17,13 @@ import {
   Inspection,
   InspectionStatus,
 } from '../../../models/quality.model';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { FIELD } from '../../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { SelectButtonChangeEvent, SelectButtonModule } from 'primeng/selectbutton';
 
 const ALL = 'ALL';
 const AWAITING = 'AWAITING';
@@ -33,51 +33,47 @@ const AWAITING = 'AWAITING';
   imports: [
     DatePipe,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
+    FormsModule,
+    SelectButtonModule,
+    PaginatorModule,
     EmptyStateComponent,
     ErrorStateComponent,
     QualityStatusChipComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ...FIELD,
+    InputTextModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toolbar">
-      <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
-        <mat-label>Tìm mã, tên phiếu, vị trí</mat-label>
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput [formControl]="search" />
-      </mat-form-field>
+      <app-field class="toolbar__search" dense>
+        <label fieldLabel>Tìm mã, tên phiếu, vị trí</label>
+        <app-icon fieldPrefix>search</app-icon>
+        <input pInputText [formControl]="search" />
+      </app-field>
       <span class="toolbar__spacer"></span>
       @if (store.canEdit()) {
-        <button mat-flat-button type="button" [disabled]="store.busy() || !store.wbs().length" (click)="create()">
-          <mat-icon>add</mat-icon> Lập phiếu nghiệm thu
+        <button pButton type="button" [disabled]="store.busy() || !store.wbs().length" (click)="create()">
+          <app-icon>add</app-icon> Lập phiếu nghiệm thu
         </button>
       }
     </div>
     <div class="toolbar">
-      <mat-chip-listbox aria-label="Lọc phiếu nghiệm thu" [value]="selected()" [hideSingleSelectionIndicator]="true" (change)="onFilter($event)">
-        <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
-        @if (canApprove()) {
-          <mat-chip-option [value]="awaitingValue">
-            Chờ tôi duyệt
-            @if (store.awaitingCount()) {
-              ({{ store.awaitingCount() }})
-            }
-          </mat-chip-option>
-        }
-        @for (status of statuses; track status) {
-          <mat-chip-option [value]="status">{{ statusLabels[status] }}</mat-chip-option>
-        }
-      </mat-chip-listbox>
+      <p-selectbutton class="app-chips"
+        [options]="filterOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"
+        [ngModel]="selected()"
+        (onChange)="onFilter($event)"
+        [attr.aria-label]="'Lọc phiếu nghiệm thu'"
+      />
     </div>
 
     @if (store.inspectionsLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.inspectionsError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadInspections()" />
@@ -108,12 +104,12 @@ const AWAITING = 'AWAITING';
                 <td class="hide-sm">{{ inspection.inspectionDate | date: 'dd/MM/yyyy' }}</td>
                 <td>
                   <span class="counts" [attr.aria-label]="inspection.stats.pass + ' đạt, ' + inspection.stats.fail + ' không đạt'">
-                    <span class="counts__pass"><mat-icon>check</mat-icon>{{ inspection.stats.pass }}</span>
+                    <span class="counts__pass"><app-icon>check</app-icon>{{ inspection.stats.pass }}</span>
                     @if (inspection.stats.fail) {
-                      <span class="counts__fail"><mat-icon>close</mat-icon>{{ inspection.stats.fail }}</span>
+                      <span class="counts__fail"><app-icon>close</app-icon>{{ inspection.stats.fail }}</span>
                     }
                     @if (inspection.stats.pending) {
-                      <span class="counts__pending"><mat-icon>more_horiz</mat-icon>{{ inspection.stats.pending }}</span>
+                      <span class="counts__pending"><app-icon>more_horiz</app-icon>{{ inspection.stats.pending }}</span>
                     }
                   </span>
                 </td>
@@ -123,13 +119,7 @@ const AWAITING = 'AWAITING';
           </tbody>
         </table>
       </div>
-      <mat-paginator
-        [length]="store.inspectionsTotal()"
-        [pageIndex]="store.inspectionFilter().page - 1"
-        [pageSize]="store.pageSize()"
-        [hidePageSize]="true"
-        (page)="onPage($event)"
-      />
+      <p-paginator [totalRecords]="store.inspectionsTotal()" [first]="(store.inspectionFilter().page - 1) * store.pageSize()" [rows]="store.pageSize()" [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} / {totalRecords}" (onPageChange)="onPage($event)" />
     }
   `,
   styleUrl: './panels.scss',
@@ -152,6 +142,16 @@ export class InspectionsPanelComponent {
     return !!role && INSPECTION_APPROVAL_LEVELS.some((level) => level.roles.includes(role));
   });
 
+  /** "Chờ tôi duyệt" chỉ hiện với người tham gia duyệt, kèm số phiếu đang chờ. */
+  protected readonly filterOptions = computed(() => {
+    const awaiting = this.store.awaitingCount();
+    return [
+      { label: 'Tất cả', value: ALL },
+      ...(this.canApprove() ? [{ label: awaiting ? `Chờ tôi duyệt (${awaiting})` : 'Chờ tôi duyệt', value: AWAITING }] : []),
+      ...INSPECTION_STATUSES.map((status) => ({ label: INSPECTION_STATUS_LABELS[status], value: status })),
+    ];
+  });
+
   protected readonly selected = computed(() => {
     const filter = this.store.inspectionFilter();
     return filter.awaitingMe ? AWAITING : (filter.status ?? ALL);
@@ -163,7 +163,7 @@ export class InspectionsPanelComponent {
       .subscribe((q) => void this.store.setInspectionFilter({ q }));
   }
 
-  protected onFilter(event: MatChipListboxChange): void {
+  protected onFilter(event: SelectButtonChangeEvent): void {
     const value: unknown = event.value;
     if (value === AWAITING) {
       void this.store.setInspectionFilter({ awaitingMe: true, status: null });
@@ -173,8 +173,8 @@ export class InspectionsPanelComponent {
     void this.store.setInspectionFilter({ awaitingMe: false, status });
   }
 
-  protected onPage(event: PageEvent): void {
-    void this.store.setInspectionFilter({ page: event.pageIndex + 1 });
+  protected onPage(event: PaginatorState): void {
+    void this.store.setInspectionFilter({ page: (event.page ?? 0) + 1 });
   }
 
   protected open(inspection: Inspection): void {

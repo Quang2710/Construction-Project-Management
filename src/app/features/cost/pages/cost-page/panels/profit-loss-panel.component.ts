@@ -1,26 +1,26 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { VndPipe } from '../../../../../shared/pipes/vnd.pipe';
 import { KpiCardComponent } from '../../../../../shared/ui/kpi-card/kpi-card.component';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
 import { ErrorStateComponent } from '../../../../../shared/ui/state/error-state.component';
 import { CostStore } from '../../../data-access/cost.store';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 
 /** Báo cáo lãi/lỗ toàn danh mục dự án (ADMIN, PROJECT_MANAGER). */
 @Component({
   selector: 'app-profit-loss-panel',
   imports: [
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
     VndPipe,
     KpiCardComponent,
     EmptyStateComponent,
     ErrorStateComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ProgressSpinnerModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -30,22 +30,22 @@ import { CostStore } from '../../../data-access/cost.store';
       </span>
       <span class="toolbar__spacer"></span>
       <button
-        mat-stroked-button
+        pButton outlined
         type="button"
         [disabled]="store.exporting() || store.overview().length === 0"
         (click)="store.exportProfitLoss()"
       >
         @if (store.exporting()) {
-          <mat-spinner diameter="18" />
+          <p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 18px; height: 18px" />
         } @else {
-          <mat-icon>download</mat-icon>
+          <app-icon>download</app-icon>
         }
         Xuất Excel
       </button>
     </div>
 
     @if (store.overviewLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.overviewError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadOverview()" />
@@ -112,7 +112,7 @@ import { CostStore } from '../../../data-access/cost.store';
       cursor: pointer;
     }
     .row--clickable:hover {
-      background: var(--mat-sys-surface-container-low);
+      background: var(--app-surface-container-low);
     }
   `,
 })

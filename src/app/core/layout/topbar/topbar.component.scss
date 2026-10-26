@@ -4,15 +4,22 @@
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 64px;
-  padding: 0 12px;
-  background: var(--mat-sys-surface);
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  gap: 8px;
+  height: 60px;
+  padding: 0 16px 0 12px;
+  border-bottom: 1px solid var(--app-outline-variant);
+  background: color-mix(in srgb, var(--app-surface) 85%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
 }
 
 .topbar__spacer {
   flex: 1;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .user {
@@ -21,17 +28,20 @@
   gap: 10px;
   margin-left: 4px;
   padding: 4px 8px 4px 4px;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   color: inherit;
   font: inherit;
   cursor: pointer;
+  transition:
+    background-color var(--app-transition),
+    border-color var(--app-transition);
 
   &:hover,
   &:focus-visible {
-    background: var(--mat-sys-surface-container-high);
-    outline: none;
+    border-color: var(--app-outline-variant);
+    background: var(--app-surface-container-low);
   }
 }
 
@@ -43,32 +53,48 @@
 }
 
 .user__name {
-  font: var(--mat-sys-label-large);
+  font: var(--app-label-large);
 }
 
 .user__role {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
-.menu-header {
+.user__caret {
+  font-size: 20px;
+  color: var(--app-on-surface-variant);
+}
+
+// Menu tài khoản (nội dung p-popover).
+.menu {
+  width: 260px;
+}
+
+.menu__header {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px 16px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--app-outline-variant);
 }
 
-.menu-header__name {
-  font: var(--mat-sys-title-small);
+.menu__name {
+  margin: 0;
+  font: var(--app-title-small);
 }
 
-.menu-header__email,
-.menu-header__role {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+.menu__meta {
+  margin: 0;
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 @media (max-width: 599.98px) {
+  .topbar {
+    padding: 0 8px;
+  }
+
   .user__info,
   .user__caret {
     display: none;

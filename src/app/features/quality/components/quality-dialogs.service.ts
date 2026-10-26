@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { AppDialog } from '../../../shared/ui/dialog/app-dialog.service';
 import { firstValueFrom } from 'rxjs';
 import {
   InspectionCreateDialogComponent,
@@ -17,7 +17,7 @@ const NARROW = { width: '480px', maxWidth: 'calc(100vw - 32px)' };
 /** Mở các dialog nghiệp vụ chất lượng; trả về dữ liệu người dùng nhập (undefined nếu huỷ). */
 @Injectable({ providedIn: 'root' })
 export class QualityDialogsService {
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
 
   createInspection(data: InspectionCreateDialogData): Promise<InspectionCreateResult | undefined> {
     const ref = this.dialog.open<InspectionCreateDialogComponent, InspectionCreateDialogData, InspectionCreateResult>(

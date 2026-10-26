@@ -8,8 +8,8 @@
 
 .actions__count {
   margin-left: auto;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .info {
@@ -17,8 +17,8 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 12px;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .info--warning {
@@ -39,7 +39,7 @@
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 12px;
-  background: var(--mat-sys-surface-container-high);
+  background: var(--app-surface-container-high);
 
   img {
     width: 100%;
@@ -49,7 +49,7 @@
 }
 
 .item--error .preview {
-  outline: 2px solid var(--mat-sys-error);
+  outline: 2px solid var(--app-error);
 }
 
 .overlay {
@@ -63,13 +63,13 @@
   padding: 8px;
   background: rgb(0 0 0 / 0.55);
   color: #fff;
-  font: var(--mat-sys-body-small);
+  font: var(--app-body-small);
   text-align: center;
 }
 
 .overlay--error button {
-  --mat-button-outlined-label-text-color: #fff;
-  --mat-button-outlined-outline-color: #fff;
+  border-color: #fff;
+  color: #fff;
 }
 
 .remove {
@@ -91,9 +91,9 @@
   border-radius: 999px;
   background: rgb(0 0 0 / 0.6);
   color: #fff;
-  font: var(--mat-sys-label-small);
+  font: var(--app-label-small);
 
-  mat-icon {
+  app-icon {
     width: 14px;
     height: 14px;
     font-size: 14px;
@@ -107,6 +107,6 @@
 
 .empty {
   margin: 0;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }

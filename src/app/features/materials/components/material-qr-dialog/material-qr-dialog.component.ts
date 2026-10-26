@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, DOCUMENT, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Material } from '../../models/material.model';
+import { injectDialogData, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
@@ -12,23 +12,28 @@ function escapeHtml(value: string): string {
 /** Nhãn QR để dán lên kệ/bãi vật tư; quét nhãn này để nhập/xuất nhanh. */
 @Component({
   selector: 'app-material-qr-dialog',
-  imports: [MatDialogModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [
+    ButtonModule,
+    IconComponent,
+    ProgressSpinnerModule,
+    DialogCloseDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Nhãn QR vật tư</h2>
-    <mat-dialog-content class="content">
+    <h2 dialogTitle>Nhãn QR vật tư</h2>
+    <div dialogContent>
       @if (qr(); as src) {
         <img class="qr" [src]="src" [alt]="'Mã QR ' + data.code" width="220" height="220" />
       } @else {
-        <mat-spinner diameter="40" />
+        <p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 40px; height: 40px" />
       }
       <p class="code">{{ data.code }}</p>
       <p class="name">{{ data.name }} ({{ data.unit }})</p>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Đóng</button>
-      <button mat-flat-button type="button" [disabled]="!qr()" (click)="print()"><mat-icon>print</mat-icon> In nhãn</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Đóng</button>
+      <button pButton type="button" [disabled]="!qr()" (click)="print()"><app-icon>print</app-icon> In nhãn</button>
+    </div>
   `,
   styles: `
     .content {
@@ -43,17 +48,17 @@ function escapeHtml(value: string): string {
     }
     .code {
       margin: 8px 0 0;
-      font: var(--mat-sys-title-medium);
+      font: var(--app-title-medium);
       letter-spacing: 0.05em;
     }
     .name {
       margin: 0;
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--app-on-surface-variant);
     }
   `,
 })
 export class MaterialQrDialogComponent {
-  protected readonly data = inject<Material>(MAT_DIALOG_DATA);
+  protected readonly data = injectDialogData<Material>();
   private readonly document = inject(DOCUMENT);
   protected readonly qr = signal<string | null>(null);
 

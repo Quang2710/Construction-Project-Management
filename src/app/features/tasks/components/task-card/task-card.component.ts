@@ -1,16 +1,22 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { TooltipModule } from 'primeng/tooltip';
 import { UserAvatarComponent } from '../../../../shared/ui/user-avatar/user-avatar.component';
 import { todayIso } from '../../../../shared/utils/date.utils';
 import { Task } from '../../models/task.model';
 import { isTaskOverdue } from '../../utils/task.utils';
 import { TaskPriorityBadgeComponent } from '../task-priority-badge/task-priority-badge.component';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-task-card',
-  imports: [DatePipe, MatIconModule, MatTooltipModule, UserAvatarComponent, TaskPriorityBadgeComponent],
+  imports: [
+    DatePipe,
+    UserAvatarComponent,
+    TaskPriorityBadgeComponent,
+    IconComponent,
+    TooltipModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'button',
@@ -28,7 +34,7 @@ import { TaskPriorityBadgeComponent } from '../task-priority-badge/task-priority
     </div>
     <p class="card__title">
       @if (task().isMilestone) {
-        <mat-icon class="card__milestone" matTooltip="Mốc tiến độ">diamond</mat-icon>
+        <app-icon class="card__milestone" pTooltip="Mốc tiến độ" tooltipPosition="bottom">diamond</app-icon>
       }
       {{ task().title }}
     </p>
@@ -46,19 +52,19 @@ import { TaskPriorityBadgeComponent } from '../task-priority-badge/task-priority
     </div>
 
     <div class="card__bottom">
-      <span class="due" [matTooltip]="overdue() ? 'Quá hạn' : 'Hạn hoàn thành'">
-        <mat-icon>{{ overdue() ? 'alarm' : 'event' }}</mat-icon>
+      <span class="due" [pTooltip]="overdue() ? 'Quá hạn' : 'Hạn hoàn thành'" tooltipPosition="bottom">
+        <app-icon>{{ overdue() ? 'alarm' : 'event' }}</app-icon>
         {{ task().dueDate | date: 'dd/MM/yyyy' }}
       </span>
       <span class="card__meta">
         @if (task().commentCount) {
-          <span class="comments" [matTooltip]="task().commentCount + ' bình luận'">
-            <mat-icon>chat_bubble</mat-icon>{{ task().commentCount }}
+          <span class="comments" [pTooltip]="task().commentCount + ' bình luận'" tooltipPosition="bottom">
+            <app-icon>chat_bubble</app-icon>{{ task().commentCount }}
           </span>
         }
         <span class="percent">{{ task().percentComplete }}%</span>
         @if (task().assignee; as assignee) {
-          <app-user-avatar [name]="assignee.fullName" [size]="26" [matTooltip]="assignee.fullName" />
+          <app-user-avatar [name]="assignee.fullName" [size]="26" [pTooltip]="assignee.fullName" tooltipPosition="bottom" />
         }
       </span>
     </div>

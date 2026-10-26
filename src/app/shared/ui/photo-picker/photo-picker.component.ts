@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, OnDestroy, output, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../icon/icon.component';
 
 interface PickedPhoto {
   readonly file: File;
@@ -13,15 +13,18 @@ interface PickedPhoto {
  */
 @Component({
   selector: 'app-photo-picker',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [
+    ButtonModule,
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="actions">
-      <button mat-stroked-button type="button" [disabled]="disabled() || photos().length >= max()" (click)="camera.click()">
-        <mat-icon>photo_camera</mat-icon> Chụp ảnh
+      <button pButton outlined type="button" [disabled]="disabled() || photos().length >= max()" (click)="camera.click()">
+        <app-icon>photo_camera</app-icon> Chụp ảnh
       </button>
-      <button mat-stroked-button type="button" [disabled]="disabled() || photos().length >= max()" (click)="gallery.click()">
-        <mat-icon>add_photo_alternate</mat-icon> Chọn ảnh
+      <button pButton outlined type="button" [disabled]="disabled() || photos().length >= max()" (click)="gallery.click()">
+        <app-icon>add_photo_alternate</app-icon> Chọn ảnh
       </button>
       <span class="hint">{{ photos().length }}/{{ max() }} ảnh</span>
       <input #camera hidden type="file" accept="image/*" capture="environment" (change)="onFiles(camera)" />
@@ -33,14 +36,14 @@ interface PickedPhoto {
           <li class="thumb">
             <img [src]="photo.url" [alt]="photo.file.name" />
             <button
-              mat-icon-button
+              pButton text rounded severity="secondary"
               class="remove"
               type="button"
               [disabled]="disabled()"
               [attr.aria-label]="'Bỏ ảnh ' + photo.file.name"
               (click)="remove(index)"
             >
-              <mat-icon>close</mat-icon>
+              <app-icon pButtonIcon>close</app-icon>
             </button>
           </li>
         }
@@ -55,8 +58,8 @@ interface PickedPhoto {
       gap: 8px;
     }
     .hint {
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-on-surface-variant);
+      font: var(--app-body-small);
+      color: var(--app-on-surface-variant);
     }
     .grid {
       display: grid;
@@ -71,7 +74,7 @@ interface PickedPhoto {
       aspect-ratio: 1;
       overflow: hidden;
       border-radius: 8px;
-      background: var(--mat-sys-surface-container-high);
+      background: var(--app-surface-container-high);
     }
     .thumb img {
       width: 100%;
@@ -82,7 +85,6 @@ interface PickedPhoto {
       position: absolute;
       top: 2px;
       right: 2px;
-      --mat-icon-button-state-layer-size: 32px;
       width: 32px;
       height: 32px;
       padding: 4px;

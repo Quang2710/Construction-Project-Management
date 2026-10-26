@@ -1,16 +1,17 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { merge } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { WbsNode } from '../../../scheduling/models/wbs.model';
 import { ChecklistTemplate, InspectionCreateRequest } from '../../models/quality.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 export interface InspectionCreateDialogData {
   readonly projectCode: string;
@@ -24,73 +25,68 @@ export type InspectionCreateResult = Omit<InspectionCreateRequest, 'projectId'>;
 @Component({
   selector: 'app-inspection-create-dialog',
   imports: [
+    MutablePipe,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
+    ButtonModule,
+    ...FIELD,
+    InputTextModule,
+    DialogCloseDirective,
+    SelectModule,
+    DatePickerModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Lập phiếu nghiệm thu · {{ data.projectCode }}</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Lập phiếu nghiệm thu · {{ data.projectCode }}</h2>
+    <div dialogContent>
       <form [formGroup]="form" id="inspection-create-form" class="form" (ngSubmit)="save()">
-        <mat-form-field class="full">
-          <mat-label>Hạng mục (WBS)</mat-label>
-          <mat-select formControlName="wbsId">
-            @for (node of data.wbs; track node.id) {
-              <mat-option [value]="node.id">{{ node.code }} · {{ node.name }}</mat-option>
-            }
-          </mat-select>
+        <app-field class="full">
+          <label fieldLabel>Hạng mục (WBS)</label>
+          <p-select formControlName="wbsId" [options]="data.wbs | mutable" optionValue="id" placeholder="Chọn…" [fluid]="true">
+            <ng-template #selectedItem let-node>{{ node.code }} · {{ node.name }}</ng-template>
+            <ng-template #item let-node>{{ node.code }} · {{ node.name }}</ng-template>
+          </p-select>
           @if (form.controls.wbsId.hasError('required')) {
-            <mat-error>Vui lòng chọn hạng mục cần nghiệm thu.</mat-error>
+            <app-error>Vui lòng chọn hạng mục cần nghiệm thu.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field class="full">
-          <mat-label>Mẫu checklist</mat-label>
-          <mat-select formControlName="templateId">
-            @for (template of data.templates; track template.id) {
-              <mat-option [value]="template.id">{{ template.name }} ({{ template.items.length }} tiêu chí)</mat-option>
-            }
-          </mat-select>
+        <app-field class="full">
+          <label fieldLabel>Mẫu checklist</label>
+          <p-select formControlName="templateId" [options]="data.templates | mutable" optionValue="id" placeholder="Chọn…" [fluid]="true">
+            <ng-template #selectedItem let-template>{{ template.name }} ({{ template.items.length }} tiêu chí)</ng-template>
+            <ng-template #item let-template>{{ template.name }} ({{ template.items.length }} tiêu chí)</ng-template>
+          </p-select>
           @if (form.controls.templateId.hasError('required')) {
-            <mat-error>Vui lòng chọn mẫu checklist.</mat-error>
+            <app-error>Vui lòng chọn mẫu checklist.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field class="full">
-          <mat-label>Tên phiếu</mat-label>
-          <input matInput formControlName="title" maxlength="200" />
+        <app-field class="full">
+          <label fieldLabel>Tên phiếu</label>
+          <input pInputText formControlName="title" maxlength="200" />
           @if (form.controls.title.hasError('required') || form.controls.title.hasError('pattern')) {
-            <mat-error>Vui lòng nhập tên phiếu nghiệm thu.</mat-error>
+            <app-error>Vui lòng nhập tên phiếu nghiệm thu.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Vị trí</mat-label>
-          <input matInput formControlName="location" maxlength="200" placeholder="VD: Sàn tầng 5, trục A–C" />
-        </mat-form-field>
+        <app-field>
+          <label fieldLabel>Vị trí</label>
+          <input pInputText formControlName="location" maxlength="200" placeholder="VD: Sàn tầng 5, trục A–C" />
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Ngày nghiệm thu</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="inspectionDate" placeholder="dd/MM/yyyy" />
-          <mat-datepicker-toggle matIconSuffix [for]="picker" />
-          <mat-datepicker #picker />
-          @if (form.controls.inspectionDate.hasError('matDatepickerParse')) {
-            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
-          } @else if (form.controls.inspectionDate.hasError('required')) {
-            <mat-error>Vui lòng chọn ngày nghiệm thu.</mat-error>
+        <app-field>
+          <label fieldLabel>Ngày nghiệm thu</label>
+          <p-datepicker formControlName="inspectionDate" dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" [fluid]="true" />
+          @if (form.controls.inspectionDate.hasError('required')) {
+            <app-error>Vui lòng chọn ngày nghiệm thu.</app-error>
           }
-        </mat-form-field>
+        </app-field>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="inspection-create-form">Lập phiếu</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="inspection-create-form">Lập phiếu</button>
+    </div>
   `,
   styles: `
     .form {
@@ -110,8 +106,8 @@ export type InspectionCreateResult = Omit<InspectionCreateRequest, 'projectId'>;
   `,
 })
 export class InspectionCreateDialogComponent {
-  protected readonly data = inject<InspectionCreateDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<InspectionCreateDialogComponent, InspectionCreateResult>>(MatDialogRef);
+  protected readonly data = injectDialogData<InspectionCreateDialogData>();
+  private readonly dialogRef = injectDialogRef<InspectionCreateResult>();
 
   protected readonly form = new FormGroup({
     wbsId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),

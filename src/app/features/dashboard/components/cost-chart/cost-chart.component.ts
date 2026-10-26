@@ -11,7 +11,9 @@ const ROW_HEIGHT = 44;
 /** Cột ngang: ngân sách vs đã chi theo dự án (một trục, cùng đơn vị VND). */
 @Component({
   selector: 'app-cost-chart',
-  imports: [BaseChartDirective],
+  imports: [
+    BaseChartDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="chart" [style.height.px]="height()">

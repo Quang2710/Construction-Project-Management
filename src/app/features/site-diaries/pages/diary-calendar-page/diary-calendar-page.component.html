@@ -3,19 +3,19 @@
   [subtitle]="isClient() ? 'Báo cáo thi công hằng ngày đã được phê duyệt' : 'Báo cáo thi công hằng ngày theo dự án'"
 >
   <a
-    mat-flat-button
+    pButton
     *hasRole="permissions.editDiaries"
     routerLink="/site-diaries/new"
     [queryParams]="{ projectId: store.projectId() }"
   >
-    <mat-icon>add</mat-icon>
+    <app-icon>add</app-icon>
     Lập nhật ký hôm nay
   </a>
 </app-page-header>
 
 @if (outbox.entries().length) {
   <div class="outbox" role="status">
-    <mat-icon>{{ network.online() ? 'schedule_send' : 'cloud_off' }}</mat-icon>
+    <app-icon>{{ network.online() ? 'schedule_send' : 'cloud_off' }}</app-icon>
     <span>
       {{ outbox.entries().length }} nhật ký lập khi mất mạng đang chờ đồng bộ:
       @for (entry of outbox.entries(); track entry.id; let last = $last) {
@@ -28,47 +28,47 @@
 
 <div class="toolbar">
   <div class="month-nav">
-    <button mat-icon-button type="button" aria-label="Tháng trước" (click)="store.shiftMonth(-1)">
-      <mat-icon>chevron_left</mat-icon>
+    <button pButton text rounded severity="secondary" type="button" aria-label="Tháng trước" (click)="store.shiftMonth(-1)">
+      <app-icon pButtonIcon>chevron_left</app-icon>
     </button>
     <h2 class="month-nav__label">{{ store.monthLabel() }}</h2>
-    <button mat-icon-button type="button" aria-label="Tháng sau" (click)="store.shiftMonth(1)">
-      <mat-icon>chevron_right</mat-icon>
+    <button pButton text rounded severity="secondary" type="button" aria-label="Tháng sau" (click)="store.shiftMonth(1)">
+      <app-icon pButtonIcon>chevron_right</app-icon>
     </button>
-    <button mat-stroked-button type="button" (click)="store.goToToday()">Hôm nay</button>
+    <button pButton outlined type="button" (click)="store.goToToday()">Hôm nay</button>
   </div>
 
-  <mat-form-field class="toolbar__project" subscriptSizing="dynamic">
-    <mat-label>Dự án</mat-label>
-    <mat-select [value]="store.projectId()" (valueChange)="store.setProject($event)">
-      <mat-option [value]="null">Tất cả dự án</mat-option>
-      @for (project of store.projects(); track project.id) {
-        <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <app-field class="toolbar__project" dense>
+    <label fieldLabel>Dự án</label>
+    <p-select [ngModel]="store.projectId()" (ngModelChange)="store.setProject($event)" [options]="store.projects()" optionValue="id" [showClear]="true" placeholder="Tất cả dự án" [filter]="true" filterBy="code,name" emptyFilterMessage="Không tìm thấy dự án" [fluid]="true">
+      <ng-template #selectedItem let-project>{{ project.code }} · {{ project.name }}</ng-template>
+      <ng-template #item let-project>{{ project.code }} · {{ project.name }}</ng-template>
+    </p-select>
+  </app-field>
 </div>
 
 @if (!isClient()) {
-  <mat-chip-listbox
-    class="status-filter"
-    aria-label="Lọc theo trạng thái"
-    [value]="store.status() ?? allValue"
-    [hideSingleSelectionIndicator]="true"
-    (change)="onStatusChange($event)"
+  <p-selectbutton
+    class="status-filter app-chips"
+    [options]="statusFilterOptions()"
+    optionLabel="label"
+    optionValue="value"
+    [allowEmpty]="false"
+    [ngModel]="store.status() ?? allValue"
+    (onChange)="onStatusChange($event)"
+    [attr.aria-label]="'Lọc theo trạng thái'"
   >
-    <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
-    @for (item of store.statusCounts(); track item.status) {
-      <mat-chip-option [value]="item.status">
-        <span class="legend-dot" [class]="'legend-dot--' + item.status.toLowerCase()"></span>
-        {{ statusLabels[item.status] }} ({{ item.count }})
-      </mat-chip-option>
-    }
-  </mat-chip-listbox>
+    <ng-template #item let-option>
+      @if (option.value !== allValue) {
+        <span class="legend-dot" [class]="'legend-dot legend-dot--' + option.value.toLowerCase()"></span>
+      }
+      {{ option.label }}
+    </ng-template>
+  </p-selectbutton>
 }
 
 @if (store.loading()) {
-  <mat-progress-bar mode="indeterminate" class="loading" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" class="loading" />
 }
 
 @if (store.error(); as error) {
@@ -93,12 +93,12 @@
           </div>
           <p class="diary-card__name">{{ diary.project.name }}</p>
           <p class="diary-card__meta">
-            <mat-icon [matTooltip]="weatherLabels[diary.weather.morning]">{{ weatherIcons[diary.weather.morning] }}</mat-icon>
+            <app-icon [pTooltip]="weatherLabels[diary.weather.morning]" tooltipPosition="bottom">{{ weatherIcons[diary.weather.morning] }}</app-icon>
             <span>{{ diary.totalWorkers }} công nhân</span>
             <span>· {{ diary.workItems.length }} hạng mục</span>
             <span>· {{ diary.photos.length }} ảnh</span>
             @if (diary.incidents.length) {
-              <span class="incident"><mat-icon>warning</mat-icon>{{ diary.incidents.length }} sự cố</span>
+              <span class="incident"><app-icon>warning</app-icon>{{ diary.incidents.length }} sự cố</span>
             }
           </p>
           <p class="diary-card__author">Người lập: {{ diary.createdBy.fullName }}</p>
@@ -109,13 +109,13 @@
 
       @if (canCreateForSelected() && !selectedHasProjectDiary()) {
         <a
-          mat-stroked-button
+          pButton outlined
           class="day-panel__create"
           *hasRole="permissions.editDiaries"
           routerLink="/site-diaries/new"
           [queryParams]="{ projectId: store.projectId(), date: store.selectedDate() }"
         >
-          <mat-icon>edit_calendar</mat-icon>
+          <app-icon>edit_calendar</app-icon>
           Lập nhật ký cho ngày này
         </a>
       }

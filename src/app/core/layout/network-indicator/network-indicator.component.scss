@@ -6,20 +6,24 @@
   padding: 0 12px 0 8px;
   border: 0;
   border-radius: 999px;
-  font: var(--mat-sys-label-large);
+  font: var(--app-label-large);
   cursor: pointer;
 
-  mat-icon {
-    width: 18px;
-    height: 18px;
+  transition: filter var(--app-transition);
+
+  &:hover {
+    filter: brightness(0.97);
+  }
+
+  app-icon {
     font-size: 18px;
   }
 }
 
 .chip--offline,
 .chip--failed {
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  background: var(--app-error-container);
+  color: var(--app-on-error-container);
 }
 
 .chip--pending,
@@ -29,25 +33,41 @@
   color: var(--app-on-warning-container);
 }
 
+.panel {
+  width: min(360px, calc(100vw - 24px));
+}
+
 .head {
-  padding: 8px 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--app-outline-variant);
+}
+
+.entries {
+  padding: 0 4px 4px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px 12px;
+  border-top: 1px solid var(--app-outline-variant);
 }
 
 .head__title {
   margin: 0;
-  font: var(--mat-sys-title-small);
+  font: var(--app-title-small);
 }
 
 .head__sub {
   margin: 4px 0 0;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .section {
   margin: 8px 16px 4px;
-  font: var(--mat-sys-label-medium);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-label-medium);
+  color: var(--app-on-surface-variant);
 }
 
 .entry {
@@ -63,7 +83,7 @@
 }
 
 .entry__icon--failed {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .entry__body {
@@ -77,16 +97,16 @@
 }
 
 .entry__label {
-  font: var(--mat-sys-body-medium);
+  font: var(--app-body-medium);
 }
 
 .entry__meta {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .entry__error {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 /* Màn hình hẹp: chỉ còn icon để topbar không tràn. */

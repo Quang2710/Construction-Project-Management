@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { PUNCH_SEVERITY_LABELS, PunchSeverity } from '../../models/quality.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 const ICONS: Readonly<Record<PunchSeverity, string>> = {
   LOW: 'keyboard_arrow_down',
@@ -11,31 +11,33 @@ const ICONS: Readonly<Record<PunchSeverity, string>> = {
 /** Mức độ lỗi: luôn kèm icon + chữ, không chỉ dựa vào màu. */
 @Component({
   selector: 'app-severity-badge',
-  imports: [MatIconModule],
+  imports: [
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': '"severity severity--" + severity().toLowerCase()' },
-  template: `<mat-icon>{{ icon() }}</mat-icon>{{ label() }}`,
+  template: `<app-icon>{{ icon() }}</app-icon>{{ label() }}`,
   styles: `
     :host {
       display: inline-flex;
       align-items: center;
       gap: 2px;
-      font: var(--mat-sys-label-medium);
+      font: var(--app-label-medium);
       white-space: nowrap;
     }
-    mat-icon {
+    app-icon {
       width: 18px;
       height: 18px;
       font-size: 18px;
     }
     :host(.severity--low) {
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--app-on-surface-variant);
     }
     :host(.severity--medium) {
       color: var(--app-warning);
     }
     :host(.severity--high) {
-      color: var(--mat-sys-error);
+      color: var(--app-error);
     }
   `,
 })

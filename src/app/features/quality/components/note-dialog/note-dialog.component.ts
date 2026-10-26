@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { ButtonModule } from 'primeng/button';
+import { TextareaModule } from 'primeng/textarea';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 export interface NoteDialogData {
   readonly title: string;
@@ -19,42 +19,44 @@ export interface NoteDialogData {
 /** Hộp thoại nhập ý kiến khi duyệt / trả lại / mở lại. Trả về ghi chú, hoặc undefined nếu huỷ. */
 @Component({
   selector: 'app-note-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    ...FIELD,
+    TextareaModule,
+    DialogCloseDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>{{ data.title }}</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>{{ data.title }}</h2>
+    <div dialogContent>
       <p class="subtitle">{{ data.subtitle }}</p>
-      <mat-form-field class="field">
-        <mat-label>{{ data.label }}</mat-label>
-        <textarea matInput [formControl]="note" rows="4" maxlength="1000" cdkFocusInitial></textarea>
+      <app-field class="field">
+        <label fieldLabel>{{ data.label }}</label>
+        <textarea pTextarea [formControl]="note" rows="4" maxlength="1000"></textarea>
         @if (note.hasError('required')) {
-          <mat-error>{{ data.requiredMessage ?? 'Vui lòng nhập lý do.' }}</mat-error>
+          <app-error>{{ data.requiredMessage ?? 'Vui lòng nhập lý do.' }}</app-error>
         }
-      </mat-form-field>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="button" [class.danger]="data.destructive" (click)="confirm()">{{ data.confirmText }}</button>
-    </mat-dialog-actions>
+      </app-field>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="button" [severity]="data.destructive ? 'danger' : undefined\" (click)="confirm()">{{ data.confirmText }}</button>
+    </div>
   `,
   styles: `
     .subtitle {
       margin: 0 0 12px;
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--app-on-surface-variant);
     }
     .field {
       width: 100%;
     }
-    .danger {
-      --mat-button-filled-container-color: var(--mat-sys-error);
-      --mat-button-filled-label-text-color: var(--mat-sys-on-error);
-    }
   `,
 })
 export class NoteDialogComponent {
-  protected readonly data = inject<NoteDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<NoteDialogComponent, string>>(MatDialogRef);
+  protected readonly data = injectDialogData<NoteDialogData>();
+  private readonly dialogRef = injectDialogRef<string>();
 
   protected readonly note = new FormControl('', {
     nonNullable: true,

@@ -1,10 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
+import { ButtonModule } from 'primeng/button';
 import { Photo } from '../../models/photo.model';
 import { distanceMeters, formatDistance, osmUrl } from '../../utils/geo.utils';
+import { injectDialogData, DialogCloseDirective } from '../dialog/app-dialog.service';
+import { IconComponent } from '../icon/icon.component';
 
 export interface PhotoLightboxData {
   readonly photos: readonly Photo[];
@@ -15,7 +15,12 @@ export interface PhotoLightboxData {
 
 @Component({
   selector: 'app-photo-lightbox',
-  imports: [DatePipe, MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [
+    DatePipe,
+    ButtonModule,
+    IconComponent,
+    DialogCloseDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(keydown.arrowleft)': 'move(-1)', '(keydown.arrowright)': 'move(1)' },
   template: `
@@ -23,15 +28,15 @@ export interface PhotoLightboxData {
       <div class="viewer">
         <img class="viewer__image" [src]="photo.url" [alt]="photo.caption || photo.fileName" />
         @if (data.photos.length > 1) {
-          <button mat-icon-button class="nav nav--prev" type="button" aria-label="Ảnh trước" (click)="move(-1)">
-            <mat-icon>chevron_left</mat-icon>
+          <button pButton text rounded severity="secondary" class="nav nav--prev" type="button" aria-label="Ảnh trước" (click)="move(-1)">
+            <app-icon pButtonIcon>chevron_left</app-icon>
           </button>
-          <button mat-icon-button class="nav nav--next" type="button" aria-label="Ảnh sau" (click)="move(1)">
-            <mat-icon>chevron_right</mat-icon>
+          <button pButton text rounded severity="secondary" class="nav nav--next" type="button" aria-label="Ảnh sau" (click)="move(1)">
+            <app-icon pButtonIcon>chevron_right</app-icon>
           </button>
         }
-        <button mat-icon-button class="close" type="button" mat-dialog-close aria-label="Đóng">
-          <mat-icon>close</mat-icon>
+        <button pButton text rounded severity="secondary" class="close" type="button" appDialogClose aria-label="Đóng">
+          <app-icon pButtonIcon>close</app-icon>
         </button>
       </div>
       <div class="meta">
@@ -43,14 +48,14 @@ export interface PhotoLightboxData {
         </div>
         @if (photo.location; as location) {
           <a class="meta__gps" [href]="mapUrl()" target="_blank" rel="noopener">
-            <mat-icon>location_on</mat-icon>
+            <app-icon>location_on</app-icon>
             {{ location.lat.toFixed(5) }}, {{ location.lng.toFixed(5) }}
             @if (distance(); as distance) {
               <span [class.far]="isFar()">· cách công trình {{ distance }}</span>
             }
           </a>
         } @else {
-          <span class="meta__sub"><mat-icon>location_off</mat-icon> Không có GPS</span>
+          <span class="meta__sub"><app-icon>location_off</app-icon> Không có GPS</span>
         }
       </div>
     }
@@ -58,7 +63,7 @@ export interface PhotoLightboxData {
   styleUrl: './photo-lightbox.component.scss',
 })
 export class PhotoLightboxComponent {
-  protected readonly data = inject<PhotoLightboxData>(MAT_DIALOG_DATA);
+  protected readonly data = injectDialogData<PhotoLightboxData>();
   protected readonly index = signal(this.data.index);
   protected readonly photo = computed(() => this.data.photos[this.index()] ?? null);
 

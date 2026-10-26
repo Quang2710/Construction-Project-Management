@@ -1,36 +1,35 @@
-<h2 mat-dialog-title>Phiếu yêu cầu vật tư · {{ data.projectCode }}</h2>
-<mat-dialog-content>
+<h2 dialogTitle>Phiếu yêu cầu vật tư · {{ data.projectCode }}</h2>
+<div dialogContent>
   <form [formGroup]="form" id="request-form" class="form" (ngSubmit)="save()">
     <div formArrayName="items" class="items">
       @for (group of form.controls.items.controls; track group; let index = $index) {
         <div class="row" [formGroupName]="index">
-          <mat-form-field class="row__material">
-            <mat-label>Vật tư</mat-label>
-            <mat-select formControlName="materialId">
-              @for (material of data.materials; track material.id) {
-                <mat-option [value]="material.id">{{ material.code }} · {{ material.name }}</mat-option>
-              }
-            </mat-select>
+          <app-field class="row__material">
+            <label fieldLabel>Vật tư</label>
+            <p-select formControlName="materialId" [options]="data.materials | mutable" optionValue="id" placeholder="Chọn…" [fluid]="true">
+              <ng-template #selectedItem let-material>{{ material.code }} · {{ material.name }}</ng-template>
+              <ng-template #item let-material>{{ material.code }} · {{ material.name }}</ng-template>
+            </p-select>
             @if (group.controls.materialId.hasError('required')) {
-              <mat-error>Chọn vật tư.</mat-error>
+              <app-error>Chọn vật tư.</app-error>
             }
-          </mat-form-field>
-          <mat-form-field class="row__qty">
-            <mat-label>Số lượng</mat-label>
-            <input matInput type="number" min="0" step="any" formControlName="quantity" />
-            <span matTextSuffix>{{ materialOf(group.controls.materialId.value)?.unit }}</span>
+          </app-field>
+          <app-field class="row__qty">
+            <label fieldLabel>Số lượng</label>
+            <input pInputText type="number" min="0" step="any" formControlName="quantity" />
+            <span fieldSuffix>{{ materialOf(group.controls.materialId.value)?.unit }}</span>
             @if (group.controls.quantity.invalid) {
-              <mat-error>Số lượng > 0.</mat-error>
+              <app-error>Số lượng > 0.</app-error>
             }
-          </mat-form-field>
+          </app-field>
           <button
-            mat-icon-button
+            pButton text rounded severity="secondary"
             type="button"
             aria-label="Xoá dòng"
             [disabled]="form.controls.items.length === 1"
             (click)="removeItem(index)"
           >
-            <mat-icon>delete</mat-icon>
+            <app-icon pButtonIcon>delete</app-icon>
           </button>
         </div>
       }
@@ -38,29 +37,29 @@
     @if (duplicate()) {
       <p class="error" role="alert">Mỗi vật tư chỉ xuất hiện một lần trong phiếu.</p>
     }
-    <button mat-button type="button" class="add" (click)="addItem()"><mat-icon>add</mat-icon> Thêm vật tư</button>
+    <button pButton text type="button" class="add" (click)="addItem()"><app-icon>add</app-icon> Thêm vật tư</button>
 
     <div class="row">
-      <mat-form-field class="row__material">
-        <mat-label>Cần trước ngày</mat-label>
-        <input matInput [matDatepicker]="picker" [min]="today" formControlName="neededBy" placeholder="dd/MM/yyyy" />
-        <mat-datepicker-toggle matIconSuffix [for]="picker" />
-        <mat-datepicker #picker />
+      <app-field class="row__material">
+        <label fieldLabel>Cần trước ngày</label>
+        <p-datepicker [minDate]="today" formControlName="neededBy" dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" [fluid]="true" />
         @if (form.controls.neededBy.hasError('required')) {
-          <mat-error>Chọn ngày cần vật tư.</mat-error>
+          <app-error>Chọn ngày cần vật tư.</app-error>
+        } @else if (form.controls.neededBy.hasError('minDate')) {
+          <app-error>Ngày cần vật tư không được ở quá khứ.</app-error>
         }
-      </mat-form-field>
+      </app-field>
     </div>
 
-    <mat-form-field>
-      <mat-label>Mục đích sử dụng / ghi chú</mat-label>
-      <textarea matInput rows="2" formControlName="note" maxlength="1000"></textarea>
-    </mat-form-field>
+    <app-field>
+      <label fieldLabel>Mục đích sử dụng / ghi chú</label>
+      <textarea pTextarea rows="2" formControlName="note" maxlength="1000"></textarea>
+    </app-field>
 
     <p class="total">Giá trị ước tính: <strong>{{ total() | vnd }}</strong></p>
   </form>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button type="button" mat-dialog-close>Huỷ</button>
-  <button mat-flat-button type="submit" form="request-form">Gửi phiếu</button>
-</mat-dialog-actions>
+</div>
+<div dialogActions>
+  <button pButton text type="button" appDialogClose>Huỷ</button>
+  <button pButton type="submit" form="request-form">Gửi phiếu</button>
+</div>

@@ -1,10 +1,10 @@
 :host {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
   overflow: hidden;
-  background: var(--mat-sys-surface);
+  background: var(--app-surface);
 }
 
 .toolbar {
@@ -13,17 +13,14 @@
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
-  background: var(--mat-sys-surface-container-low);
+  border-bottom: 1px solid var(--app-outline-variant);
+  background: var(--app-surface-container-low);
 
-  mat-button-toggle-group {
-    --mat-standard-button-toggle-height: 36px;
-  }
 }
 
 .toolbar__label {
   min-width: 56px;
-  font: var(--mat-sys-label-large);
+  font: var(--app-label-large);
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
@@ -38,8 +35,8 @@
   align-items: center;
   gap: 6px 16px;
   padding: 8px 12px;
-  font: var(--mat-sys-body-small);
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  font: var(--app-body-small);
+  border-bottom: 1px solid var(--app-outline-variant);
 }
 
 .legend__item {
@@ -80,7 +77,7 @@
   height: min(75vh, 900px);
   padding: 12px;
   overflow: auto;
-  background: var(--mat-sys-surface-container-highest);
+  background: var(--app-surface-container-highest);
   overscroll-behavior: contain;
 }
 
@@ -97,20 +94,20 @@
 }
 
 .side__col + .side__col {
-  border-left: 1px solid var(--mat-sys-outline-variant);
+  border-left: 1px solid var(--app-outline-variant);
 }
 
 .side__label {
   margin: 0;
   padding: 6px 12px;
-  font: var(--mat-sys-label-large);
-  background: var(--mat-sys-surface-container-low);
+  font: var(--app-label-large);
+  background: var(--app-surface-container-low);
 }
 
 .error {
   margin: 0;
   padding: 12px 16px;
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 @media (max-width: 719.98px) {
@@ -120,10 +117,20 @@
 
   .side__col + .side__col {
     border-left: 0;
-    border-top: 1px solid var(--mat-sys-outline-variant);
+    border-top: 1px solid var(--app-outline-variant);
   }
 
   .viewport {
     height: 55vh;
+  }
+}
+
+.mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  app-icon {
+    font-size: 18px;
   }
 }

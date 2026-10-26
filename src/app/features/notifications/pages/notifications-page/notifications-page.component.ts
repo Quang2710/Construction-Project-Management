@@ -1,10 +1,10 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { FormsModule } from '@angular/forms';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { NotificationCenterStore } from '../../../../core/notifications/notification-center.store';
 import { NOTIFICATION_ICONS, NOTIFICATION_TYPE_LABELS } from '../../../../shared/models/notification.model';
 import { RelativeTimePipe } from '../../../../shared/pipes/relative-time.pipe';
@@ -12,42 +12,44 @@ import { PageHeaderComponent } from '../../../../shared/ui/page-header/page-head
 import { EmptyStateComponent } from '../../../../shared/ui/state/empty-state.component';
 import { ErrorStateComponent } from '../../../../shared/ui/state/error-state.component';
 import { NotificationsListStore } from '../../data-access/notifications-list.store';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-notifications-page',
   imports: [
+    FormsModule,
     DatePipe,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatIconModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
+    SelectButtonModule,
+    PaginatorModule,
     RelativeTimePipe,
     PageHeaderComponent,
     EmptyStateComponent,
     ErrorStateComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
   ],
   providers: [NotificationsListStore],
   template: `
     <app-page-header title="Thông báo" subtitle="Cập nhật theo thời gian thực từ nhật ký, nghiệm thu, punch list, vật tư và bản vẽ">
-      <button mat-stroked-button type="button" [disabled]="center.unreadCount() === 0" (click)="store.markAllRead()">
-        <mat-icon>done_all</mat-icon> Đánh dấu đã đọc tất cả
+      <button pButton outlined type="button" [disabled]="center.unreadCount() === 0" (click)="store.markAllRead()">
+        <app-icon>done_all</app-icon> Đánh dấu đã đọc tất cả
       </button>
     </app-page-header>
 
-    <mat-button-toggle-group
-      class="filter"
-      [value]="store.unreadOnly()"
-      [hideSingleSelectionIndicator]="true"
-      aria-label="Lọc thông báo"
-      (change)="store.setFilter({ unreadOnly: $event.value })"
-    >
-      <mat-button-toggle [value]="false">Tất cả</mat-button-toggle>
-      <mat-button-toggle [value]="true">Chưa đọc ({{ center.unreadCount() }})</mat-button-toggle>
-    </mat-button-toggle-group>
+    <p-selectbutton
+      class="filter app-chips"
+      [options]="filterOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [allowEmpty]="false"
+      [ngModel]="store.unreadOnly()"
+      (onChange)="store.setFilter({ unreadOnly: $event.value === true })"
+      [attr.aria-label]="'Lọc thông báo'"
+    />
 
     @if (store.loading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.error(); as error) {
       <app-error-state [message]="error" (retry)="store.load()" />
@@ -58,7 +60,7 @@ import { NotificationsListStore } from '../../data-access/notifications-list.sto
         @for (item of store.items(); track item.id) {
           <li>
             <button type="button" class="item" [class.item--unread]="!item.read" (click)="store.open(item)">
-              <mat-icon class="item__icon">{{ icons[item.type] }}</mat-icon>
+              <app-icon class="item__icon">{{ icons[item.type] }}</app-icon>
               <span class="item__body">
                 <span class="item__title">{{ item.title }}</span>
                 @if (item.message) {
@@ -76,19 +78,13 @@ import { NotificationsListStore } from '../../data-access/notifications-list.sto
           </li>
         }
       </ul>
-      <mat-paginator
-        [length]="store.total()"
-        [pageIndex]="store.page() - 1"
-        [pageSize]="store.pageSize"
-        [hidePageSize]="true"
-        (page)="onPage($event)"
-      />
+      <p-paginator [totalRecords]="store.total()" [first]="(store.page() - 1) * store.pageSize" [rows]="store.pageSize" [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} / {totalRecords}" (onPageChange)="onPage($event)" />
     }
   `,
   styles: `
     .filter {
-      margin-bottom: 12px;
-      --mat-standard-button-toggle-height: 36px;
+      display: block;
+      margin-bottom: 16px;
     }
     .list {
       display: flex;
@@ -96,12 +92,12 @@ import { NotificationsListStore } from '../../data-access/notifications-list.sto
       margin: 0;
       padding: 0;
       overflow: hidden;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--mat-sys-corner-medium);
+      border: 1px solid var(--app-outline-variant);
+      border-radius: var(--app-corner-medium);
       list-style: none;
     }
     li + li {
-      border-top: 1px solid var(--mat-sys-outline-variant);
+      border-top: 1px solid var(--app-outline-variant);
     }
     .item {
       display: flex;
@@ -110,7 +106,7 @@ import { NotificationsListStore } from '../../data-access/notifications-list.sto
       width: 100%;
       padding: 12px 16px;
       border: 0;
-      background: var(--mat-sys-surface);
+      background: var(--app-surface);
       color: inherit;
       font: inherit;
       text-align: left;
@@ -118,20 +114,20 @@ import { NotificationsListStore } from '../../data-access/notifications-list.sto
     }
     .item:hover,
     .item:focus-visible {
-      background: var(--mat-sys-surface-container-low);
+      background: var(--app-surface-container-low);
     }
     .item--unread {
-      background: color-mix(in srgb, var(--mat-sys-primary-container) 35%, var(--mat-sys-surface));
+      background: color-mix(in srgb, var(--app-primary-container) 35%, var(--app-surface));
     }
     .item--unread .item__title {
       font-weight: 600;
     }
     .item--unread .item__icon {
-      color: var(--mat-sys-primary);
+      color: var(--app-primary);
     }
     .item__icon {
       flex: none;
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--app-on-surface-variant);
     }
     .item__body {
       display: flex;
@@ -142,8 +138,8 @@ import { NotificationsListStore } from '../../data-access/notifications-list.sto
     }
     .item__message,
     .item__meta {
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-on-surface-variant);
+      font: var(--app-body-small);
+      color: var(--app-on-surface-variant);
     }
     .item__dot {
       flex: none;
@@ -151,7 +147,7 @@ import { NotificationsListStore } from '../../data-access/notifications-list.sto
       height: 10px;
       margin-top: 6px;
       border-radius: 50%;
-      background: var(--mat-sys-primary);
+      background: var(--app-primary);
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -161,12 +157,16 @@ export class NotificationsPageComponent implements OnInit {
   protected readonly center = inject(NotificationCenterStore);
   protected readonly icons = NOTIFICATION_ICONS;
   protected readonly typeLabels = NOTIFICATION_TYPE_LABELS;
+  protected readonly filterOptions = computed(() => [
+    { label: 'Tất cả', value: false },
+    { label: `Chưa đọc (${this.center.unreadCount()})`, value: true },
+  ]);
 
   ngOnInit(): void {
     void this.store.load();
   }
 
-  protected onPage(event: PageEvent): void {
-    void this.store.setFilter({ page: event.pageIndex + 1 });
+  protected onPage(event: PaginatorState): void {
+    void this.store.setFilter({ page: (event.page ?? 0) + 1 });
   }
 }

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { VndPipe } from '../../../../../shared/pipes/vnd.pipe';
 import { ChartCardComponent } from '../../../../../shared/ui/chart-card/chart-card.component';
 import { KpiCardComponent, KpiTone } from '../../../../../shared/ui/kpi-card/kpi-card.component';
@@ -10,6 +9,7 @@ import { CashFlowChartComponent } from '../../../components/cash-flow-chart/cash
 import { CostItemsChartComponent } from '../../../components/cost-items-chart/cost-items-chart.component';
 import { CostStore } from '../../../data-access/cost.store';
 import { COST_CATEGORY_LABELS, CostItemSummary } from '../../../models/cost.model';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 
 interface Kpi {
   readonly label: string;
@@ -24,19 +24,19 @@ type MeterTone = 'ok' | 'warn' | 'over';
 @Component({
   selector: 'app-overview-panel',
   imports: [
-    MatIconModule,
-    MatProgressBarModule,
     VndPipe,
     ChartCardComponent,
     KpiCardComponent,
     ErrorStateComponent,
     CashFlowChartComponent,
     CostItemsChartComponent,
+    IconComponent,
+    ProgressBarModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (store.summaryLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.summaryError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadSummary()" />
@@ -49,7 +49,7 @@ type MeterTone = 'ok' | 'warn' | 'over';
 
       @if (store.overrunItems().length) {
         <div class="alert" role="status">
-          <mat-icon>warning</mat-icon>
+          <app-icon>warning</app-icon>
           <span>
             {{ store.overrunItems().length }} hạng mục vượt dự toán hoặc chi nhanh hơn khối lượng hoàn thành (lệch quá 10%):
             {{ overrunCodes() }}
@@ -77,9 +77,9 @@ type MeterTone = 'ok' | 'warn' | 'over';
                     <td>
                       <div class="name">{{ item.code }} · {{ item.name }}</div>
                       @if (item.actual > item.budget) {
-                        <span class="flag flag--over"><mat-icon>error</mat-icon> Vượt dự toán</span>
+                        <span class="flag flag--over"><app-icon>error</app-icon> Vượt dự toán</span>
                       } @else if (item.overrun) {
-                        <span class="flag"><mat-icon>warning</mat-icon> Chi nhanh hơn khối lượng</span>
+                        <span class="flag"><app-icon>warning</app-icon> Chi nhanh hơn khối lượng</span>
                       }
                     </td>
                     <td class="num">{{ item.budget | vnd: 'compact' }}</td>

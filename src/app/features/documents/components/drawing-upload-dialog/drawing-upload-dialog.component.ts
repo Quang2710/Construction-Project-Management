@@ -1,14 +1,16 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
 import { DrawingDraft } from '../../data-access/documents.store';
 import { Discipline, DISCIPLINE_LABELS, DISCIPLINE_PREFIXES, DISCIPLINES } from '../../models/document.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 const MAX_SIZE = 20 * 1024 * 1024;
 
@@ -26,68 +28,78 @@ export interface DrawingUploadResult {
 /** Tải lên bản vẽ mới (Rev A) hoặc phiên bản mới của bản vẽ đã có. Chỉ nhận PDF ≤ 20 MB. */
 @Component({
   selector: 'app-drawing-upload-dialog',
-  imports: [DecimalPipe, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatSelectModule],
+  imports: [
+    MutablePipe,
+    DecimalPipe,
+    ReactiveFormsModule,
+    ButtonModule,
+    IconComponent,
+    ...FIELD,
+    InputTextModule,
+    TextareaModule,
+    DialogCloseDirective,
+    SelectModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>
+    <h2 dialogTitle>
       @if (data.mode === 'drawing') {
         Phát hành bản vẽ mới · {{ data.projectCode }}
       } @else {
         Phiên bản {{ data.nextRevision }} · {{ data.drawingCode }}
       }
     </h2>
-    <mat-dialog-content>
+    <div dialogContent>
       <form [formGroup]="form" id="drawing-upload-form" class="form" (ngSubmit)="save()">
         @if (data.mode === 'drawing') {
-          <mat-form-field>
-            <mat-label>Bộ môn</mat-label>
-            <mat-select formControlName="discipline">
-              @for (discipline of disciplines; track discipline) {
-                <mat-option [value]="discipline">{{ disciplineLabels[discipline] }} ({{ prefixes[discipline] }})</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Số hiệu bản vẽ</mat-label>
-            <input matInput formControlName="code" maxlength="20" [placeholder]="prefixes[form.controls.discipline.value] + '-101'" />
+          <app-field>
+            <label fieldLabel>Bộ môn</label>
+            <p-select formControlName="discipline" [options]="disciplines | mutable" placeholder="Chọn…" [fluid]="true">
+              <ng-template #selectedItem let-discipline>{{ $any(disciplineLabels)[discipline] }} ({{ $any(prefixes)[discipline] }})</ng-template>
+              <ng-template #item let-discipline>{{ $any(disciplineLabels)[discipline] }} ({{ $any(prefixes)[discipline] }})</ng-template>
+            </p-select>
+          </app-field>
+          <app-field>
+            <label fieldLabel>Số hiệu bản vẽ</label>
+            <input pInputText formControlName="code" maxlength="20" [placeholder]="prefixes[form.controls.discipline.value] + '-101'" />
             @if (form.controls.code.hasError('required')) {
-              <mat-error>Vui lòng nhập số hiệu bản vẽ.</mat-error>
+              <app-error>Vui lòng nhập số hiệu bản vẽ.</app-error>
             } @else if (form.controls.code.hasError('pattern')) {
-              <mat-error>2–20 ký tự: chữ, số, dấu - . _</mat-error>
+              <app-error>2–20 ký tự: chữ, số, dấu - . _</app-error>
             }
-          </mat-form-field>
-          <mat-form-field class="full">
-            <mat-label>Tên bản vẽ</mat-label>
-            <input matInput formControlName="title" maxlength="200" />
+          </app-field>
+          <app-field class="full">
+            <label fieldLabel>Tên bản vẽ</label>
+            <input pInputText formControlName="title" maxlength="200" />
             @if (form.controls.title.hasError('required') || form.controls.title.hasError('pattern')) {
-              <mat-error>Vui lòng nhập tên bản vẽ.</mat-error>
+              <app-error>Vui lòng nhập tên bản vẽ.</app-error>
             }
-          </mat-form-field>
+          </app-field>
         }
-        <mat-form-field class="full">
-          <mat-label>{{ data.mode === 'drawing' ? 'Ghi chú phát hành' : 'Nội dung thay đổi so với phiên bản trước' }}</mat-label>
-          <textarea matInput formControlName="description" rows="2" maxlength="500"></textarea>
+        <app-field class="full">
+          <label fieldLabel>{{ data.mode === 'drawing' ? 'Ghi chú phát hành' : 'Nội dung thay đổi so với phiên bản trước' }}</label>
+          <textarea pTextarea formControlName="description" rows="2" maxlength="500"></textarea>
           @if (form.controls.description.hasError('required') || form.controls.description.hasError('pattern')) {
-            <mat-error>Vui lòng mô tả nội dung thay đổi.</mat-error>
+            <app-error>Vui lòng mô tả nội dung thay đổi.</app-error>
           }
-        </mat-form-field>
+        </app-field>
       </form>
 
       <div class="file">
-        <button mat-stroked-button type="button" (click)="picker.click()"><mat-icon>upload_file</mat-icon> Chọn tệp PDF</button>
+        <button pButton outlined type="button" (click)="picker.click()"><app-icon>upload_file</app-icon> Chọn tệp PDF</button>
         <input #picker hidden type="file" accept="application/pdf,.pdf" (change)="onFile(picker)" />
         @if (file(); as file) {
-          <span class="file__name"><mat-icon>picture_as_pdf</mat-icon> {{ file.name }} · {{ file.size / 1048576 | number: '1.0-1' }} MB</span>
+          <span class="file__name"><app-icon>picture_as_pdf</app-icon> {{ file.name }} · {{ file.size / 1048576 | number: '1.0-1' }} MB</span>
         }
       </div>
       @if (fileError()) {
         <p class="error" role="alert">{{ fileError() }}</p>
       }
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="drawing-upload-form">Phát hành</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="drawing-upload-form">Phát hành</button>
+    </div>
   `,
   styles: `
     .form {
@@ -111,12 +123,12 @@ export interface DrawingUploadResult {
       gap: 4px;
       min-width: 0;
       overflow-wrap: anywhere;
-      font: var(--mat-sys-body-medium);
+      font: var(--app-body-medium);
     }
     .error {
       margin: 8px 0 0;
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-error);
+      font: var(--app-body-small);
+      color: var(--app-error);
     }
     @media (max-width: 599.98px) {
       .form {
@@ -126,8 +138,8 @@ export interface DrawingUploadResult {
   `,
 })
 export class DrawingUploadDialogComponent {
-  protected readonly data = inject<DrawingUploadDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<DrawingUploadDialogComponent, DrawingUploadResult>>(MatDialogRef);
+  protected readonly data = injectDialogData<DrawingUploadDialogData>();
+  private readonly dialogRef = injectDialogRef<DrawingUploadResult>();
 
   protected readonly disciplines = DISCIPLINES;
   protected readonly disciplineLabels = DISCIPLINE_LABELS;

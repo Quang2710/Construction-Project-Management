@@ -1,11 +1,11 @@
 @if (store.loading() && !store.drawing()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (store.error(); as error) {
   <app-error-state title="Không tải được bản vẽ" [message]="error" (retry)="reload()" />
 } @else if (store.drawing(); as drawing) {
-  <a class="back" routerLink="/documents" [queryParams]="backQuery()"><mat-icon>arrow_back</mat-icon> Hồ sơ bản vẽ</a>
+  <a class="back" routerLink="/documents" [queryParams]="backQuery()"><app-icon>arrow_back</app-icon> Hồ sơ bản vẽ</a>
 
   <header class="header">
     <div>
@@ -22,22 +22,22 @@
     </div>
     <div class="header__actions">
       @if (store.revision(); as revision) {
-        <a mat-stroked-button [href]="revision.file.url" [attr.download]="revision.file.fileName" target="_blank" rel="noopener">
-          <mat-icon>download</mat-icon> Tải PDF
+        <a pButton outlined [href]="revision.file.url" [attr.download]="revision.file.fileName" target="_blank" rel="noopener">
+          <app-icon>download</app-icon> Tải PDF
         </a>
       }
       @if (drawing.revisions.length > 1) {
-        <button mat-stroked-button type="button" (click)="toggleCompare()">
-          <mat-icon>{{ comparing() ? 'close' : 'compare' }}</mat-icon>
+        <button pButton outlined type="button" (click)="toggleCompare()">
+          <app-icon>{{ comparing() ? 'close' : 'compare' }}</app-icon>
           {{ comparing() ? 'Thoát so sánh' : 'So sánh phiên bản' }}
         </button>
       }
       @if (store.canManage()) {
-        <button mat-flat-button type="button" [disabled]="store.uploading()" (click)="uploadRevision()">
+        <button pButton type="button" [disabled]="store.uploading()" (click)="uploadRevision()">
           @if (store.uploading()) {
-            <mat-spinner diameter="18" />
+            <p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 18px; height: 18px" />
           } @else {
-            <mat-icon>upload_file</mat-icon>
+            <app-icon>upload_file</app-icon>
           }
           Phiên bản mới
         </button>
@@ -50,14 +50,13 @@
       @if (comparing()) {
         <div class="compare-bar">
           <span>So sánh Rev {{ store.revision()?.revision }} với</span>
-          <mat-form-field subscriptSizing="dynamic" class="compare-bar__select">
-            <mat-label>Phiên bản</mat-label>
-            <mat-select [value]="store.compareId()" (valueChange)="changeCompare($event)">
-              @for (revision of compareOptions(); track revision.id) {
-                <mat-option [value]="revision.id">Rev {{ revision.revision }} · {{ revision.issuedAt | date: 'dd/MM/yyyy' }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
+          <app-field dense class="compare-bar__select">
+            <label fieldLabel>Phiên bản</label>
+            <p-select [ngModel]="store.compareId()" (ngModelChange)="changeCompare($event)" [options]="compareOptions()" optionValue="id" placeholder="Chọn…" [fluid]="true">
+              <ng-template #selectedItem let-revision>Rev {{ revision.revision }} · {{ revision.issuedAt | date: 'dd/MM/yyyy' }}</ng-template>
+              <ng-template #item let-revision>Rev {{ revision.revision }} · {{ revision.issuedAt | date: 'dd/MM/yyyy' }}</ng-template>
+            </p-select>
+          </app-field>
         </div>
       }
 
@@ -72,12 +71,12 @@
             [newerLabel]="pair.newer.revision"
           />
         } @else {
-          <mat-progress-bar mode="indeterminate" />
+          <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
         }
       } @else if (store.viewData(); as data) {
         <app-pdf-viewer [data]="data" />
       } @else {
-        <mat-progress-bar mode="indeterminate" />
+        <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
       }
     </section>
 

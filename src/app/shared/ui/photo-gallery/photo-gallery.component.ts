@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { TooltipModule } from 'primeng/tooltip';
+import { AppDialog } from '../dialog/app-dialog.service';
 import { Photo } from '../../models/photo.model';
 import { distanceMeters, formatDistance } from '../../utils/geo.utils';
 import { PhotoLightboxComponent, PhotoLightboxData } from '../photo-lightbox/photo-lightbox.component';
+import { IconComponent } from '../icon/icon.component';
 
 interface GalleryItem {
   readonly photo: Photo;
@@ -15,7 +15,10 @@ interface GalleryItem {
 /** Lưới ảnh hiện trường; bấm để xem phóng to. */
 @Component({
   selector: 'app-photo-gallery',
-  imports: [MatIconModule, MatTooltipModule],
+  imports: [
+    IconComponent,
+    TooltipModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ul class="grid">
@@ -24,8 +27,8 @@ interface GalleryItem {
           <button type="button" class="thumb" (click)="open(index)" [attr.aria-label]="'Xem ảnh ' + (item.photo.caption || item.photo.fileName)">
             <img [src]="item.photo.url" [alt]="item.photo.caption || item.photo.fileName" loading="lazy" />
             @if (item.distance) {
-              <span class="gps" [class.gps--far]="item.far" [matTooltip]="item.far ? 'Chụp cách xa công trình' : 'Vị trí chụp'">
-                <mat-icon>{{ item.far ? 'wrong_location' : 'location_on' }}</mat-icon>{{ item.distance }}
+              <span class="gps" [class.gps--far]="item.far" [pTooltip]="item.far ? 'Chụp cách xa công trình' : 'Vị trí chụp'" tooltipPosition="bottom">
+                <app-icon>{{ item.far ? 'wrong_location' : 'location_on' }}</app-icon>{{ item.distance }}
               </span>
             }
           </button>
@@ -52,7 +55,7 @@ interface GalleryItem {
       overflow: hidden;
       border: 0;
       border-radius: 12px;
-      background: var(--mat-sys-surface-container-high);
+      background: var(--app-surface-container-high);
       cursor: zoom-in;
     }
     .thumb img {
@@ -76,13 +79,13 @@ interface GalleryItem {
       border-radius: 999px;
       background: rgb(0 0 0 / 0.6);
       color: #fff;
-      font: var(--mat-sys-label-small);
+      font: var(--app-label-small);
     }
     .gps--far {
-      background: var(--mat-sys-error);
-      color: var(--mat-sys-on-error);
+      background: var(--app-error);
+      color: var(--app-on-error);
     }
-    .gps mat-icon {
+    .gps app-icon {
       width: 14px;
       height: 14px;
       font-size: 14px;
@@ -90,15 +93,15 @@ interface GalleryItem {
     .caption {
       margin: 4px 0 0;
       overflow: hidden;
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-on-surface-variant);
+      font: var(--app-body-small);
+      color: var(--app-on-surface-variant);
       text-overflow: ellipsis;
       white-space: nowrap;
     }
   `,
 })
 export class PhotoGalleryComponent {
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
 
   readonly photos = input.required<readonly Photo[]>();
   readonly site = input<{ lat: number; lng: number } | null>(null);
@@ -117,7 +120,6 @@ export class PhotoGalleryComponent {
       width: '1000px',
       maxWidth: 'calc(100vw - 16px)',
       panelClass: 'lightbox-panel',
-      autoFocus: 'dialog',
     });
   }
 }

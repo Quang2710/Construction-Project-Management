@@ -1,21 +1,21 @@
 <div class="actions">
   <input #cameraInput type="file" accept="image/*" capture="environment" hidden (change)="onFiles(cameraInput)" />
   <input #galleryInput type="file" accept="image/*" multiple hidden (change)="onFiles(galleryInput)" />
-  <button mat-flat-button type="button" [disabled]="disabled() || !canAdd()" (click)="cameraInput.click()">
-    <mat-icon>photo_camera</mat-icon>
+  <button pButton type="button" [disabled]="disabled() || !canAdd()" (click)="cameraInput.click()">
+    <app-icon>photo_camera</app-icon>
     Chụp ảnh
   </button>
-  <button mat-stroked-button type="button" [disabled]="disabled() || !canAdd()" (click)="galleryInput.click()">
-    <mat-icon>add_photo_alternate</mat-icon>
+  <button pButton outlined type="button" [disabled]="disabled() || !canAdd()" (click)="galleryInput.click()">
+    <app-icon>add_photo_alternate</app-icon>
     Chọn từ thư viện
   </button>
   <span class="actions__count">{{ photos().length }}/{{ maxPhotos() }} ảnh</span>
 </div>
 
 @if (locating()) {
-  <p class="info"><mat-spinner diameter="16" /> Đang lấy vị trí GPS để gắn vào ảnh…</p>
+  <p class="info"><p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 16px; height: 16px" /> Đang lấy vị trí GPS để gắn vào ảnh…</p>
 } @else if (gpsWarning(); as warning) {
-  <p class="info info--warning"><mat-icon>location_off</mat-icon> {{ warning }} Ảnh sẽ không có toạ độ.</p>
+  <p class="info info--warning"><app-icon>location_off</app-icon> {{ warning }} Ảnh sẽ không có toạ độ.</p>
 }
 
 @if (photos().length) {
@@ -25,46 +25,46 @@
         <div class="preview">
           <img [src]="photo.previewUrl" [alt]="photo.caption || photo.fileName" />
           @if (photo.status === 'uploading') {
-            <div class="overlay"><mat-spinner diameter="28" /><span>Đang tải lên…</span></div>
+            <div class="overlay"><p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 28px; height: 28px" /><span>Đang tải lên…</span></div>
           } @else if (photo.status === 'offline') {
             <div class="overlay overlay--offline">
-              <mat-icon>cloud_off</mat-icon>
+              <app-icon>cloud_off</app-icon>
               <span>Tải lên khi có mạng</span>
             </div>
           } @else if (photo.status === 'error') {
             <div class="overlay overlay--error">
-              <mat-icon>error</mat-icon>
+              <app-icon>error</app-icon>
               <span>{{ photo.error }}</span>
-              <button mat-stroked-button type="button" (click)="retry.emit(photo.localId)">Thử lại</button>
+              <button pButton outlined type="button" (click)="retry.emit(photo.localId)">Thử lại</button>
             </div>
           }
           <button
-            mat-icon-button
+            pButton text rounded severity="secondary"
             class="remove"
             type="button"
             aria-label="Bỏ ảnh"
             [disabled]="disabled()"
             (click)="remove.emit(photo.localId)"
           >
-            <mat-icon>close</mat-icon>
+            <app-icon pButtonIcon>close</app-icon>
           </button>
-          <span class="gps" [matTooltip]="photo.location ? 'Đã gắn toạ độ GPS' : 'Chưa có toạ độ'">
-            <mat-icon>{{ photo.location ? 'location_on' : 'location_off' }}</mat-icon>
+          <span class="gps" [pTooltip]="photo.location ? 'Đã gắn toạ độ GPS' : 'Chưa có toạ độ'" tooltipPosition="bottom">
+            <app-icon>{{ photo.location ? 'location_on' : 'location_off' }}</app-icon>
             @if (photo.location?.accuracy; as accuracy) {
               ±{{ accuracy }} m
             }
           </span>
         </div>
-        <mat-form-field class="caption" subscriptSizing="dynamic">
-          <mat-label>Chú thích</mat-label>
+        <app-field class="caption" dense>
+          <label fieldLabel>Chú thích</label>
           <input
-            matInput
+            pInputText
             maxlength="200"
             [value]="photo.caption"
             [disabled]="disabled()"
             (input)="onCaption(photo.localId, $event)"
           />
-        </mat-form-field>
+        </app-field>
       </li>
     }
   </ul>

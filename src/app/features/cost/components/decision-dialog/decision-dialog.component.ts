@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { ButtonModule } from 'primeng/button';
+import { TextareaModule } from 'primeng/textarea';
 import { VndPipe } from '../../../../shared/pipes/vnd.pipe';
 import { ChangeOrder } from '../../models/cost.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 export interface DecisionDialogData {
   readonly mode: 'approve' | 'reject';
@@ -15,11 +15,18 @@ export interface DecisionDialogData {
 /** Chấp thuận (ý kiến tuỳ chọn) / không chấp thuận (bắt buộc lý do) phát sinh. Trả về ghi chú, hoặc undefined nếu huỷ. */
 @Component({
   selector: 'app-decision-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, VndPipe],
+  imports: [
+    ReactiveFormsModule,
+    VndPipe,
+    ButtonModule,
+    ...FIELD,
+    TextareaModule,
+    DialogCloseDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>{{ data.mode === 'approve' ? 'Chấp thuận phát sinh' : 'Không chấp thuận phát sinh' }}</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>{{ data.mode === 'approve' ? 'Chấp thuận phát sinh' : 'Không chấp thuận phát sinh' }}</h2>
+    <div dialogContent>
       <p class="subtitle">{{ data.order.code }} · {{ data.order.title }}</p>
       @if (data.mode === 'approve') {
         <p class="impact">
@@ -27,20 +34,20 @@ export interface DecisionDialogData {
           giá trị hợp đồng tăng {{ data.order.revenueAmount | vnd }}.
         </p>
       }
-      <mat-form-field class="field">
-        <mat-label>{{ data.mode === 'approve' ? 'Ý kiến (không bắt buộc)' : 'Lý do không chấp thuận' }}</mat-label>
-        <textarea matInput [formControl]="note" rows="4" maxlength="1000" cdkFocusInitial></textarea>
+      <app-field class="field">
+        <label fieldLabel>{{ data.mode === 'approve' ? 'Ý kiến (không bắt buộc)' : 'Lý do không chấp thuận' }}</label>
+        <textarea pTextarea [formControl]="note" rows="4" maxlength="1000"></textarea>
         @if (note.hasError('required')) {
-          <mat-error>Vui lòng nhập lý do không chấp thuận.</mat-error>
+          <app-error>Vui lòng nhập lý do không chấp thuận.</app-error>
         }
-      </mat-form-field>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="button" [class.danger]="data.mode === 'reject'" (click)="confirm()">
+      </app-field>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="button" [severity]="data.mode === 'reject' ? 'danger' : undefined\" (click)="confirm()">
         {{ data.mode === 'approve' ? 'Chấp thuận' : 'Không chấp thuận' }}
       </button>
-    </mat-dialog-actions>
+    </div>
   `,
   styles: `
     .subtitle {
@@ -49,20 +56,16 @@ export interface DecisionDialogData {
     }
     .impact {
       margin: 0 0 16px;
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--app-on-surface-variant);
     }
     .field {
       width: 100%;
     }
-    .danger {
-      --mat-button-filled-container-color: var(--mat-sys-error);
-      --mat-button-filled-label-text-color: var(--mat-sys-on-error);
-    }
   `,
 })
 export class DecisionDialogComponent {
-  protected readonly data = inject<DecisionDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<DecisionDialogComponent, string>>(MatDialogRef);
+  protected readonly data = injectDialogData<DecisionDialogData>();
+  private readonly dialogRef = injectDialogRef<string>();
 
   protected readonly note = new FormControl('', {
     nonNullable: true,

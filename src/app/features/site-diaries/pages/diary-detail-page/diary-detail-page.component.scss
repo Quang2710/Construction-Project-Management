@@ -14,14 +14,14 @@
 }
 
 .header__project {
-  font: var(--mat-sys-label-large);
-  color: var(--mat-sys-primary);
+  font: var(--app-label-large);
+  color: var(--app-primary);
   text-decoration: none;
 }
 
 .header__title {
   margin: 4px 0;
-  font: var(--mat-sys-headline-small);
+  font: var(--app-headline-small);
 
   &::first-letter {
     text-transform: uppercase;
@@ -30,7 +30,7 @@
 
 .header__sub {
   margin: 0;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 .header__actions {
@@ -40,7 +40,7 @@
 }
 
 .danger {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .banner {
@@ -53,13 +53,13 @@
 }
 
 .banner--error {
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  background: var(--app-error-container);
+  color: var(--app-on-error-container);
 }
 
 .banner--info {
-  background: var(--mat-sys-tertiary-container);
-  color: var(--mat-sys-on-tertiary-container);
+  background: var(--app-tertiary-container);
+  color: var(--app-on-tertiary-container);
 }
 
 .grid {
@@ -70,9 +70,9 @@
 
 .card {
   padding: 16px 20px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface);
 }
 
 .card--wide {
@@ -84,20 +84,20 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 12px;
-  font: var(--mat-sys-title-medium);
+  font: var(--app-title-medium);
 }
 
 .card__badge {
   padding: 0 8px;
   border-radius: 999px;
-  background: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
-  font: var(--mat-sys-label-medium);
+  background: var(--app-secondary-container);
+  color: var(--app-on-secondary-container);
+  font: var(--app-label-medium);
 }
 
 .card__badge--error {
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  background: var(--app-error-container);
+  color: var(--app-on-error-container);
 }
 
 .weather {
@@ -115,18 +115,18 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font: var(--mat-sys-body-medium);
+  font: var(--app-body-medium);
 
   th,
   td {
     padding: 6px 8px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    border-bottom: 1px solid var(--app-outline-variant);
     text-align: left;
   }
 
   th {
-    font: var(--mat-sys-label-large);
-    color: var(--mat-sys-on-surface-variant);
+    font: var(--app-label-large);
+    color: var(--app-on-surface-variant);
   }
 
   .num {
@@ -137,7 +137,7 @@
 
 .muted {
   margin: 0;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 .safe {
@@ -145,7 +145,7 @@
   align-items: center;
   gap: 8px;
 
-  mat-icon {
+  app-icon {
     color: var(--app-success);
   }
 }
@@ -164,13 +164,13 @@
 }
 
 .incident--high {
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  background: var(--app-error-container);
+  color: var(--app-on-error-container);
 }
 
 .incident__title {
   margin: 0;
-  font: var(--mat-sys-title-small);
+  font: var(--app-title-small);
 }
 
 .incident__text,
@@ -202,7 +202,7 @@
     bottom: 0;
     left: 5px;
     width: 2px;
-    background: var(--mat-sys-outline-variant);
+    background: var(--app-outline-variant);
   }
 }
 
@@ -212,11 +212,11 @@
   height: 12px;
   margin-top: 4px;
   border-radius: 50%;
-  background: var(--mat-sys-outline);
+  background: var(--app-outline);
 }
 
 .timeline__item--submitted .timeline__dot {
-  background: var(--mat-sys-tertiary);
+  background: var(--app-tertiary);
 }
 
 .timeline__item--approved .timeline__dot {
@@ -224,19 +224,19 @@
 }
 
 .timeline__item--rejected .timeline__dot {
-  background: var(--mat-sys-error);
+  background: var(--app-error);
 }
 
 .timeline__title {
   margin: 0;
-  font: var(--mat-sys-title-small);
+  font: var(--app-title-small);
 }
 
 .timeline__time,
 .timeline__note {
   margin: 2px 0 0;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 @media (max-width: 899.98px) {

@@ -1,41 +1,40 @@
 <app-page-header title="Tiến độ thi công" subtitle="Biểu đồ Gantt theo WBS — kéo thanh để đổi ngày, kéo nối hai thanh để tạo phụ thuộc">
   @if (store.canManageWbs()) {
-    <button mat-stroked-button type="button" [disabled]="!store.projectId()" (click)="createWbs()">
-      <mat-icon>account_tree</mat-icon>
+    <button pButton outlined type="button" [disabled]="!store.projectId()" (click)="createWbs()">
+      <app-icon>account_tree</app-icon>
       Thêm hạng mục WBS
     </button>
   }
   @if (store.canEdit()) {
-    <button mat-flat-button type="button" [disabled]="!store.projectId()" (click)="createTask()">
-      <mat-icon>add</mat-icon>
+    <button pButton type="button" [disabled]="!store.projectId()" (click)="createTask()">
+      <app-icon>add</app-icon>
       Thêm công việc
     </button>
   }
 </app-page-header>
 
 <div class="toolbar">
-  <mat-form-field class="toolbar__project" subscriptSizing="dynamic">
-    <mat-label>Dự án</mat-label>
-    <mat-select [value]="store.projectId()" (valueChange)="store.setProject($event)">
-      @for (project of store.projects(); track project.id) {
-        <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <app-field class="toolbar__project" dense>
+    <label fieldLabel>Dự án</label>
+    <p-select [ngModel]="store.projectId()" (ngModelChange)="store.setProject($event)" [options]="store.projects()" optionValue="id" placeholder="Chọn…" [filter]="true" filterBy="code,name" emptyFilterMessage="Không tìm thấy dự án" [fluid]="true">
+      <ng-template #selectedItem let-project>{{ project.code }} · {{ project.name }}</ng-template>
+      <ng-template #item let-project>{{ project.code }} · {{ project.name }}</ng-template>
+    </p-select>
+  </app-field>
 
-  <mat-button-toggle-group
-    hideSingleSelectionIndicator
-    aria-label="Đơn vị thời gian"
-    [value]="store.viewType()"
-    (change)="store.setViewType($event.value)"
-  >
-    @for (view of viewTypes; track view.value) {
-      <mat-button-toggle [value]="view.value">{{ view.label }}</mat-button-toggle>
-    }
-  </mat-button-toggle-group>
+  <p-selectbutton
+    [options]="viewTypes | mutable"
+    optionLabel="label"
+    optionValue="value"
+    [allowEmpty]="false"
+    size="small"
+    [ngModel]="store.viewType()"
+    (onChange)="store.setViewType($event.value)"
+    [attr.aria-label]="'Đơn vị thời gian'"
+  />
 
-  <button mat-stroked-button type="button" (click)="scrollToToday()">
-    <mat-icon>today</mat-icon>
+  <button pButton outlined type="button" (click)="scrollToToday()">
+    <app-icon>today</app-icon>
     Hôm nay
   </button>
 </div>
@@ -43,18 +42,18 @@
 @if (store.projectId()) {
   <div class="summary">
     <span class="summary__item">
-      <mat-icon>flag</mat-icon>
+      <app-icon>flag</app-icon>
       Hoàn thành dự kiến:
       <strong [class.late]="lateFinish()">{{ finishDate() | date: 'dd/MM/yyyy' }}</strong>
       @if (lateFinish()) {
         <span class="late">(trễ so với kế hoạch {{ store.project()?.endDate | date: 'dd/MM/yyyy' }})</span>
       }
     </span>
-    <span class="summary__item"><mat-icon>route</mat-icon> {{ store.stats().critical }} việc trên đường găng</span>
-    <span class="summary__item"><mat-icon>diamond</mat-icon> {{ store.stats().milestones }} mốc</span>
+    <span class="summary__item"><app-icon>route</app-icon> {{ store.stats().critical }} việc trên đường găng</span>
+    <span class="summary__item"><app-icon>diamond</app-icon> {{ store.stats().milestones }} mốc</span>
     @if (store.stats().violations) {
       <span class="summary__item summary__item--warn">
-        <mat-icon>warning</mat-icon> {{ store.stats().violations }} liên kết bị vi phạm
+        <app-icon>warning</app-icon> {{ store.stats().violations }} liên kết bị vi phạm
       </span>
     }
   </div>
@@ -69,7 +68,7 @@
 }
 
 @if (store.loading() || store.saving()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (store.error(); as error) {
@@ -103,9 +102,9 @@
               } @else {
                 <button type="button" class="cell-task" [class.cell-task--critical]="origin.critical" (click)="openTask(origin.task.id)">
                   @if (origin.task.isMilestone) {
-                    <mat-icon class="cell-task__icon">diamond</mat-icon>
+                    <app-icon class="cell-task__icon">diamond</app-icon>
                   }
-                  <span class="cell-task__title" [matTooltip]="origin.task.title">{{ origin.task.title }}</span>
+                  <span class="cell-task__title" [pTooltip]="origin.task.title" tooltipPosition="bottom">{{ origin.task.title }}</span>
                 </button>
               }
             }
@@ -150,14 +149,14 @@
       <ng-template #bar let-item="item">
         @if (asOrigin(item); as origin) {
           @if (origin.kind === 'task' && origin.task.isMilestone) {
-            <span class="milestone" [style.background]="item.color" [matTooltip]="origin.task.title"></span>
+            <span class="milestone" [style.background]="item.color" [pTooltip]="origin.task.title" tooltipPosition="bottom"></span>
           }
         }
       </ng-template>
     </ngx-gantt>
   </div>
   <p class="hint">
-    <mat-icon>info</mat-icon>
+    <app-icon>info</app-icon>
     Dự trữ = số ngày một công việc có thể trễ mà không làm chậm ngày hoàn thành. Bấm vào đường nối để xoá phụ thuộc.
   </p>
 }

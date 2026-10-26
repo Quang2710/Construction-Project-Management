@@ -1,36 +1,536 @@
-@use '@angular/material' as mat;
+// =============================================================================
+// Design token của app (PrimeNG Aura, xanh dương + xám trung tính).
+// Component dùng --app-* thay vì giá trị cứng; sáng/tối chỉ đổi ở đây (class .app-dark trên <html>).
+// Palette --p-* do PrimeNG sinh từ AppThemePreset (src/app/core/theme/app-theme.preset.ts).
+// =============================================================================
 
-// Theme M3: màu cam công trường + xanh dương phụ trợ.
-// theme-type: color-scheme -> màu dùng light-dark(), đổi theme chỉ cần đổi color-scheme.
-html {
+:root {
   color-scheme: light;
 
-  @include mat.theme(
-    (
-      color: (
-        theme-type: color-scheme,
-        primary: mat.$orange-palette,
-        tertiary: mat.$azure-palette,
-      ),
-      typography: 'Be Vietnam Pro',
-      density: 0,
-    )
-  );
+  --app-font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  // Nền & bề mặt
+  --app-background: var(--p-surface-50);
+  --app-surface: var(--p-surface-0);
+  --app-surface-container-lowest: var(--p-surface-0);
+  --app-surface-container-low: var(--p-surface-50);
+  --app-surface-container: var(--p-surface-100);
+  --app-surface-container-high: var(--p-surface-100);
+  --app-surface-container-highest: var(--p-surface-200);
+  --app-on-surface: var(--p-surface-800);
+  --app-on-surface-variant: var(--p-surface-500);
+  --app-outline: var(--p-surface-300);
+  --app-outline-variant: var(--p-surface-200);
+
+  // Màu chủ đạo & phụ
+  --app-primary: var(--p-primary-color);
+  --app-on-primary: var(--p-primary-contrast-color);
+  --app-primary-container: var(--p-primary-50);
+  --app-on-primary-container: var(--p-primary-700);
+  --app-secondary-container: var(--p-surface-100);
+  --app-on-secondary-container: var(--p-surface-700);
+  --app-tertiary: var(--p-indigo-500);
+  --app-on-tertiary: #fff;
+  --app-tertiary-container: var(--p-indigo-50);
+  --app-on-tertiary-container: var(--p-indigo-700);
+
+  // Ngữ nghĩa
+  --app-error: var(--p-red-600);
+  --app-on-error: #fff;
+  --app-error-container: var(--p-red-50);
+  --app-on-error-container: var(--p-red-700);
+  --app-success: var(--p-green-600);
+  --app-success-container: var(--p-green-50);
+  --app-on-success-container: var(--p-green-700);
+  --app-warning: var(--p-amber-600);
+  --app-warning-container: var(--p-amber-50);
+  --app-on-warning-container: var(--p-amber-800);
+
+  // Hình khối & đổ bóng (nhẹ, phẳng)
+  --app-corner-small: 8px;
+  --app-corner-medium: 12px;
+  --app-corner-large: 16px;
+  --app-shadow-1: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+  --app-shadow-2: 0 4px 12px rgb(15 23 42 / 0.08);
+  --app-transition: 160ms cubic-bezier(0.2, 0, 0, 1);
+
+  // Kiểu chữ (shorthand `font`): weight size/line-height family. Dùng px vì cỡ chữ gốc (html) đặt 14px
+  // để thu nhỏ đồng bộ component PrimeNG (vốn tính theo rem).
+  --app-display-small: 600 36px / 44px var(--app-font);
+  --app-headline-medium: 600 28px / 36px var(--app-font);
+  --app-headline-small: 600 24px / 32px var(--app-font);
+  --app-title-large: 600 20px / 28px var(--app-font);
+  --app-title-medium: 600 16px / 24px var(--app-font);
+  --app-title-small: 600 14px / 20px var(--app-font);
+  --app-body-large: 400 16px / 24px var(--app-font);
+  --app-body-medium: 400 14px / 20px var(--app-font);
+  --app-body-small: 400 13px / 18px var(--app-font);
+  --app-label-large: 500 14px / 20px var(--app-font);
+  --app-label-medium: 500 13px / 16px var(--app-font);
+  --app-label-small: 500 12px / 16px var(--app-font);
 }
 
-html.theme-dark {
+:root.app-dark {
   color-scheme: dark;
+
+  --app-background: var(--p-surface-950);
+  --app-surface: var(--p-surface-900);
+  --app-surface-container-lowest: var(--p-surface-950);
+  --app-surface-container-low: color-mix(in srgb, var(--p-surface-800) 55%, var(--p-surface-900));
+  --app-surface-container: var(--p-surface-800);
+  --app-surface-container-high: var(--p-surface-800);
+  --app-surface-container-highest: var(--p-surface-700);
+  --app-on-surface: var(--p-surface-0);
+  --app-on-surface-variant: var(--p-surface-400);
+  --app-outline: var(--p-surface-600);
+  --app-outline-variant: var(--p-surface-700);
+
+  --app-primary-container: color-mix(in srgb, var(--p-primary-400) 16%, transparent);
+  --app-on-primary-container: var(--p-primary-200);
+  --app-secondary-container: var(--p-surface-800);
+  --app-on-secondary-container: var(--p-surface-200);
+  --app-tertiary: var(--p-indigo-400);
+  --app-on-tertiary: var(--p-surface-950);
+  --app-tertiary-container: color-mix(in srgb, var(--p-indigo-400) 16%, transparent);
+  --app-on-tertiary-container: var(--p-indigo-200);
+
+  --app-error: var(--p-red-400);
+  --app-on-error: var(--p-surface-950);
+  --app-error-container: color-mix(in srgb, var(--p-red-400) 16%, transparent);
+  --app-on-error-container: var(--p-red-200);
+  --app-success: var(--p-green-400);
+  --app-success-container: color-mix(in srgb, var(--p-green-400) 16%, transparent);
+  --app-on-success-container: var(--p-green-200);
+  --app-warning: var(--p-amber-400);
+  --app-warning-container: color-mix(in srgb, var(--p-amber-400) 16%, transparent);
+  --app-on-warning-container: var(--p-amber-200);
+
+  --app-shadow-1: 0 1px 2px rgb(0 0 0 / 0.3);
+  --app-shadow-2: 0 4px 16px rgb(0 0 0 / 0.4);
 }
 
-// Màu ngữ nghĩa bổ sung (M3 không có sẵn success/warning).
-html {
-  --app-success: light-dark(#1b7f3b, #7ddc95);
-  --app-success-container: light-dark(#d4f3dc, #12401f);
-  --app-on-success-container: light-dark(#0b3d1a, #c8f2d3);
-  --app-warning: light-dark(#a15c00, #ffb95c);
-  --app-warning-container: light-dark(#ffe8c7, #4a2c00);
-  --app-on-warning-container: light-dark(#4a2c00, #ffe8c7);
+// =============================================================================
+// Nền tảng
+// =============================================================================
+
+html,
+body {
+  height: 100%;
 }
+
+// Component PrimeNG tính kích thước theo rem: cỡ gốc 14px cho mật độ vừa phải, đồng bộ với chữ của app.
+html {
+  font-size: 14px;
+}
+
+body {
+  margin: 0;
+  font: var(--app-body-medium);
+  background: var(--app-background);
+  color: var(--app-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--app-primary);
+}
+
+code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--app-surface-container-highest);
+  font-size: 0.9em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
+// Thanh cuộn mảnh, dịu màu.
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-outline) transparent;
+}
+
+// Icon Material Symbols (component <app-icon>).
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+// Trợ năng: ẩn khỏi màn hình nhưng vẫn đọc được bằng trình đọc màn hình.
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// =============================================================================
+// Trường nhập <app-field> (shared/ui/field): nhãn trên, ô nhập rộng hết khung, lỗi/gợi ý dưới.
+// =============================================================================
+
+.app-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  [fieldLabel] {
+    font: var(--app-label-medium);
+    color: var(--app-on-surface-variant);
+  }
+}
+
+.app-field__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  > .p-inputtext,
+  > .p-textarea,
+  > input,
+  > textarea,
+  > p-select,
+  > p-datepicker,
+  > p-autocomplete,
+  > p-inputnumber,
+  > p-multiselect {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  // Component PrimeNG bọc input bên trong: kéo input bên trong cho rộng hết.
+  p-datepicker .p-datepicker,
+  p-autocomplete .p-autocomplete,
+  p-inputnumber .p-inputnumber,
+  .p-datepicker-input,
+  .p-autocomplete-input,
+  .p-inputnumber-input,
+  .p-select {
+    width: 100%;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.app-field__prefix,
+.app-field__suffix {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--app-on-surface-variant);
+  transform: translateY(-50%);
+  pointer-events: none;
+
+  .app-icon {
+    font-size: 20px;
+  }
+
+  button,
+  a {
+    pointer-events: auto;
+  }
+}
+
+.app-field__prefix {
+  left: 12px;
+}
+
+.app-field__suffix {
+  right: 10px;
+  font: var(--app-body-medium);
+}
+
+.app-field--prefix .app-field__control > input {
+  padding-left: 2.5rem;
+}
+
+.app-field--suffix .app-field__control > input {
+  padding-right: 3rem;
+}
+
+.app-field--invalid {
+  [fieldLabel] {
+    color: var(--app-error);
+  }
+
+  .p-inputtext,
+  .p-textarea,
+  .p-select,
+  .p-datepicker-input,
+  .p-autocomplete-input {
+    border-color: var(--p-inputtext-invalid-border-color, var(--app-error));
+  }
+}
+
+// Chừa sẵn chỗ cho lỗi/gợi ý để form không xô lệch.
+.app-field__subscript {
+  min-height: 1.125rem;
+  margin-top: -2px;
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
+
+  &:empty {
+    margin-top: -6px;
+  }
+}
+
+.app-field--dense .app-field__subscript {
+  display: none;
+}
+
+.app-field__error {
+  display: block;
+  color: var(--app-error);
+}
+
+// =============================================================================
+// Bố cục dialog (shared/ui/dialog): [dialogTitle] / [dialogContent] / [dialogActions].
+// =============================================================================
+
+[dialogTitle] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 20px 24px 12px;
+  font: var(--app-title-large);
+}
+
+[dialogContent] {
+  max-height: min(70vh, 720px);
+  padding: 4px 24px 8px;
+  overflow: auto;
+}
+
+[dialogActions] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 24px 20px;
+}
+
+@media (max-width: 599.98px) {
+  [dialogTitle] {
+    padding: 16px 16px 8px;
+  }
+
+  [dialogContent] {
+    padding: 4px 16px 8px;
+  }
+
+  [dialogActions] {
+    padding: 12px 16px 16px;
+  }
+}
+
+// =============================================================================
+// Tinh chỉnh PrimeNG dùng chung
+// =============================================================================
+
+// Nút: chữ đậm vừa, không viết hoa, icon Material Symbols cùng cỡ chữ.
+.p-button {
+  font-weight: 500;
+  text-decoration: none;
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+}
+
+.p-button.p-button-sm .material-symbols-outlined {
+  font-size: 18px;
+}
+
+// Nút nguy hiểm dạng chữ / viền dùng màu lỗi.
+.p-button.p-button-danger.p-button-text,
+.p-button.p-button-danger.p-button-outlined {
+  color: var(--app-error);
+}
+
+// Thanh tiến trình chạy ở đầu vùng nội dung khi đang tải.
+.p-progressbar.app-loading-bar {
+  height: 3px;
+  border-radius: 0;
+}
+
+// Dialog: tiêu đề / nội dung / nút bố cục theo app-dialog (shared/ui/dialog).
+.p-dialog.app-dialog {
+  .p-dialog-content {
+    padding: 0;
+  }
+}
+
+.p-dialog.lightbox-panel {
+  overflow: hidden;
+  background: #000;
+
+  .p-dialog-content {
+    padding: 0;
+    background: #000;
+  }
+}
+
+// Tabs: nền trong suốt, panel không thêm padding (panel bên trong tự canh lề).
+.p-tabs {
+  --p-tabs-tablist-background: transparent;
+  --p-tabs-tabpanel-background: transparent;
+  --p-tabs-tabpanel-padding: 0;
+}
+
+// Phân trang nằm trong khung danh sách: không vẽ nền riêng.
+.p-paginator {
+  --p-paginator-background: transparent;
+}
+
+.p-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+// Toast: chữ thường, gọn.
+.p-toast {
+  max-width: calc(100vw - 32px);
+}
+
+.p-toast .p-toast-message-content {
+  align-items: center;
+}
+
+// Popover menu (chuông thông báo, trạng thái mạng, tài khoản).
+.p-popover.app-popover {
+  .p-popover-content {
+    padding: 0;
+  }
+}
+
+// Danh sách thao tác trong popover (menu tài khoản, menu dòng bảng...).
+.app-menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  padding: 6px;
+}
+
+.app-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--app-corner-small);
+  background: transparent;
+  color: var(--app-on-surface);
+  font: var(--app-body-medium);
+  text-align: left;
+  cursor: pointer;
+
+  .app-icon {
+    font-size: 20px;
+    color: var(--app-on-surface-variant);
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--app-surface-container);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.app-menu__item--danger,
+.app-menu__item--danger .app-icon {
+  color: var(--app-error);
+}
+
+// Bộ lọc dạng chip (p-selectbutton class="app-chips"): các viên rời, viên đang chọn tô màu chủ đạo.
+// Lặp class để thắng quy tắc :first-child/:last-child của SelectButton.
+// Màn hình hẹp: một hàng cuộn ngang thay vì xuống dòng.
+.p-selectbutton.app-chips.app-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+
+  .p-togglebutton {
+    flex: none;
+    padding: 0;
+    border: 1px solid var(--app-outline-variant);
+    border-radius: 999px;
+    background: var(--app-surface);
+    color: var(--app-on-surface-variant);
+    white-space: nowrap;
+    transition:
+      background-color var(--app-transition),
+      border-color var(--app-transition),
+      color var(--app-transition);
+
+    &:hover:not(.p-togglebutton-checked) {
+      border-color: var(--app-outline);
+      color: var(--app-on-surface);
+    }
+  }
+
+  .p-togglebutton .p-togglebutton-content {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+    color: inherit;
+  }
+
+  .p-togglebutton.p-togglebutton-checked {
+    border-color: color-mix(in srgb, var(--app-primary) 40%, transparent);
+    background: var(--app-primary-container);
+    color: var(--app-on-primary-container);
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 719.98px) {
+  .p-selectbutton.app-chips.app-chips {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
+
+// =============================================================================
+// Thư viện bên thứ ba
+// =============================================================================
 
 // Ghim bản đồ (divIcon của Leaflet nằm ngoài encapsulation của component).
 .map-pin {
@@ -59,42 +559,14 @@ html {
   font-family: inherit;
 }
 
-// Lightbox ảnh hiện trường: nền đen, không padding.
-.lightbox-panel {
-  @include mat.dialog-overrides(
-    (
-      container-color: #000,
-      container-shape: 12px,
-    )
-  );
-
-  .mat-mdc-dialog-surface {
-    overflow: hidden;
-  }
-}
-
-// Menu chuông thông báo (overlay gắn vào body): rộng hơn menu mặc định, mục được xuống dòng.
-.bell-menu.mat-mdc-menu-panel {
-  width: min(400px, calc(100vw - 16px));
-  max-width: none;
-  max-height: min(560px, calc(100vh - 96px));
-
-  .mat-mdc-menu-item-text {
-    display: flex;
-    align-items: flex-start;
-    width: 100%;
-  }
-}
-
-// Menu trạng thái mạng / hàng đợi đồng bộ.
-.network-menu.mat-mdc-menu-panel {
-  width: min(360px, calc(100vw - 16px));
-  max-width: none;
+// Bản đồ tối: đảo màu tile thay vì đổi nhà cung cấp tile.
+.app-dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
 }
 
 // Kéo thả Kanban: bản xem trước được gắn vào body nên style phải ở global.
 .cdk-drag-preview {
-  box-shadow: 0 12px 28px rgb(0 0 0 / 0.25);
+  box-shadow: var(--app-shadow-2);
   transform: rotate(2deg);
 }
 
@@ -104,50 +576,4 @@ html {
 
 .cdk-drag-animating {
   transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-// Bản đồ tối: đảo màu tile thay vì đổi nhà cung cấp tile.
-html.theme-dark .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
-}
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  -webkit-font-smoothing: antialiased;
-}
-
-code {
-  padding: 1px 6px;
-  border-radius: 6px;
-  background: var(--mat-sys-surface-container-highest);
-  font-size: 0.9em;
-}
-
-// Snackbar theo mức độ thông báo.
-.snack-error {
-  @include mat.snack-bar-overrides(
-    (
-      container-color: var(--mat-sys-error-container),
-      supporting-text-color: var(--mat-sys-on-error-container),
-      button-color: var(--mat-sys-on-error-container),
-    )
-  );
-}
-
-.snack-success {
-  @include mat.snack-bar-overrides(
-    (
-      container-color: var(--mat-sys-primary-container),
-      supporting-text-color: var(--mat-sys-on-primary-container),
-      button-color: var(--mat-sys-on-primary-container),
-    )
-  );
 }

@@ -1,23 +1,25 @@
 <app-page-header title="Bản đồ công trình" subtitle="Vị trí các dự án trên toàn quốc" />
 
-<mat-chip-listbox
-  class="filters"
-  aria-label="Lọc theo trạng thái"
-  [value]="store.statusFilter() ?? allValue"
-  [hideSingleSelectionIndicator]="true"
-  (change)="onStatusChange($event)"
+<p-selectbutton
+  class="filters app-chips"
+  [options]="statusFilterOptions | mutable"
+  optionLabel="label"
+  optionValue="value"
+  [allowEmpty]="false"
+  [ngModel]="store.statusFilter() ?? allValue"
+  (onChange)="onStatusChange($event)"
+  [attr.aria-label]="'Lọc theo trạng thái'"
 >
-  <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
-  @for (status of statuses; track status) {
-    <mat-chip-option [value]="status">
-      <span class="legend-dot" [style.background]="statusColors[status]"></span>
-      {{ statusLabels[status] }}
-    </mat-chip-option>
-  }
-</mat-chip-listbox>
+  <ng-template #item let-option>
+    @if (option.color) {
+      <span class="legend-dot" [style.background]="option.color"></span>
+    }
+    {{ option.label }}
+  </ng-template>
+</p-selectbutton>
 
 @if (store.loading()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (store.error(); as error) {
@@ -42,9 +44,9 @@
           <p class="selected__address">{{ project.location.address }}, {{ project.location.province }}</p>
           <app-progress-compare [actual]="project.progress" [planned]="project.plannedProgress" />
           <p class="selected__budget">Ngân sách {{ project.budget | vnd: 'compact' }}</p>
-          <a mat-flat-button [routerLink]="['/projects', project.id]">
+          <a pButton [routerLink]="['/projects', project.id]">
             Xem chi tiết
-            <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+            <app-icon iconPositionEnd>arrow_forward</app-icon>
           </a>
         </section>
       }

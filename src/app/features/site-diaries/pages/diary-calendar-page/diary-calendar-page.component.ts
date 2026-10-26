@@ -1,13 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipListboxChange, MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { SelectButtonChangeEvent, SelectButtonModule } from 'primeng/selectbutton';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { PERMISSIONS } from '../../../../core/auth/permissions';
 import { NetworkStatusService } from '../../../../core/offline/network-status.service';
@@ -20,26 +19,29 @@ import { DiaryStatusChipComponent } from '../../components/diary-status-chip/dia
 import { DiaryCalendarStore } from '../../data-access/diary-calendar.store';
 import { DiaryOutboxService } from '../../data-access/diary-outbox.service';
 import { DIARY_STATUS_LABELS, DIARY_STATUSES, DiaryStatus, WEATHER_ICONS, WEATHER_LABELS } from '../../models/site-diary.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 const ALL = 'ALL';
 
 @Component({
   selector: 'app-diary-calendar-page',
   imports: [
+    FormsModule,
     DatePipe,
     RouterLink,
-    MatButtonModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatSelectModule,
-    MatTooltipModule,
+    SelectButtonModule,
     HasRoleDirective,
     PageHeaderComponent,
     ErrorStateComponent,
     DiaryCalendarComponent,
     DiaryStatusChipComponent,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressBarModule,
+    ...FIELD,
+    SelectModule,
   ],
   providers: [DiaryCalendarStore],
   templateUrl: './diary-calendar-page.component.html',
@@ -60,6 +62,11 @@ export class DiaryCalendarPageComponent implements OnInit {
   protected readonly allValue = ALL;
   protected readonly statuses = DIARY_STATUSES;
   protected readonly statusLabels = DIARY_STATUS_LABELS;
+  /** Bộ lọc trạng thái kèm số nhật ký trong tháng. */
+  protected readonly statusFilterOptions = computed(() => [
+    { label: 'Tất cả', value: ALL },
+    ...this.store.statusCounts().map((item) => ({ label: `${DIARY_STATUS_LABELS[item.status]} (${item.count})`, value: item.status })),
+  ]);
   protected readonly weatherIcons = WEATHER_ICONS;
   protected readonly weatherLabels = WEATHER_LABELS;
   protected readonly isClient = computed(() => this.auth.role() === 'CLIENT');
@@ -79,7 +86,7 @@ export class DiaryCalendarPageComponent implements OnInit {
     }
   }
 
-  protected onStatusChange(event: MatChipListboxChange): void {
+  protected onStatusChange(event: SelectButtonChangeEvent): void {
     const value: unknown = event.value;
     this.store.setStatus(typeof value === 'string' && value !== ALL ? (value as DiaryStatus) : null);
   }

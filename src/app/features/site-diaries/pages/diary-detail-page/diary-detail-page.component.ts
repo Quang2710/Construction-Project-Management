@@ -1,10 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AppDialog } from '../../../../shared/ui/dialog/app-dialog.service';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { BreadcrumbService } from '../../../../core/layout/breadcrumb/breadcrumb.service';
@@ -25,6 +21,10 @@ import {
   WEATHER_ICONS,
   WEATHER_LABELS,
 } from '../../models/site-diary.model';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-diary-detail-page',
@@ -32,15 +32,15 @@ import {
     DatePipe,
     DecimalPipe,
     RouterLink,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
     RoleLabelPipe,
     EmptyStateComponent,
     ErrorStateComponent,
     DiaryStatusChipComponent,
     PhotoGalleryComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ProgressSpinnerModule,
   ],
   providers: [DiaryDetailStore],
   templateUrl: './diary-detail-page.component.html',
@@ -49,7 +49,7 @@ import {
 })
 export class DiaryDetailPageComponent {
   private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly notification = inject(NotificationService);
   private readonly breadcrumbs = inject(BreadcrumbService);

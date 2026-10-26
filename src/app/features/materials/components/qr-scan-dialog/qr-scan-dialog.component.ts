@@ -9,11 +9,11 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
 
 export interface QrScanDialogData {
   /** Mã có sẵn trong danh mục, dùng cho nút "Mô phỏng quét". */
@@ -39,18 +39,25 @@ const SCAN_INTERVAL_MS = 300;
  */
 @Component({
   selector: 'app-qr-scan-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule],
+  imports: [
+    ReactiveFormsModule,
+    ButtonModule,
+    IconComponent,
+    ...FIELD,
+    InputTextModule,
+    DialogCloseDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Quét mã QR vật tư</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Quét mã QR vật tư</h2>
+    <div dialogContent>
       <div class="viewport">
         <video #video class="video" [class.video--hidden]="camera() !== 'scanning'" playsinline muted></video>
         @if (camera() === 'scanning') {
           <div class="frame" aria-hidden="true"></div>
         } @else {
           <div class="placeholder">
-            <mat-icon>qr_code_scanner</mat-icon>
+            <app-icon>qr_code_scanner</app-icon>
             <span>
               @switch (camera()) {
                 @case ('starting') { Đang mở camera… }
@@ -63,20 +70,20 @@ const SCAN_INTERVAL_MS = 300;
       </div>
 
       <form class="manual" (ngSubmit)="submitManual()">
-        <mat-form-field class="manual__field" subscriptSizing="dynamic">
-          <mat-label>Nhập mã vật tư</mat-label>
-          <input matInput [formControl]="code" class="upper" placeholder="VD: TH-CB400-D16" />
-        </mat-form-field>
-        <button mat-flat-button type="submit" [disabled]="code.invalid">Tra cứu</button>
+        <app-field class="manual__field" dense>
+          <label fieldLabel>Nhập mã vật tư</label>
+          <input pInputText [formControl]="code" class="upper" placeholder="VD: TH-CB400-D16" />
+        </app-field>
+        <button pButton type="submit" [disabled]="code.invalid">Tra cứu</button>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions>
-      <button mat-stroked-button type="button" [disabled]="!data.sampleCodes.length" (click)="simulate()">
-        <mat-icon>auto_awesome</mat-icon> Mô phỏng quét
+    </div>
+    <div dialogActions>
+      <button pButton outlined type="button" [disabled]="!data.sampleCodes.length" (click)="simulate()">
+        <app-icon>auto_awesome</app-icon> Mô phỏng quét
       </button>
       <span class="spacer"></span>
-      <button mat-button type="button" mat-dialog-close>Đóng</button>
-    </mat-dialog-actions>
+      <button pButton text type="button" appDialogClose>Đóng</button>
+    </div>
   `,
   styles: `
     .viewport {
@@ -114,7 +121,7 @@ const SCAN_INTERVAL_MS = 300;
       padding: 16px;
       color: #e5e5e5;
       text-align: center;
-      mat-icon {
+      app-icon {
         width: 48px;
         height: 48px;
         font-size: 48px;
@@ -137,8 +144,8 @@ const SCAN_INTERVAL_MS = 300;
   `,
 })
 export class QrScanDialogComponent {
-  protected readonly data = inject<QrScanDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<QrScanDialogComponent, string>>(MatDialogRef);
+  protected readonly data = injectDialogData<QrScanDialogData>();
+  private readonly dialogRef = injectDialogRef<string>();
   private readonly video = viewChild.required<ElementRef<HTMLVideoElement>>('video');
 
   protected readonly camera = signal<CameraState>('starting');

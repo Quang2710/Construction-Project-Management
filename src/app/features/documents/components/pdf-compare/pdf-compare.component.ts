@@ -9,13 +9,15 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { diffImages, ImageDiffResult } from '../../utils/image-diff';
 import { closePdf, fitWidthScale, openPdf, PdfDocument, renderPage } from '../../utils/pdf-renderer';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { FormsModule } from '@angular/forms';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 export type CompareMode = 'overlay' | 'side';
 
@@ -49,7 +51,15 @@ function imageDataAt(source: HTMLCanvasElement, width: number, height: number): 
 /** So sánh hai phiên bản bản vẽ: chồng lớp tô màu khác biệt, hoặc đặt cạnh nhau cuộn đồng bộ. */
 @Component({
   selector: 'app-pdf-compare',
-  imports: [MatButtonModule, MatButtonToggleModule, MatIconModule, MatProgressBarModule, MatTooltipModule],
+  imports: [
+    MutablePipe,
+    FormsModule,
+    SelectButtonModule,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressBarModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './pdf-compare.component.html',
   styleUrl: './pdf-compare.component.scss',
@@ -66,6 +76,10 @@ export class PdfCompareComponent implements OnDestroy {
   private readonly frame = viewChild.required<ElementRef<HTMLElement>>('frame');
 
   protected readonly zoomStep = ZOOM_STEP;
+  protected readonly modeOptions: readonly { label: string; value: CompareMode; icon: string }[] = [
+    { label: 'Chồng lớp', value: 'overlay', icon: 'layers' },
+    { label: 'Cạnh nhau', value: 'side', icon: 'view_column_2' },
+  ];
   protected readonly mode = signal<CompareMode>('overlay');
   protected readonly page = signal(1);
   protected readonly pageCount = signal(0);

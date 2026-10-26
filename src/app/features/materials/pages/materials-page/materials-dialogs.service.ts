@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { AppDialog } from '../../../../shared/ui/dialog/app-dialog.service';
 import { firstValueFrom } from 'rxjs';
 import { QrScanDialogComponent, QrScanDialogData } from '../../components/qr-scan-dialog/qr-scan-dialog.component';
 import {
@@ -25,7 +25,7 @@ const DIALOG_SIZE = { width: '560px', maxWidth: 'calc(100vw - 24px)' };
 /** Mở các dialog nghiệp vụ kho; được cung cấp ở cấp trang Vật tư (cùng MaterialsStore). */
 @Injectable()
 export class MaterialsDialogsService {
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
   private readonly store = inject(MaterialsStore);
 
   async openMovement(type: StockTransactionType, materialId?: string): Promise<boolean> {

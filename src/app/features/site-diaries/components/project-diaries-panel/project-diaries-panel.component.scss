@@ -14,7 +14,7 @@
 
 .header__summary {
   margin: 0;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 .header__actions {
@@ -27,13 +27,13 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
   overflow: hidden;
 }
 
 .list li + li {
-  border-top: 1px solid var(--mat-sys-outline-variant);
+  border-top: 1px solid var(--app-outline-variant);
 }
 
 .item {
@@ -46,7 +46,7 @@
 
   &:hover,
   &:focus-visible {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
     outline: none;
   }
 }
@@ -56,17 +56,17 @@
   flex-direction: column;
   align-items: center;
   width: 48px;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 
   strong {
-    font: var(--mat-sys-title-small);
-    color: var(--mat-sys-on-surface);
+    font: var(--app-title-small);
+    color: var(--app-on-surface);
   }
 }
 
 .item__weather {
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 .item__main {
@@ -77,10 +77,10 @@
 }
 
 .item__sub {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .incident {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }

@@ -1,12 +1,11 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { PERMISSIONS } from '../../../../core/auth/permissions';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
@@ -18,25 +17,28 @@ import { TaskDialogResult } from '../../components/task-dialog/task-dialog.compo
 import { TaskDialogService } from '../../components/task-dialog/task-dialog.service';
 import { KanbanStore } from '../../data-access/kanban.store';
 import { Task, TASK_STATUS_LABELS, TASK_STATUSES, TaskStatus } from '../../models/task.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 @Component({
   selector: 'app-kanban-page',
   imports: [
+    FormsModule,
     CdkDropListGroup,
     CdkDropList,
     CdkDrag,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatSlideToggleModule,
-    MatProgressBarModule,
+    ToggleSwitchModule,
     HasRoleDirective,
     PageHeaderComponent,
     EmptyStateComponent,
     ErrorStateComponent,
     TaskCardComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ...FIELD,
+    InputTextModule,
+    SelectModule,
   ],
   providers: [KanbanStore],
   templateUrl: './kanban-page.component.html',

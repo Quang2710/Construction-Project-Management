@@ -9,14 +9,6 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { NotificationService } from '../../../../core/notifications/notification.service';
@@ -35,6 +27,18 @@ import {
   PROVINCES,
 } from '../../models/project.model';
 import { PROJECT_STATUS_COLORS } from '../../utils/project-status.utils';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { DatePickerModule } from 'primeng/datepicker';
+import { toOptions } from '../../../../shared/utils/options';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 interface ProjectForm {
   code: FormControl<string>;
@@ -69,20 +73,23 @@ function roundCoord(value: number): number {
 @Component({
   selector: 'app-project-form-page',
   imports: [
+    MutablePipe,
     ReactiveFormsModule,
     RouterLink,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
     VndPipe,
     PageHeaderComponent,
     ErrorStateComponent,
     ProjectMapComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    ...FIELD,
+    InputTextModule,
+    TextareaModule,
+    SelectModule,
+    MultiSelectModule,
+    DatePickerModule,
   ],
   providers: [ProjectFormStore],
   templateUrl: './project-form-page.component.html',
@@ -99,6 +106,7 @@ export class ProjectFormPageComponent implements HasUnsavedChanges {
 
   protected readonly statuses = PROJECT_STATUSES;
   protected readonly statusLabels = PROJECT_STATUS_LABELS;
+  protected readonly statusOptions = toOptions(this.statuses, this.statusLabels);
   protected readonly provinces = PROVINCES;
   protected readonly submitError = signal<string | null>(null);
   private readonly saved = signal(false);

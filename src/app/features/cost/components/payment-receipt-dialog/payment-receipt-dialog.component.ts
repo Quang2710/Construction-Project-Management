@@ -1,40 +1,47 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
 import { VndPipe } from '../../../../shared/pipes/vnd.pipe';
 import { PaymentMilestone } from '../../models/cost.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 /** Ghi nhận chủ đầu tư đã thanh toán một đợt. Trả về số tiền thực nhận, hoặc undefined nếu huỷ. */
 @Component({
   selector: 'app-payment-receipt-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, VndPipe],
+  imports: [
+    ReactiveFormsModule,
+    VndPipe,
+    ButtonModule,
+    ...FIELD,
+    InputTextModule,
+    DialogCloseDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Ghi nhận thanh toán</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Ghi nhận thanh toán</h2>
+    <div dialogContent>
       <p class="subtitle">Đợt {{ payment.order }} · {{ payment.name }}</p>
       <p class="meta">Giá trị đợt: <strong>{{ payment.amount | vnd }}</strong></p>
-      <mat-form-field class="field">
-        <mat-label>Số tiền thực nhận</mat-label>
-        <input matInput type="number" min="0" [max]="payment.amount" step="1000000" [formControl]="amount" cdkFocusInitial />
-        <span matTextSuffix>₫</span>
-        <mat-hint>Có thể thấp hơn giá trị đợt nếu chủ đầu tư giữ lại bảo hành / tạm ứng</mat-hint>
+      <app-field class="field">
+        <label fieldLabel>Số tiền thực nhận</label>
+        <input pInputText type="number" min="0" [max]="payment.amount" step="1000000" [formControl]="amount" />
+        <span fieldSuffix>₫</span>
+        <small fieldHint>Có thể thấp hơn giá trị đợt nếu chủ đầu tư giữ lại bảo hành / tạm ứng</small>
         @if (amount.hasError('required')) {
-          <mat-error>Vui lòng nhập số tiền thực nhận.</mat-error>
+          <app-error>Vui lòng nhập số tiền thực nhận.</app-error>
         } @else if (amount.hasError('min')) {
-          <mat-error>Số tiền phải lớn hơn 0.</mat-error>
+          <app-error>Số tiền phải lớn hơn 0.</app-error>
         } @else if (amount.hasError('max')) {
-          <mat-error>Không được vượt giá trị đợt thanh toán.</mat-error>
+          <app-error>Không được vượt giá trị đợt thanh toán.</app-error>
         }
-      </mat-form-field>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="button" (click)="confirm()">Xác nhận đã thu</button>
-    </mat-dialog-actions>
+      </app-field>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="button" (click)="confirm()">Xác nhận đã thu</button>
+    </div>
   `,
   styles: `
     .subtitle {
@@ -43,7 +50,7 @@ import { PaymentMilestone } from '../../models/cost.model';
     }
     .meta {
       margin: 0 0 16px;
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--app-on-surface-variant);
     }
     .field {
       width: 100%;
@@ -52,8 +59,8 @@ import { PaymentMilestone } from '../../models/cost.model';
   `,
 })
 export class PaymentReceiptDialogComponent {
-  protected readonly payment = inject<PaymentMilestone>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<PaymentReceiptDialogComponent, number>>(MatDialogRef);
+  protected readonly payment = injectDialogData<PaymentMilestone>();
+  private readonly dialogRef = injectDialogRef<number>();
 
   protected readonly amount = new FormControl<number | null>(this.payment.amount, [
     Validators.required,

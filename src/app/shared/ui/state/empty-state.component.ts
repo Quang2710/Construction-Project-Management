@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-empty-state',
-  imports: [MatIconModule],
+  imports: [
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <mat-icon class="icon">{{ icon() }}</mat-icon>
+    <app-icon class="icon">{{ icon() }}</app-icon>
     <p class="title">{{ title() }}</p>
     @if (message()) {
       <p class="message">{{ message() }}</p>

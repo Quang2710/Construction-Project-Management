@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { AppDialog } from '../../../../shared/ui/dialog/app-dialog.service';
 import { firstValueFrom } from 'rxjs';
 import { ConfirmDialogService } from '../../../../shared/ui/confirm-dialog/confirm-dialog.service';
 import { formatVnd } from '../../../../shared/utils/currency.utils';
@@ -19,7 +19,7 @@ const DIALOG_SIZE = { width: '600px', maxWidth: 'calc(100vw - 24px)' };
 /** Mở các dialog nghiệp vụ chi phí; được cung cấp ở cấp trang Chi phí (cùng CostStore). */
 @Injectable()
 export class CostDialogsService {
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly store = inject(CostStore);
 

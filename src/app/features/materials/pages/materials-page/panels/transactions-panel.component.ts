@@ -1,43 +1,46 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { MatButtonToggleChange, MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { FormsModule } from '@angular/forms';
+import { SelectButtonChangeEvent, SelectButtonModule } from 'primeng/selectbutton';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
 import { ErrorStateComponent } from '../../../../../shared/ui/state/error-state.component';
 import { MaterialsStore } from '../../../data-access/materials.store';
 import { STOCK_TRANSACTION_LABELS, StockTransactionType } from '../../../models/material.model';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { MutablePipe } from '../../../../../shared/pipes/mutable.pipe';
 
 @Component({
   selector: 'app-transactions-panel',
   imports: [
+    MutablePipe,
+    FormsModule,
     DatePipe,
     DecimalPipe,
-    MatButtonToggleModule,
-    MatIconModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
+    SelectButtonModule,
+    PaginatorModule,
     EmptyStateComponent,
     ErrorStateComponent,
+    IconComponent,
+    ProgressBarModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toolbar">
-      <mat-button-toggle-group
-        hideSingleSelectionIndicator
-        aria-label="Loại phiếu"
-        [value]="store.transactionsType() ?? 'ALL'"
-        (change)="onType($event)"
-      >
-        <mat-button-toggle value="ALL">Tất cả</mat-button-toggle>
-        <mat-button-toggle value="IN">Nhập kho</mat-button-toggle>
-        <mat-button-toggle value="OUT">Xuất kho</mat-button-toggle>
-      </mat-button-toggle-group>
+      <p-selectbutton class="app-chips"
+        [options]="typeOptions | mutable"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"
+        [ngModel]="store.transactionsType() ?? 'ALL'"
+        (onChange)="onType($event)"
+        [attr.aria-label]="'Loại phiếu'"
+      />
     </div>
 
     @if (store.transactionsLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.transactionsError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadTransactions()" />
@@ -60,7 +63,7 @@ import { STOCK_TRANSACTION_LABELS, StockTransactionType } from '../../../models/
               <tr>
                 <td>
                   <span class="type" [class]="tx.type === 'IN' ? 'type--in' : 'type--out'">
-                    <mat-icon>{{ tx.type === 'IN' ? 'south' : 'north' }}</mat-icon>{{ labels[tx.type] }}
+                    <app-icon>{{ tx.type === 'IN' ? 'south' : 'north' }}</app-icon>{{ labels[tx.type] }}
                   </span>
                   <div class="sub">{{ tx.code }} · {{ tx.createdAt | date: 'HH:mm dd/MM/yyyy' }}</div>
                 </td>
@@ -76,18 +79,17 @@ import { STOCK_TRANSACTION_LABELS, StockTransactionType } from '../../../models/
           </tbody>
         </table>
       </div>
-      <mat-paginator
-        [length]="store.transactionsTotal()"
-        [pageIndex]="store.transactionsPage() - 1"
-        [pageSize]="store.pageSize()"
-        [hidePageSize]="true"
-        (page)="onPage($event)"
-      />
+      <p-paginator [totalRecords]="store.transactionsTotal()" [first]="(store.transactionsPage() - 1) * store.pageSize()" [rows]="store.pageSize()" [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} / {totalRecords}" (onPageChange)="onPage($event)" />
     }
   `,
   styleUrl: './panels.scss',
 })
 export class TransactionsPanelComponent implements OnInit {
+  protected readonly typeOptions = [
+    { label: 'Tất cả', value: 'ALL' },
+    { label: 'Nhập kho', value: 'IN' },
+    { label: 'Xuất kho', value: 'OUT' },
+  ] as const;
   protected readonly store = inject(MaterialsStore);
   protected readonly labels = STOCK_TRANSACTION_LABELS;
 
@@ -95,12 +97,12 @@ export class TransactionsPanelComponent implements OnInit {
     void this.store.loadTransactions();
   }
 
-  protected onType(event: MatButtonToggleChange): void {
+  protected onType(event: SelectButtonChangeEvent): void {
     const value: unknown = event.value;
     void this.store.setTransactionsFilter(value === 'IN' || value === 'OUT' ? (value as StockTransactionType) : null);
   }
 
-  protected onPage(event: PageEvent): void {
-    void this.store.setTransactionsFilter(this.store.transactionsType(), event.pageIndex + 1);
+  protected onPage(event: PaginatorState): void {
+    void this.store.setTransactionsFilter(this.store.transactionsType(), (event.page ?? 0) + 1);
   }
 }

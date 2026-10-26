@@ -1,14 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleChange, MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { BreadcrumbService } from '../../../../core/layout/breadcrumb/breadcrumb.service';
@@ -27,24 +19,37 @@ import {
   ChecklistItemInput,
   INSPECTION_ACTION_LABELS,
 } from '../../models/quality.model';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { DatePickerModule } from 'primeng/datepicker';
+import { SelectButtonChangeEvent, SelectButtonModule } from 'primeng/selectbutton';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
+import { PrimeTemplate } from 'primeng/api';
 
 @Component({
   selector: 'app-inspection-page',
   imports: [
+    PrimeTemplate,
+    MutablePipe,
     DatePipe,
     ReactiveFormsModule,
     RouterLink,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatProgressBarModule,
-    MatTooltipModule,
+    FormsModule,
+    SelectButtonModule,
     ErrorStateComponent,
     ApprovalTimelineComponent,
     QualityStatusChipComponent,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressBarModule,
+    ...FIELD,
+    InputTextModule,
+    DatePickerModule,
   ],
   providers: [InspectionDetailStore],
   templateUrl: './inspection-page.component.html',
@@ -63,6 +68,11 @@ export class InspectionPageComponent implements HasUnsavedChanges {
   readonly id = input.required<string>();
 
   protected readonly resultLabels = CHECK_RESULT_LABELS;
+  protected readonly resultOptions: readonly { label: string; value: CheckResult; icon: string | null }[] = [
+    { label: 'Đạt', value: 'PASS', icon: 'check' },
+    { label: 'Không đạt', value: 'FAIL', icon: 'close' },
+    { label: 'N/A', value: 'NA', icon: null },
+  ];
   protected readonly actionLabels = INSPECTION_ACTION_LABELS;
 
   protected readonly header = new FormGroup({
@@ -131,7 +141,7 @@ export class InspectionPageComponent implements HasUnsavedChanges {
     void this.store.load(this.id());
   }
 
-  protected onResult(index: number, event: MatButtonToggleChange): void {
+  protected onResult(index: number, event: SelectButtonChangeEvent): void {
     const value: unknown = event.value;
     this.store.setResult(index, value === 'PASS' || value === 'FAIL' || value === 'NA' ? (value as CheckResult) : null);
   }

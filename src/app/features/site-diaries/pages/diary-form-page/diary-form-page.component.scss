@@ -11,15 +11,15 @@
   gap: 8px;
   padding: 12px 16px;
   border-radius: 12px;
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  background: var(--app-error-container);
+  color: var(--app-on-error-container);
 }
 
 .section {
   padding: 16px 20px 12px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface);
 }
 
 .section__title {
@@ -27,10 +27,10 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 16px;
-  font: var(--mat-sys-title-medium);
+  font: var(--app-title-medium);
 
-  mat-icon {
-    color: var(--mat-sys-primary);
+  app-icon {
+    color: var(--app-primary);
   }
 }
 
@@ -38,9 +38,9 @@
   margin-left: auto;
   padding: 2px 10px;
   border-radius: 999px;
-  background: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
-  font: var(--mat-sys-label-medium);
+  background: var(--app-secondary-container);
+  color: var(--app-on-secondary-container);
+  font: var(--app-label-medium);
 }
 
 .grid {
@@ -88,12 +88,12 @@
   margin-bottom: 12px;
   padding: 12px 12px 4px;
   border-radius: 12px;
-  background: var(--mat-sys-surface-container-low);
+  background: var(--app-surface-container-low);
 }
 
 .empty {
   margin: 0 0 8px;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 .safe {
@@ -101,19 +101,19 @@
   align-items: center;
   gap: 8px;
 
-  mat-icon {
+  app-icon {
     color: var(--app-success);
   }
 }
 
 .danger {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .field-error {
   margin: 8px 0 0;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-error);
+  font: var(--app-body-small);
+  color: var(--app-error);
 }
 
 .actions {
@@ -125,7 +125,7 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 12px 0 16px;
-  background: var(--mat-sys-surface);
+  background: var(--app-surface);
 }
 
 @media (max-width: 719.98px) {

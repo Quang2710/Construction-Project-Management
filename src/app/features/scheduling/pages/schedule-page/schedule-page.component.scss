@@ -16,7 +16,7 @@
   flex-wrap: wrap;
   gap: 8px 20px;
   margin-bottom: 8px;
-  font: var(--mat-sys-body-medium);
+  font: var(--app-body-medium);
 }
 
 .summary__item {
@@ -24,21 +24,21 @@
   align-items: center;
   gap: 6px;
 
-  mat-icon {
+  app-icon {
     width: 18px;
     height: 18px;
     font-size: 18px;
-    color: var(--mat-sys-on-surface-variant);
+    color: var(--app-on-surface-variant);
   }
 }
 
 .summary__item--warn,
-.summary__item--warn mat-icon {
+.summary__item--warn app-icon {
   color: var(--app-warning);
 }
 
 .late {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
   font-weight: 600;
 }
 
@@ -47,8 +47,8 @@
   flex-wrap: wrap;
   gap: 6px 16px;
   margin-bottom: 12px;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 
   span {
     display: inline-flex;
@@ -68,22 +68,22 @@
   width: 10px;
   height: 10px;
   border-radius: 2px;
-  background: var(--mat-sys-on-surface);
+  background: var(--app-on-surface);
   transform: rotate(45deg);
 }
 
 .swatch--range {
   height: 4px;
   border-radius: 0;
-  background: var(--mat-sys-on-surface-variant);
+  background: var(--app-on-surface-variant);
 }
 
 .gantt-wrapper {
   height: calc(100dvh - 330px);
   min-height: 420px;
   overflow: hidden;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
 
   ngx-gantt {
     display: block;
@@ -109,13 +109,13 @@
   cursor: pointer;
 
   &:hover .cell-task__title {
-    color: var(--mat-sys-primary);
+    color: var(--app-primary);
     text-decoration: underline;
   }
 }
 
 .cell-task--critical .cell-task__title {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .cell-task__icon {
@@ -137,7 +137,7 @@
   width: 14px;
   height: 14px;
   margin-top: -7px;
-  border: 2px solid var(--mat-sys-surface);
+  border: 2px solid var(--app-surface);
   border-radius: 2px;
   transform: rotate(45deg);
 }
@@ -147,10 +147,10 @@
   align-items: center;
   gap: 6px;
   margin: 8px 0 0;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 
-  mat-icon {
+  app-icon {
     width: 16px;
     height: 16px;
     font-size: 16px;

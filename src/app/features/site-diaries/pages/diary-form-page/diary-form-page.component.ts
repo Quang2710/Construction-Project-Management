@@ -10,15 +10,6 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
 import { HasUnsavedChanges } from '../../../../core/guards/unsaved-changes.guard';
 import { NotificationService } from '../../../../core/notifications/notification.service';
@@ -46,6 +37,19 @@ import {
   WEATHER_LABELS,
   WeatherCondition,
 } from '../../models/site-diary.model';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { toOptions } from '../../../../shared/utils/options';
+import { maxDateValidator } from '../../../../shared/utils/date-validators';
+import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 interface LaborForm {
   crew: FormControl<string>;
@@ -141,21 +145,23 @@ function filterSuggestions(options: readonly string[], query: string): readonly 
 @Component({
   selector: 'app-diary-form-page',
   imports: [
+    MutablePipe,
     ReactiveFormsModule,
     RouterLink,
-    MatAutocompleteModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
+    AutoCompleteModule,
     PageHeaderComponent,
     EmptyStateComponent,
     ErrorStateComponent,
     PhotoUploaderComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    ...FIELD,
+    InputTextModule,
+    TextareaModule,
+    SelectModule,
+    DatePickerModule,
   ],
   providers: [DiaryFormStore],
   templateUrl: './diary-form-page.component.html',
@@ -175,10 +181,13 @@ export class DiaryFormPageComponent implements HasUnsavedChanges {
 
   protected readonly weatherOptions = WEATHER_CONDITIONS;
   protected readonly weatherLabels = WEATHER_LABELS;
+  protected readonly weatherSelectOptions = toOptions(this.weatherOptions, this.weatherLabels);
   protected readonly incidentTypes = INCIDENT_TYPES;
   protected readonly incidentTypeLabels = INCIDENT_TYPE_LABELS;
+  protected readonly incidentTypeOptions = toOptions(this.incidentTypes, this.incidentTypeLabels);
   protected readonly severities = INCIDENT_SEVERITIES;
   protected readonly severityLabels = INCIDENT_SEVERITY_LABELS;
+  protected readonly severityOptions = toOptions(this.severities, this.severityLabels);
   protected readonly unitOptions = UNIT_SUGGESTIONS;
   protected readonly maxPhotos = MAX_PHOTOS;
   protected readonly today = new Date();
@@ -188,7 +197,7 @@ export class DiaryFormPageComponent implements HasUnsavedChanges {
 
   protected readonly form = new FormGroup<DiaryForm>({
     projectId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    date: new FormControl<Date | null>(new Date(), [Validators.required]),
+    date: new FormControl<Date | null>(new Date(), [Validators.required, maxDateValidator(this.today)]),
     morning: new FormControl<WeatherCondition>('SUNNY', { nonNullable: true }),
     afternoon: new FormControl<WeatherCondition>('SUNNY', { nonNullable: true }),
     minTemp: new FormControl<number | null>(null, [Validators.min(-10), Validators.max(50)]),
@@ -249,12 +258,15 @@ export class DiaryFormPageComponent implements HasUnsavedChanges {
     return !this.saved() && (this.form.dirty || this.photosTouched());
   }
 
-  protected crewOptions(index: number): readonly string[] {
-    return filterSuggestions(CREW_SUGGESTIONS, this.form.controls.labor.at(index)?.controls.crew.value ?? '');
+  /** Gợi ý cho ô đang mở (mỗi lúc chỉ một dropdown gợi ý hiển thị). */
+  protected readonly suggestions = signal<string[]>([]);
+
+  protected suggestCrew(event: AutoCompleteCompleteEvent): void {
+    this.suggestions.set([...filterSuggestions(CREW_SUGGESTIONS, event.query)]);
   }
 
-  protected equipmentOptions(index: number): readonly string[] {
-    return filterSuggestions(EQUIPMENT_SUGGESTIONS, this.form.controls.equipment.at(index)?.controls.name.value ?? '');
+  protected suggestEquipment(event: AutoCompleteCompleteEvent): void {
+    this.suggestions.set([...filterSuggestions(EQUIPMENT_SUGGESTIONS, event.query)]);
   }
 
   protected addLabor(): void {

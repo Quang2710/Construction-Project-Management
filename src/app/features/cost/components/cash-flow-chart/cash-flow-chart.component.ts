@@ -9,7 +9,9 @@ import { CostMonthPoint } from '../../models/cost.model';
 /** Cột theo tháng: chi phí phát sinh vs tiền chủ đầu tư thanh toán (12 tháng gần nhất). */
 @Component({
   selector: 'app-cash-flow-chart',
-  imports: [BaseChartDirective],
+  imports: [
+    BaseChartDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="chart">

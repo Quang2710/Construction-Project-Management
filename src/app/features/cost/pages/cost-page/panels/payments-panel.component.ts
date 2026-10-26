@@ -1,38 +1,38 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { VndPipe } from '../../../../../shared/pipes/vnd.pipe';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
 import { ErrorStateComponent } from '../../../../../shared/ui/state/error-state.component';
 import { CostStatusChipComponent } from '../../../components/cost-status-chip/cost-status-chip.component';
 import { CostStore } from '../../../data-access/cost.store';
 import { CostDialogsService } from '../cost-dialogs.service';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-payments-panel',
   imports: [
     DatePipe,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
     VndPipe,
     EmptyStateComponent,
     ErrorStateComponent,
     CostStatusChipComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (store.overduePayments().length) {
       <div class="alert" role="status">
-        <mat-icon>schedule</mat-icon>
+        <app-icon>schedule</app-icon>
         <span>{{ store.overduePayments().length }} đợt đã đề nghị thanh toán nhưng quá hạn chưa thu tiền.</span>
       </div>
     }
 
     @if (store.paymentsLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.paymentsError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadPayments()" />
@@ -76,12 +76,12 @@ import { CostDialogsService } from '../cost-dialogs.service';
                   <td class="actions">
                     @switch (payment.status) {
                       @case ('PLANNED') {
-                        <button mat-stroked-button type="button" [disabled]="store.busy()" (click)="dialogs.invoice(payment)">
+                        <button pButton outlined type="button" [disabled]="store.busy()" (click)="dialogs.invoice(payment)">
                           Đề nghị TT
                         </button>
                       }
                       @case ('INVOICED') {
-                        <button mat-flat-button type="button" [disabled]="store.busy()" (click)="dialogs.receive(payment)">
+                        <button pButton type="button" [disabled]="store.busy()" (click)="dialogs.receive(payment)">
                           Ghi nhận thu
                         </button>
                       }

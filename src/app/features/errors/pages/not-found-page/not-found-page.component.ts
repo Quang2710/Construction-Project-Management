@@ -1,11 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-not-found-page',
-  imports: [RouterLink, MatButtonModule, MatIconModule],
+  imports: [
+    RouterLink,
+    ButtonModule,
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="error error--fullscreen">
@@ -13,8 +17,8 @@ import { RouterLink } from '@angular/router';
       <h1 class="error__title">Không tìm thấy trang</h1>
       <p class="error__message">Đường dẫn bạn truy cập không tồn tại hoặc đã bị thay đổi.</p>
       <div class="error__actions">
-        <a mat-flat-button routerLink="/">
-          <mat-icon>home</mat-icon>
+        <a pButton routerLink="/">
+          <app-icon>home</app-icon>
           Về trang chủ
         </a>
       </div>

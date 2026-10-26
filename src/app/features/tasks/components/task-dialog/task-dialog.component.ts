@@ -1,4 +1,3 @@
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -10,18 +9,6 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSliderModule } from '@angular/material/slider';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { PERMISSIONS } from '../../../../core/auth/permissions';
@@ -43,6 +30,20 @@ import {
   TaskStatus,
 } from '../../models/task.model';
 import { isTaskOverdue } from '../../utils/task.utils';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { toOptions } from '../../../../shared/utils/options';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ChipModule } from 'primeng/chip';
+import { SliderModule } from 'primeng/slider';
 
 export interface TaskDialogData {
   readonly task: Task | null;
@@ -82,21 +83,22 @@ const dueAfterStart: ValidatorFn = (control: AbstractControl<Date | null>): Vali
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatCheckboxModule,
-    MatSliderModule,
-    MatChipsModule,
-    MatAutocompleteModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
+    AutoCompleteModule,
+    CheckboxModule,
+    ChipModule,
+    SliderModule,
     UserAvatarComponent,
     RelativeTimePipe,
     RoleLabelPipe,
+    ButtonModule,
+    IconComponent,
+    ProgressSpinnerModule,
+    ...FIELD,
+    InputTextModule,
+    TextareaModule,
+    DialogCloseDirective,
+    SelectModule,
+    DatePickerModule,
   ],
   providers: [TaskDialogStore],
   templateUrl: './task-dialog.component.html',
@@ -104,8 +106,8 @@ const dueAfterStart: ValidatorFn = (control: AbstractControl<Date | null>): Vali
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskDialogComponent {
-  private readonly data = inject<TaskDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<TaskDialogComponent, TaskDialogResult>>(MatDialogRef);
+  private readonly data = injectDialogData<TaskDialogData>();
+  private readonly dialogRef = injectDialogRef<TaskDialogResult>();
   private readonly auth = inject(AuthStore);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly notification = inject(NotificationService);
@@ -113,9 +115,10 @@ export class TaskDialogComponent {
 
   protected readonly statuses = TASK_STATUSES;
   protected readonly statusLabels = TASK_STATUS_LABELS;
+  protected readonly statusOptions = toOptions(this.statuses, this.statusLabels);
   protected readonly priorities = TASK_PRIORITIES;
   protected readonly priorityLabels = TASK_PRIORITY_LABELS;
-  protected readonly separatorKeys = [ENTER, COMMA] as const;
+  protected readonly priorityOptions = toOptions(this.priorities, this.priorityLabels);
 
   protected readonly canEdit = computed(() => this.auth.hasAnyRole(PERMISSIONS.editTasks));
   protected readonly canDelete = computed(() => this.auth.hasAnyRole(PERMISSIONS.deleteTasks));
@@ -158,7 +161,8 @@ export class TaskDialogComponent {
   private readonly labels = toSignal(this.form.controls.labels.valueChanges, {
     initialValue: this.form.controls.labels.value,
   });
-  private readonly labelQuery = toSignal(this.labelInput.valueChanges, { initialValue: '' });
+  /** Từ khoá người dùng gõ trong ô nhãn (AutoComplete báo qua completeMethod). */
+  protected readonly labelQuery = signal('');
   protected readonly labelSuggestions = computed(() => {
     const chosen = new Set(this.labels());
     const query = this.labelQuery().trim().toLowerCase();
@@ -222,17 +226,18 @@ export class TaskDialogComponent {
     return task ? { kind: 'saved', task } : undefined;
   }
 
-  protected formatPercent(value: number): string {
-    return `${value}%`;
+  /** Enter hoặc dấu phẩy: thêm nhãn đang gõ (cho phép nhãn mới ngoài gợi ý). */
+  protected onLabelKey(event: KeyboardEvent): void {
+    if (event.key !== 'Enter' && event.key !== ',') {
+      return;
+    }
+    event.preventDefault();
+    this.pushLabel(this.labelInput.value);
+    this.labelInput.setValue('');
   }
 
-  protected addLabel(event: MatChipInputEvent): void {
-    this.pushLabel(event.value);
-    event.chipInput.clear();
-  }
-
-  protected selectLabel(event: MatAutocompleteSelectedEvent): void {
-    this.pushLabel(String(event.option.value));
+  protected selectLabel(label: unknown): void {
+    this.pushLabel(String(label));
     this.labelInput.setValue('');
   }
 

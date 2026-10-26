@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { TASK_PRIORITY_LABELS, TaskPriority } from '../../models/task.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 const PRIORITY_ICONS: Readonly<Record<TaskPriority, string>> = {
   LOW: 'keyboard_arrow_down',
@@ -11,10 +11,12 @@ const PRIORITY_ICONS: Readonly<Record<TaskPriority, string>> = {
 
 @Component({
   selector: 'app-task-priority-badge',
-  imports: [MatIconModule],
+  imports: [
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': '"badge badge--" + priority().toLowerCase()', '[attr.title]': '"Ưu tiên: " + label()' },
-  template: `<mat-icon>{{ icon() }}</mat-icon><span>{{ label() }}</span>`,
+  template: `<app-icon>{{ icon() }}</app-icon><span>{{ label() }}</span>`,
   styles: `
     :host {
       display: inline-flex;
@@ -22,29 +24,29 @@ const PRIORITY_ICONS: Readonly<Record<TaskPriority, string>> = {
       gap: 2px;
       padding: 1px 8px 1px 4px;
       border-radius: 999px;
-      font: var(--mat-sys-label-small);
+      font: var(--app-label-small);
       white-space: nowrap;
     }
-    mat-icon {
+    app-icon {
       width: 16px;
       height: 16px;
       font-size: 16px;
     }
     :host(.badge--low) {
-      background: var(--mat-sys-surface-container-highest);
-      color: var(--mat-sys-on-surface-variant);
+      background: var(--app-surface-container-highest);
+      color: var(--app-on-surface-variant);
     }
     :host(.badge--medium) {
-      background: var(--mat-sys-secondary-container);
-      color: var(--mat-sys-on-secondary-container);
+      background: var(--app-secondary-container);
+      color: var(--app-on-secondary-container);
     }
     :host(.badge--high) {
       background: var(--app-warning-container);
       color: var(--app-on-warning-container);
     }
     :host(.badge--urgent) {
-      background: var(--mat-sys-error-container);
-      color: var(--mat-sys-on-error-container);
+      background: var(--app-error-container);
+      color: var(--app-on-error-container);
     }
   `,
 })

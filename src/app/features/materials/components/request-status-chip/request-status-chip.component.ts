@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { MATERIAL_REQUEST_STATUS_LABELS, MaterialRequestStatus } from '../../models/material.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 const ICONS: Readonly<Record<MaterialRequestStatus, string>> = {
   PENDING: 'hourglass_top',
@@ -11,10 +11,12 @@ const ICONS: Readonly<Record<MaterialRequestStatus, string>> = {
 
 @Component({
   selector: 'app-request-status-chip',
-  imports: [MatIconModule],
+  imports: [
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': '"chip chip--" + status().toLowerCase()' },
-  template: `<mat-icon>{{ icon() }}</mat-icon><span>{{ label() }}</span>`,
+  template: `<app-icon>{{ icon() }}</app-icon><span>{{ label() }}</span>`,
   styles: `
     :host {
       display: inline-flex;
@@ -22,17 +24,17 @@ const ICONS: Readonly<Record<MaterialRequestStatus, string>> = {
       gap: 4px;
       padding: 2px 10px 2px 6px;
       border-radius: 999px;
-      font: var(--mat-sys-label-medium);
+      font: var(--app-label-medium);
       white-space: nowrap;
     }
-    mat-icon {
+    app-icon {
       width: 16px;
       height: 16px;
       font-size: 16px;
     }
     :host(.chip--pending) {
-      background: var(--mat-sys-tertiary-container);
-      color: var(--mat-sys-on-tertiary-container);
+      background: var(--app-tertiary-container);
+      color: var(--app-on-tertiary-container);
     }
     :host(.chip--approved) {
       background: var(--app-warning-container);
@@ -43,8 +45,8 @@ const ICONS: Readonly<Record<MaterialRequestStatus, string>> = {
       color: var(--app-on-success-container);
     }
     :host(.chip--rejected) {
-      background: var(--mat-sys-error-container);
-      color: var(--mat-sys-on-error-container);
+      background: var(--app-error-container);
+      color: var(--app-on-error-container);
     }
   `,
 })

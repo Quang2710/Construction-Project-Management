@@ -48,9 +48,9 @@ function escapeHtml(value: string): string {
     :host {
       display: block;
       height: 320px;
-      border-radius: var(--mat-sys-corner-medium);
+      border-radius: var(--app-corner-medium);
       overflow: hidden;
-      border: 1px solid var(--mat-sys-outline-variant);
+      border: 1px solid var(--app-outline-variant);
     }
     .map {
       width: 100%;

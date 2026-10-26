@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { ApprovalStep, InspectionStatus } from '../../models/quality.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 type StepState = 'approved' | 'rejected' | 'current' | 'waiting';
 
@@ -20,13 +20,16 @@ const ICONS: Readonly<Record<StepState, string>> = {
 /** Các cấp duyệt của phiếu nghiệm thu: đã duyệt / trả lại / đang chờ / chưa tới. */
 @Component({
   selector: 'app-approval-timeline',
-  imports: [DatePipe, MatIconModule],
+  imports: [
+    DatePipe,
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ol class="steps">
       @for (step of steps(); track step.level) {
         <li class="step" [class]="'step step--' + step.state">
-          <mat-icon class="step__icon">{{ step.icon }}</mat-icon>
+          <app-icon class="step__icon">{{ step.icon }}</app-icon>
           <div class="step__body">
             <p class="step__title">Cấp {{ step.level }} · {{ step.label }}</p>
             @if (step.by && step.at) {
@@ -66,30 +69,30 @@ const ICONS: Readonly<Record<StepState, string>> = {
       bottom: 0;
       left: 11px;
       width: 2px;
-      background: var(--mat-sys-outline-variant);
+      background: var(--app-outline-variant);
     }
     .step__icon {
       flex: none;
-      color: var(--mat-sys-outline);
+      color: var(--app-outline);
     }
     .step--approved .step__icon {
       color: var(--app-success);
     }
     .step--rejected .step__icon {
-      color: var(--mat-sys-error);
+      color: var(--app-error);
     }
     .step--current .step__icon {
-      color: var(--mat-sys-tertiary);
+      color: var(--app-tertiary);
     }
     .step__title {
       margin: 0;
-      font: var(--mat-sys-title-small);
+      font: var(--app-title-small);
     }
     .step__meta,
     .step__note {
       margin: 2px 0 0;
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-on-surface-variant);
+      font: var(--app-body-small);
+      color: var(--app-on-surface-variant);
     }
     .step__note {
       font-style: italic;

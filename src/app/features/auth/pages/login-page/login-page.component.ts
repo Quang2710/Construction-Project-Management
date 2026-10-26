@@ -1,11 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { InputTextModule } from 'primeng/inputtext';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { APP_NAME } from '../../../../core/config/app-title.strategy';
 import { DEMO_ACCOUNTS, DemoAccount } from '../../../../core/config/demo-accounts';
@@ -13,6 +11,8 @@ import { DemoDataService } from '../../../../core/demo/demo-data.service';
 import { NotificationService } from '../../../../core/notifications/notification.service';
 import { RoleLabelPipe } from '../../../../shared/pipes/role-label.pipe';
 import { ConfirmDialogService } from '../../../../shared/ui/confirm-dialog/confirm-dialog.service';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 interface LoginForm {
   email: FormControl<string>;
@@ -35,12 +35,12 @@ function safeReturnUrl(url: string | undefined): string {
   selector: 'app-login-page',
   imports: [
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
     RoleLabelPipe,
+    ButtonModule,
+    IconComponent,
+    ProgressSpinnerModule,
+    ...FIELD,
+    InputTextModule,
   ],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',

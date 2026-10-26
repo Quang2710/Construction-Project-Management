@@ -1,15 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { TooltipModule } from 'primeng/tooltip';
 import { AuthStore } from '../../auth/auth.store';
 import { APP_NAME } from '../../config/app-title.strategy';
 import { filterNavSections, NAV_SECTIONS } from '../navigation';
+import { IconComponent } from '../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, RouterLinkActive, MatListModule, MatIconModule, MatTooltipModule],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    IconComponent,
+    TooltipModule,
+  ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,28 +1,28 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { VndPipe } from '../../../../../shared/pipes/vnd.pipe';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
 import { ErrorStateComponent } from '../../../../../shared/ui/state/error-state.component';
 import { CostStatusChipComponent } from '../../../components/cost-status-chip/cost-status-chip.component';
 import { CostStore } from '../../../data-access/cost.store';
 import { CostDialogsService } from '../cost-dialogs.service';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-change-orders-panel',
   imports: [
     DatePipe,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatTooltipModule,
     VndPipe,
     EmptyStateComponent,
     ErrorStateComponent,
     CostStatusChipComponent,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressBarModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -35,14 +35,14 @@ import { CostDialogsService } from '../cost-dialogs.service';
       </span>
       <span class="toolbar__spacer"></span>
       @if (store.canManage()) {
-        <button mat-flat-button type="button" [disabled]="!store.costItems().length" (click)="dialogs.proposeChangeOrder()">
-          <mat-icon>add</mat-icon> Đề xuất phát sinh
+        <button pButton type="button" [disabled]="!store.costItems().length" (click)="dialogs.proposeChangeOrder()">
+          <app-icon>add</app-icon> Đề xuất phát sinh
         </button>
       }
     </div>
 
     @if (store.changeOrdersLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.changeOrdersError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadChangeOrders()" />
@@ -83,24 +83,24 @@ import { CostDialogsService } from '../cost-dialogs.service';
                   <td class="actions">
                     @if (order.status === 'PROPOSED') {
                       <button
-                        mat-icon-button
+                        pButton text rounded severity="secondary"
                         type="button"
-                        matTooltip="Chấp thuận"
+                        pTooltip="Chấp thuận" tooltipPosition="bottom"
                         aria-label="Chấp thuận"
                         [disabled]="store.busy()"
                         (click)="dialogs.decide(order, 'approve')"
                       >
-                        <mat-icon>check</mat-icon>
+                        <app-icon pButtonIcon>check</app-icon>
                       </button>
                       <button
-                        mat-icon-button
+                        pButton text rounded severity="secondary"
                         type="button"
-                        matTooltip="Không chấp thuận"
+                        pTooltip="Không chấp thuận" tooltipPosition="bottom"
                         aria-label="Không chấp thuận"
                         [disabled]="store.busy()"
                         (click)="dialogs.decide(order, 'reject')"
                       >
-                        <mat-icon>close</mat-icon>
+                        <app-icon pButtonIcon>close</app-icon>
                       </button>
                     }
                   </td>

@@ -14,8 +14,8 @@ import { getInitials } from '../../utils/string.utils';
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      background: var(--mat-sys-primary-container);
-      color: var(--mat-sys-on-primary-container);
+      background: var(--app-primary-container);
+      color: var(--app-on-primary-container);
       font-weight: 600;
       user-select: none;
     }

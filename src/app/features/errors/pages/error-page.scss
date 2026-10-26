@@ -16,7 +16,7 @@
 
 .error--fullscreen {
   min-height: 100dvh;
-  background: var(--mat-sys-surface);
+  background: var(--app-surface);
 }
 
 .error__code {
@@ -24,18 +24,18 @@
   font-size: clamp(72px, 18vw, 128px);
   font-weight: 800;
   line-height: 1;
-  color: var(--mat-sys-primary);
+  color: var(--app-primary);
 }
 
 .error__title {
   margin: 8px 0 0;
-  font: var(--mat-sys-headline-small);
+  font: var(--app-headline-small);
 }
 
 .error__message {
   max-width: 480px;
   margin: 0 0 16px;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 .error__actions {

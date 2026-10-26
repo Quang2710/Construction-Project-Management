@@ -1,16 +1,23 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { InputTextModule } from 'primeng/inputtext';
 import { PhotoDraft } from '../../data-access/diary-form.store';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 /** Chọn/chụp ảnh hiện trường, xem trước, chú thích; trạng thái tải lên do store quản lý. */
 @Component({
   selector: 'app-photo-uploader',
-  imports: [MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatProgressSpinnerModule, MatTooltipModule],
+  imports: [
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressSpinnerModule,
+    ...FIELD,
+    InputTextModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './photo-uploader.component.html',
   styleUrl: './photo-uploader.component.scss',

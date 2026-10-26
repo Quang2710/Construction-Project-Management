@@ -10,11 +10,11 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { closePdf, fitWidthScale, openPdf, PdfDocument, renderPage } from '../../utils/pdf-renderer';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 const ZOOM_STEP = 1.25;
 const MIN_SCALE = 0.2;
@@ -23,25 +23,30 @@ const MAX_SCALE = 6;
 /** Xem PDF trực tiếp bằng pdf.js: chuyển trang, phóng to/thu nhỏ, vừa khung. */
 @Component({
   selector: 'app-pdf-viewer',
-  imports: [MatButtonModule, MatIconModule, MatProgressBarModule, MatTooltipModule],
+  imports: [
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressBarModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toolbar" role="toolbar" aria-label="Điều khiển xem bản vẽ">
-      <button mat-icon-button type="button" aria-label="Trang trước" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
-        <mat-icon>chevron_left</mat-icon>
+      <button pButton text rounded severity="secondary" type="button" aria-label="Trang trước" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        <app-icon pButtonIcon>chevron_left</app-icon>
       </button>
       <span class="toolbar__label">Trang {{ page() }}/{{ pageCount() || '–' }}</span>
-      <button mat-icon-button type="button" aria-label="Trang sau" [disabled]="page() >= pageCount()" (click)="goTo(page() + 1)">
-        <mat-icon>chevron_right</mat-icon>
+      <button pButton text rounded severity="secondary" type="button" aria-label="Trang sau" [disabled]="page() >= pageCount()" (click)="goTo(page() + 1)">
+        <app-icon pButtonIcon>chevron_right</app-icon>
       </button>
       <span class="toolbar__spacer"></span>
-      <button mat-icon-button type="button" aria-label="Thu nhỏ" matTooltip="Thu nhỏ" (click)="zoom(1 / zoomStep)"><mat-icon>zoom_out</mat-icon></button>
+      <button pButton text rounded severity="secondary" type="button" aria-label="Thu nhỏ" pTooltip="Thu nhỏ" tooltipPosition="bottom" (click)="zoom(1 / zoomStep)"><app-icon pButtonIcon>zoom_out</app-icon></button>
       <span class="toolbar__label">{{ percent() }}%</span>
-      <button mat-icon-button type="button" aria-label="Phóng to" matTooltip="Phóng to" (click)="zoom(zoomStep)"><mat-icon>zoom_in</mat-icon></button>
-      <button mat-icon-button type="button" aria-label="Vừa khung" matTooltip="Vừa chiều rộng" (click)="fit()"><mat-icon>fit_screen</mat-icon></button>
+      <button pButton text rounded severity="secondary" type="button" aria-label="Phóng to" pTooltip="Phóng to" tooltipPosition="bottom" (click)="zoom(zoomStep)"><app-icon pButtonIcon>zoom_in</app-icon></button>
+      <button pButton text rounded severity="secondary" type="button" aria-label="Vừa khung" pTooltip="Vừa chiều rộng" tooltipPosition="bottom" (click)="fit()"><app-icon pButtonIcon>fit_screen</app-icon></button>
     </div>
     @if (rendering()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (error()) {
       <p class="error" role="alert">{{ error() }}</p>

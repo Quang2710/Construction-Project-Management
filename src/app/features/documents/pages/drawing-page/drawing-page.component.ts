@@ -1,12 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
+import { AppDialog } from '../../../../shared/ui/dialog/app-dialog.service';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { BreadcrumbService } from '../../../../core/layout/breadcrumb/breadcrumb.service';
@@ -20,22 +14,30 @@ import { PdfCompareComponent } from '../../components/pdf-compare/pdf-compare.co
 import { PdfViewerComponent } from '../../components/pdf-viewer/pdf-viewer.component';
 import { DrawingDetailStore } from '../../data-access/drawing-detail.store';
 import { DISCIPLINE_LABELS, nextRevisionLabel } from '../../models/document.model';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-drawing-page',
   imports: [
+    FormsModule,
     DatePipe,
     DecimalPipe,
     RouterLink,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
     ErrorStateComponent,
     PdfCompareComponent,
     PdfViewerComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    ...FIELD,
+    SelectModule,
   ],
   providers: [DrawingDetailStore],
   templateUrl: './drawing-page.component.html',
@@ -44,7 +46,7 @@ import { DISCIPLINE_LABELS, nextRevisionLabel } from '../../models/document.mode
 })
 export class DrawingPageComponent {
   private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
   private readonly breadcrumbs = inject(BreadcrumbService);
   protected readonly store = inject(DrawingDetailStore);
 

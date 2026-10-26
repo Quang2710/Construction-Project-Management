@@ -20,15 +20,16 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       align-items: flex-end;
       justify-content: space-between;
       gap: 12px 16px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
     .header__title {
       margin: 0;
-      font: var(--mat-sys-headline-small);
+      font: var(--app-headline-small);
+      letter-spacing: -0.02em;
     }
     .header__subtitle {
-      margin: 4px 0 0;
-      color: var(--mat-sys-on-surface-variant);
+      margin: 6px 0 0;
+      color: var(--app-on-surface-variant);
     }
     .header__actions {
       display: flex;

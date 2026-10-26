@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { ButtonModule } from 'primeng/button';
+import { TextareaModule } from 'primeng/textarea';
 import { PhotoPickerComponent } from '../../../../shared/ui/photo-picker/photo-picker.component';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 export interface ResolveResult {
   readonly note: string;
@@ -14,29 +14,36 @@ export interface ResolveResult {
 /** Báo đã khắc phục: bắt buộc ảnh sau khi xử lý để quản lý đối chiếu trước/sau. */
 @Component({
   selector: 'app-resolve-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, PhotoPickerComponent],
+  imports: [
+    ReactiveFormsModule,
+    PhotoPickerComponent,
+    ButtonModule,
+    ...FIELD,
+    TextareaModule,
+    DialogCloseDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Báo đã khắc phục</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Báo đã khắc phục</h2>
+    <div dialogContent>
       <p class="subtitle">{{ title }}</p>
-      <mat-form-field class="field">
-        <mat-label>Nội dung đã xử lý</mat-label>
-        <textarea matInput [formControl]="note" rows="3" maxlength="1000" cdkFocusInitial></textarea>
+      <app-field class="field">
+        <label fieldLabel>Nội dung đã xử lý</label>
+        <textarea pTextarea [formControl]="note" rows="3" maxlength="1000"></textarea>
         @if (note.hasError('required') || note.hasError('pattern')) {
-          <mat-error>Vui lòng mô tả cách đã khắc phục.</mat-error>
+          <app-error>Vui lòng mô tả cách đã khắc phục.</app-error>
         }
-      </mat-form-field>
+      </app-field>
       <h3 class="label">Ảnh sau khắc phục (bắt buộc)</h3>
       <app-photo-picker [max]="10" (filesChange)="onFiles($event)" />
       @if (photoError()) {
         <p class="error" role="alert">Cần ít nhất 1 ảnh sau khi khắc phục.</p>
       }
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="button" (click)="confirm()">Gửi xác nhận</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="button" (click)="confirm()">Gửi xác nhận</button>
+    </div>
   `,
   styles: `
     .subtitle {
@@ -48,18 +55,18 @@ export interface ResolveResult {
     }
     .label {
       margin: 0 0 8px;
-      font: var(--mat-sys-title-small);
+      font: var(--app-title-small);
     }
     .error {
       margin: 8px 0 0;
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-error);
+      font: var(--app-body-small);
+      color: var(--app-error);
     }
   `,
 })
 export class ResolveDialogComponent {
-  protected readonly title = inject<string>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<ResolveDialogComponent, ResolveResult>>(MatDialogRef);
+  protected readonly title = injectDialogData<string>();
+  private readonly dialogRef = injectDialogRef<ResolveResult>();
 
   protected readonly note = new FormControl('', {
     nonNullable: true,

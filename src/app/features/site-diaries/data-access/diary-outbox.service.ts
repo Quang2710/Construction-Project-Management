@@ -7,7 +7,6 @@ import { UploadsApiService } from '../../../shared/data-access/uploads-api.servi
 import { toApiError } from '../../../shared/utils/api-error';
 import { DiaryContent, DiaryPhoto, GeoPoint } from '../models/site-diary.model';
 import { SiteDiariesApiService } from './site-diaries-api.service';
-
 import { DIARY_OUTBOX_KIND } from './diary-outbox.kind';
 
 /** Ảnh chụp khi mất mạng: giữ Blob gốc trong IndexedDB, nén + tải lên khi đồng bộ. */

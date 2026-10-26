@@ -2,14 +2,15 @@ import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { Material, StockItem, StockTransactionType } from '../../models/material.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 export interface StockMovementDialogData {
   readonly type: StockTransactionType;
@@ -28,37 +29,46 @@ export interface StockMovementResult {
 @Component({
   selector: 'app-stock-movement-dialog',
   imports: [
+    MutablePipe,
     DecimalPipe,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatSelectModule,
+    SelectButtonModule,
+    ButtonModule,
+    IconComponent,
+    ...FIELD,
+    InputTextModule,
+    DialogCloseDirective,
+    SelectModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Phiếu {{ type() === 'IN' ? 'nhập' : 'xuất' }} kho</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Phiếu {{ type() === 'IN' ? 'nhập' : 'xuất' }} kho</h2>
+    <div dialogContent>
       <form [formGroup]="form" id="movement-form" class="form" (ngSubmit)="save()">
-        <mat-button-toggle-group formControlName="type" hideSingleSelectionIndicator class="type" aria-label="Loại phiếu">
-          <mat-button-toggle value="IN"><mat-icon>south</mat-icon> Nhập kho</mat-button-toggle>
-          <mat-button-toggle value="OUT"><mat-icon>north</mat-icon> Xuất kho</mat-button-toggle>
-        </mat-button-toggle-group>
+        <p-selectbutton
+          formControlName="type"
+          class="type"
+          [options]="typeOptions | mutable"
+          optionLabel="label"
+          optionValue="value"
+          [allowEmpty]="false"
+          [attr.aria-label]="'Loại phiếu'"
+        >
+          <ng-template #item let-option>
+            <span class="type__option"><app-icon>{{ option.icon }}</app-icon> {{ option.label }}</span>
+          </ng-template>
+        </p-selectbutton>
 
-        <mat-form-field>
-          <mat-label>Vật tư</mat-label>
-          <mat-select formControlName="materialId">
-            @for (material of data.materials; track material.id) {
-              <mat-option [value]="material.id">{{ material.code }} · {{ material.name }}</mat-option>
-            }
-          </mat-select>
+        <app-field>
+          <label fieldLabel>Vật tư</label>
+          <p-select formControlName="materialId" [options]="data.materials | mutable" optionValue="id" placeholder="Chọn…" [fluid]="true">
+            <ng-template #selectedItem let-material>{{ material.code }} · {{ material.name }}</ng-template>
+            <ng-template #item let-material>{{ material.code }} · {{ material.name }}</ng-template>
+          </p-select>
           @if (form.controls.materialId.hasError('required')) {
-            <mat-error>Vui lòng chọn vật tư.</mat-error>
+            <app-error>Vui lòng chọn vật tư.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
         @if (material(); as material) {
           <p class="current">
@@ -69,30 +79,30 @@ export interface StockMovementResult {
           </p>
         }
 
-        <mat-form-field>
-          <mat-label>Số lượng</mat-label>
-          <input matInput type="number" min="0" step="any" formControlName="quantity" />
-          <span matTextSuffix>{{ material()?.unit }}</span>
+        <app-field>
+          <label fieldLabel>Số lượng</label>
+          <input pInputText type="number" min="0" step="any" formControlName="quantity" />
+          <span fieldSuffix>{{ material()?.unit }}</span>
           @if (form.controls.quantity.hasError('required')) {
-            <mat-error>Vui lòng nhập số lượng.</mat-error>
+            <app-error>Vui lòng nhập số lượng.</app-error>
           } @else if (form.controls.quantity.hasError('min')) {
-            <mat-error>Số lượng phải lớn hơn 0.</mat-error>
+            <app-error>Số lượng phải lớn hơn 0.</app-error>
           }
-        </mat-form-field>
+        </app-field>
         @if (form.hasError('exceedsStock')) {
           <p class="error" role="alert">Không đủ tồn kho để xuất.</p>
         }
 
-        <mat-form-field>
-          <mat-label>{{ type() === 'IN' ? 'Nguồn nhập / ghi chú' : 'Xuất cho hạng mục / tổ đội' }}</mat-label>
-          <input matInput formControlName="note" maxlength="300" />
-        </mat-form-field>
+        <app-field>
+          <label fieldLabel>{{ type() === 'IN' ? 'Nguồn nhập / ghi chú' : 'Xuất cho hạng mục / tổ đội' }}</label>
+          <input pInputText formControlName="note" maxlength="300" />
+        </app-field>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="movement-form">{{ type() === 'IN' ? 'Nhập kho' : 'Xuất kho' }}</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="movement-form">{{ type() === 'IN' ? 'Nhập kho' : 'Xuất kho' }}</button>
+    </div>
   `,
   styles: `
     .form {
@@ -106,23 +116,36 @@ export interface StockMovementResult {
       align-self: flex-start;
       margin-bottom: 12px;
     }
+    .type__option {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .type__option app-icon {
+      font-size: 18px;
+    }
     .current {
       margin: -8px 0 12px;
-      font: var(--mat-sys-body-medium);
+      font: var(--app-body-medium);
     }
     .low,
     .error {
-      color: var(--mat-sys-error);
+      color: var(--app-error);
     }
     .error {
       margin: -8px 0 8px;
-      font: var(--mat-sys-body-small);
+      font: var(--app-body-small);
     }
   `,
 })
 export class StockMovementDialogComponent {
-  protected readonly data = inject<StockMovementDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<StockMovementDialogComponent, StockMovementResult>>(MatDialogRef);
+  protected readonly data = injectDialogData<StockMovementDialogData>();
+  private readonly dialogRef = injectDialogRef<StockMovementResult>();
+
+  protected readonly typeOptions: readonly { label: string; value: StockTransactionType; icon: string }[] = [
+    { label: 'Nhập kho', value: 'IN', icon: 'south' },
+    { label: 'Xuất kho', value: 'OUT', icon: 'north' },
+  ];
 
   protected readonly form = new FormGroup(
     {

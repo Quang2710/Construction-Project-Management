@@ -3,11 +3,11 @@
   align-items: center;
   gap: 4px;
   margin-bottom: 8px;
-  font: var(--mat-sys-label-large);
-  color: var(--mat-sys-primary);
+  font: var(--app-label-large);
+  color: var(--app-primary);
   text-decoration: none;
 
-  mat-icon {
+  app-icon {
     width: 18px;
     height: 18px;
     font-size: 18px;
@@ -31,18 +31,18 @@
 }
 
 .header__code {
-  font: var(--mat-sys-label-large);
-  color: var(--mat-sys-primary);
+  font: var(--app-label-large);
+  color: var(--app-primary);
 }
 
 .header__title {
   margin: 4px 0;
-  font: var(--mat-sys-headline-small);
+  font: var(--app-headline-small);
 }
 
 .header__sub {
   margin: 0;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 .header__actions {
@@ -52,13 +52,9 @@
 }
 
 .danger {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
-.danger-fill {
-  --mat-button-filled-container-color: var(--mat-sys-error);
-  --mat-button-filled-label-text-color: var(--mat-sys-on-error);
-}
 
 .banner {
   display: flex;
@@ -70,8 +66,8 @@
 }
 
 .banner--error {
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  background: var(--app-error-container);
+  color: var(--app-on-error-container);
 }
 
 .banner--warn {
@@ -80,8 +76,8 @@
 }
 
 .banner--info {
-  background: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
+  background: var(--app-secondary-container);
+  color: var(--app-on-secondary-container);
 }
 
 .layout {
@@ -99,9 +95,9 @@
 
 .card {
   padding: 16px 20px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface);
 }
 
 .card__header {
@@ -115,7 +111,11 @@
 
 .card__title {
   margin: 0;
-  font: var(--mat-sys-title-medium);
+  font: var(--app-title-medium);
+}
+
+.card > .card__title {
+  margin-bottom: 12px;
 }
 
 .facts {
@@ -125,8 +125,8 @@
   margin: 0;
 
   dt {
-    font: var(--mat-sys-label-medium);
-    color: var(--mat-sys-on-surface-variant);
+    font: var(--app-label-medium);
+    color: var(--app-on-surface-variant);
   }
 
   dd {
@@ -141,7 +141,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font: var(--mat-sys-body-small);
+  font: var(--app-body-small);
 }
 
 .history__action {
@@ -150,11 +150,11 @@
 
 .history__meta,
 .history__note {
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 .overdue {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
   font-weight: 500;
 }
 

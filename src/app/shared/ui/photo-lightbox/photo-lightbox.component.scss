@@ -55,7 +55,7 @@
 
 .meta__caption {
   margin: 0;
-  font: var(--mat-sys-title-small);
+  font: var(--app-title-small);
 }
 
 .meta__sub {
@@ -63,7 +63,7 @@
   align-items: center;
   gap: 4px;
   margin: 2px 0 0;
-  font: var(--mat-sys-body-small);
+  font: var(--app-body-small);
   color: #d4d4d4;
 }
 
@@ -71,7 +71,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font: var(--mat-sys-body-small);
+  font: var(--app-body-small);
   color: #fdba74;
   text-decoration: none;
 
@@ -85,14 +85,14 @@
   font-weight: 600;
 }
 
-mat-icon {
+app-icon {
   width: 18px;
   height: 18px;
   font-size: 18px;
 }
 
-.nav mat-icon,
-.close mat-icon {
+.nav app-icon,
+.close app-icon {
   width: 24px;
   height: 24px;
   font-size: 24px;

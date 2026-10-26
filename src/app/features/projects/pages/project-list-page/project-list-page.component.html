@@ -1,132 +1,116 @@
 <app-page-header title="Dự án" subtitle="Danh sách công trình, tiến độ và ngân sách">
-  <a mat-flat-button routerLink="/projects/new" *hasRole="permissions.manageProjects">
-    <mat-icon>add</mat-icon>
+  <a pButton routerLink="/projects/new" *hasRole="permissions.manageProjects">
+    <app-icon>add</app-icon>
     Tạo dự án
   </a>
 </app-page-header>
 
 <div class="filters">
-  <mat-form-field class="filters__search" subscriptSizing="dynamic">
-    <mat-label>Tìm kiếm</mat-label>
-    <mat-icon matPrefix>search</mat-icon>
-    <input matInput [formControl]="searchControl" placeholder="Mã, tên dự án, chủ đầu tư" />
+  <app-field class="filters__search" dense>
+    <app-icon fieldPrefix>search</app-icon>
+    <input pInputText [formControl]="searchControl" placeholder="Tìm theo mã, tên dự án, chủ đầu tư" aria-label="Tìm kiếm dự án" />
     @if (searchControl.value) {
-      <button mat-icon-button matSuffix type="button" aria-label="Xoá tìm kiếm" (click)="searchControl.setValue('')">
-        <mat-icon>close</mat-icon>
+      <button pButton text rounded severity="secondary" size="small" fieldSuffix type="button" aria-label="Xoá tìm kiếm" (click)="searchControl.setValue('')">
+        <app-icon pButtonIcon>close</app-icon>
       </button>
     }
-  </mat-form-field>
+  </app-field>
 
-  <mat-chip-listbox
-    class="filters__status"
-    aria-label="Lọc theo trạng thái"
-    [value]="store.status() ?? allValue"
-    [hideSingleSelectionIndicator]="true"
-    (change)="onStatusChange($event)"
-  >
-    <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
-    @for (status of statuses; track status) {
-      <mat-chip-option [value]="status">{{ statusLabels[status] }}</mat-chip-option>
-    }
-  </mat-chip-listbox>
+  <p-selectbutton class="app-chips"
+    [options]="statusOptions"
+    optionLabel="label"
+    optionValue="value"
+    [allowEmpty]="false"
+    [ngModel]="store.status() ?? allValue"
+    (onChange)="onStatusChange($event.value)"
+    ariaLabelledBy="status-filter"
+  />
+  <span id="status-filter" class="sr-only">Lọc theo trạng thái</span>
 </div>
 
 <section class="table-card">
   @if (store.loading()) {
-    <mat-progress-bar mode="indeterminate" class="table-card__loading" />
+    <p-progressbar mode="indeterminate" styleClass="app-loading-bar" class="table-card__loading" />
   }
 
   @if (store.error(); as error) {
     <app-error-state [message]="error" (retry)="store.reload()" />
   } @else if (store.isEmpty()) {
-    <app-empty-state
-      icon="apartment"
-      title="Không có dự án phù hợp"
-      message="Thử đổi từ khoá tìm kiếm hoặc bộ lọc trạng thái."
-    />
+    <app-empty-state icon="apartment" title="Không có dự án phù hợp" message="Thử đổi từ khoá tìm kiếm hoặc bộ lọc trạng thái." />
   } @else {
-    <div class="table-scroll">
-      <table
-        mat-table
-        [dataSource]="store.items()"
-        matSort
-        [matSortActive]="sortActive()"
-        [matSortDirection]="sortDirection()"
-        matSortDisableClear
-        (matSortChange)="onSort($event)"
-        [class.is-loading]="store.loading()"
-      >
-        <ng-container matColumnDef="code">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Mã</th>
-          <td mat-cell *matCellDef="let project" class="cell-code">{{ project.code }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Dự án</th>
-          <td mat-cell *matCellDef="let project">
-            <a class="project-link" [routerLink]="['/projects', project.id]" (click)="$event.stopPropagation()">
-              {{ project.name }}
-            </a>
+    <p-table
+      [value]="store.items()"
+      [lazy]="true"
+      [sortField]="sortActive()"
+      [sortOrder]="sortOrder()"
+      [rowHover]="true"
+      [scrollable]="true"
+      dataKey="id"
+      [class.is-loading]="store.loading()"
+      (onSort)="onSort($event)"
+    >
+      <ng-template #header>
+        <tr>
+          @if (!isCompact()) {
+            <th pSortableColumn="code">Mã <p-sortIcon field="code" /></th>
+          }
+          <th pSortableColumn="name">Dự án <p-sortIcon field="name" /></th>
+          @if (!isCompact()) {
+            <th pSortableColumn="startDate">Thời gian <p-sortIcon field="startDate" /></th>
+            <th pSortableColumn="budget" class="align-end">Ngân sách <p-sortIcon field="budget" /></th>
+          }
+          <th pSortableColumn="progress">Tiến độ <p-sortIcon field="progress" /></th>
+          <th pSortableColumn="status">Trạng thái <p-sortIcon field="status" /></th>
+          @if (!isCompact()) {
+            <th><span class="sr-only">Cảnh báo</span></th>
+          }
+        </tr>
+      </ng-template>
+      <ng-template #body let-project>
+        <tr class="row" (click)="openProject(project)">
+          @if (!isCompact()) {
+            <td class="cell-code">{{ project.code }}</td>
+          }
+          <td>
+            <a class="project-link" [routerLink]="['/projects', project.id]" (click)="$event.stopPropagation()">{{ project.name }}</a>
             <div class="cell-sub">{{ project.clientName }} · {{ project.location.province }}</div>
           </td>
-        </ng-container>
-
-        <ng-container matColumnDef="startDate">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Thời gian</th>
-          <td mat-cell *matCellDef="let project" class="cell-nowrap">
-            {{ project.startDate | date: 'dd/MM/yyyy' }}
-            <div class="cell-sub">→ {{ project.endDate | date: 'dd/MM/yyyy' }}</div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="budget">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition="before" class="align-end">Ngân sách</th>
-          <td mat-cell *matCellDef="let project" class="align-end cell-nowrap">
-            {{ project.budget | vnd: 'compact' }}
-            <div class="cell-sub">Đã chi {{ project.actualCost | vnd: 'compact' }}</div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="progress">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tiến độ</th>
-          <td mat-cell *matCellDef="let project" class="cell-progress">
+          @if (!isCompact()) {
+            <td class="cell-nowrap">
+              {{ project.startDate | date: 'dd/MM/yyyy' }}
+              <div class="cell-sub">→ {{ project.endDate | date: 'dd/MM/yyyy' }}</div>
+            </td>
+            <td class="align-end cell-nowrap">
+              {{ project.budget | vnd: 'compact' }}
+              <div class="cell-sub">Đã chi {{ project.actualCost | vnd: 'compact' }}</div>
+            </td>
+          }
+          <td class="cell-progress">
             <app-progress-compare [actual]="project.progress" [planned]="project.plannedProgress" [compact]="true" />
           </td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Trạng thái</th>
-          <td mat-cell *matCellDef="let project"><app-project-status-chip [status]="project.status" /></td>
-        </ng-container>
-
-        <ng-container matColumnDef="alerts">
-          <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">Cảnh báo</span></th>
-          <td mat-cell *matCellDef="let project" class="cell-alerts">
-            @if (project.isDelayed) {
-              <mat-icon class="alert-icon alert-icon--delay" matTooltip="Chậm tiến độ">schedule</mat-icon>
-            }
-            @if (project.isOverBudget) {
-              <mat-icon class="alert-icon alert-icon--budget" matTooltip="Vượt ngân sách">money_off</mat-icon>
-            }
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="columns()"></tr>
-        <tr
-          mat-row
-          *matRowDef="let project; columns: columns()"
-          class="row"
-          (click)="openProject(project)"
-        ></tr>
-      </table>
-    </div>
+          <td><app-project-status-chip [status]="project.status" /></td>
+          @if (!isCompact()) {
+            <td class="cell-alerts">
+              @if (project.isDelayed) {
+                <app-icon class="alert-icon alert-icon--delay" pTooltip="Chậm tiến độ" tooltipPosition="bottom">schedule</app-icon>
+              }
+              @if (project.isOverBudget) {
+                <app-icon class="alert-icon alert-icon--budget" pTooltip="Vượt ngân sách" tooltipPosition="bottom">money_off</app-icon>
+              }
+            </td>
+          }
+        </tr>
+      </ng-template>
+    </p-table>
   }
 
-  <mat-paginator
-    [length]="store.total()"
-    [pageIndex]="store.page() - 1"
-    [pageSize]="store.pageSize()"
-    [pageSizeOptions]="[10, 20, 50]"
-    (page)="onPage($event)"
+  <p-paginator
+    [totalRecords]="store.total()"
+    [first]="(store.page() - 1) * store.pageSize()"
+    [rows]="store.pageSize()"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first}–{last} / {totalRecords}"
+    (onPageChange)="onPage($event)"
   />
 </section>

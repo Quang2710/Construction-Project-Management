@@ -1,8 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { VndPipe } from '../../../../shared/pipes/vnd.pipe';
@@ -16,14 +15,13 @@ import { CostChartComponent } from '../../components/cost-chart/cost-chart.compo
 import { OverdueTaskListComponent } from '../../components/overdue-task-list/overdue-task-list.component';
 import { SCurveChartComponent } from '../../components/s-curve-chart/s-curve-chart.component';
 import { DashboardStore } from '../../data-access/dashboard.store';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-dashboard-page',
   imports: [
     DatePipe,
     DecimalPipe,
-    MatIconModule,
-    MatProgressBarModule,
     HasRoleDirective,
     VndPipe,
     EmptyStateComponent,
@@ -33,6 +31,8 @@ import { DashboardStore } from '../../data-access/dashboard.store';
     SCurveChartComponent,
     CostChartComponent,
     OverdueTaskListComponent,
+    IconComponent,
+    ProgressBarModule,
   ],
   // Chart.js đăng ký ở đây để chỉ nằm trong chunk lazy của trang tổng quan.
   providers: [DashboardStore, provideCharts(withDefaultRegisterables())],

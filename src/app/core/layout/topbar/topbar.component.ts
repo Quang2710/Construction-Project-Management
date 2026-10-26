@@ -1,10 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { PopoverModule } from 'primeng/popover';
 import { ConfirmDialogService } from '../../../shared/ui/confirm-dialog/confirm-dialog.service';
 import { UserAvatarComponent } from '../../../shared/ui/user-avatar/user-avatar.component';
 import { AuthStore } from '../../auth/auth.store';
@@ -14,18 +12,18 @@ import { PwaService } from '../../pwa/pwa.service';
 import { NetworkIndicatorComponent } from '../network-indicator/network-indicator.component';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 import { ThemeService } from '../../theme/theme.service';
+import { IconComponent } from '../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-topbar',
   imports: [
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatDividerModule,
-    MatTooltipModule,
+    PopoverModule,
     UserAvatarComponent,
     NetworkIndicatorComponent,
     NotificationBellComponent,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
   ],
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss',

@@ -1,15 +1,14 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { InputTextModule } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
+import { Popover, PopoverModule } from 'primeng/popover';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { AppDialog } from '../../../../../shared/ui/dialog/app-dialog.service';
 import { VndPipe } from '../../../../../shared/pipes/vnd.pipe';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
 import { ErrorStateComponent } from '../../../../../shared/ui/state/error-state.component';
@@ -19,35 +18,41 @@ import { MinQuantityDialogComponent } from '../../../components/min-quantity-dia
 import { MaterialsStore } from '../../../data-access/materials.store';
 import { MATERIAL_CATEGORY_LABELS, StockItem, StockTransactionType } from '../../../models/material.model';
 import { MaterialsDialogsService } from '../materials-dialogs.service';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../../shared/ui/field/field.component';
 
 @Component({
   selector: 'app-stock-panel',
   imports: [
     DecimalPipe,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatMenuModule,
-    MatProgressBarModule,
-    MatSlideToggleModule,
-    MatTooltipModule,
+    FormsModule,
+    PopoverModule,
+    ToggleSwitchModule,
     VndPipe,
     EmptyStateComponent,
     ErrorStateComponent,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressBarModule,
+    ...FIELD,
+    InputTextModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './stock-panel.component.html',
   styleUrl: './panels.scss',
 })
 export class StockPanelComponent {
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
   private readonly dialogs = inject(MaterialsDialogsService);
   protected readonly store = inject(MaterialsStore);
   protected readonly categoryLabels = MATERIAL_CATEGORY_LABELS;
 
   protected readonly query = signal('');
   protected readonly lowOnly = signal(false);
+  /** Dòng đang mở menu thao tác (một popover dùng chung cho cả bảng). */
+  protected readonly menuItem = signal<StockItem | null>(null);
+  private readonly rowMenu = viewChild.required<Popover>('rowMenu');
   protected readonly items = computed(() => {
     const keyword = removeVietnameseTones(this.query().trim()).toLowerCase();
     return this.store
@@ -64,6 +69,11 @@ export class StockPanelComponent {
   protected level(item: StockItem): number {
     const target = Math.max(item.minQuantity * 2, 1);
     return Math.min(100, Math.round((item.quantity / target) * 100));
+  }
+
+  protected openMenu(event: Event, item: StockItem): void {
+    this.menuItem.set(item);
+    this.rowMenu().toggle(event);
   }
 
   protected move(type: StockTransactionType, item?: StockItem): void {

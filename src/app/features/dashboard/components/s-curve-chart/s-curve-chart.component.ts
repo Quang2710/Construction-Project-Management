@@ -8,7 +8,9 @@ import { chartTheme } from '../../../../shared/utils/chart-theme';
 /** Đường cong S lũy kế: kế hoạch vs thực tế (%). */
 @Component({
   selector: 'app-s-curve-chart',
-  imports: [BaseChartDirective],
+  imports: [
+    BaseChartDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="chart">

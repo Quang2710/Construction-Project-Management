@@ -1,17 +1,22 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { addDays } from 'date-fns';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ROLE_LABELS, UserSummary } from '../../../../shared/models/user.model';
 import { PhotoPickerComponent } from '../../../../shared/ui/photo-picker/photo-picker.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { PunchDraft } from '../../data-access/quality.store';
 import { PUNCH_SEVERITIES, PUNCH_SEVERITY_LABELS, PunchSeverity } from '../../models/quality.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { toOptions } from '../../../../shared/utils/options';
+import { minDateValidator } from '../../../../shared/utils/date-validators';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
+import { RoleLabelPipe } from '../../../../shared/pipes/role-label.pipe';
 
 export interface PunchFormDialogData {
   readonly projectCode: string;
@@ -37,75 +42,69 @@ const DEFAULT_DUE_DAYS = 7;
 @Component({
   selector: 'app-punch-form-dialog',
   imports: [
+    RoleLabelPipe,
+    MutablePipe,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
     PhotoPickerComponent,
+    ButtonModule,
+    ...FIELD,
+    InputTextModule,
+    TextareaModule,
+    DialogCloseDirective,
+    SelectModule,
+    DatePickerModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Ghi nhận lỗi · {{ data.projectCode }}</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Ghi nhận lỗi · {{ data.projectCode }}</h2>
+    <div dialogContent>
       @if (data.prefill) {
         <p class="origin">Từ phiếu {{ data.prefill.inspectionCode }} – tiêu chí không đạt</p>
       }
       <form [formGroup]="form" id="punch-form" class="form" (ngSubmit)="save()">
-        <mat-form-field class="full">
-          <mat-label>Lỗi cần xử lý</mat-label>
-          <input matInput formControlName="title" maxlength="200" />
+        <app-field class="full">
+          <label fieldLabel>Lỗi cần xử lý</label>
+          <input pInputText formControlName="title" maxlength="200" />
           @if (form.controls.title.hasError('required') || form.controls.title.hasError('pattern')) {
-            <mat-error>Vui lòng mô tả ngắn lỗi cần xử lý.</mat-error>
+            <app-error>Vui lòng mô tả ngắn lỗi cần xử lý.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field class="full">
-          <mat-label>Mô tả chi tiết</mat-label>
-          <textarea matInput formControlName="description" rows="2" maxlength="2000"></textarea>
-        </mat-form-field>
+        <app-field class="full">
+          <label fieldLabel>Mô tả chi tiết</label>
+          <textarea pTextarea formControlName="description" rows="2" maxlength="2000"></textarea>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Vị trí</mat-label>
-          <input matInput formControlName="location" maxlength="200" />
-        </mat-form-field>
+        <app-field>
+          <label fieldLabel>Vị trí</label>
+          <input pInputText formControlName="location" maxlength="200" />
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Mức độ</mat-label>
-          <mat-select formControlName="severity">
-            @for (severity of severities; track severity) {
-              <mat-option [value]="severity">{{ severityLabels[severity] }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <app-field>
+          <label fieldLabel>Mức độ</label>
+          <p-select formControlName="severity" [options]="severityOptions" optionLabel="label" optionValue="value" placeholder="Chọn…" [fluid]="true" />
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Người xử lý</mat-label>
-          <mat-select formControlName="assigneeId">
-            @for (member of data.members; track member.id) {
-              <mat-option [value]="member.id">{{ member.fullName }} · {{ roleLabels[member.role] }}</mat-option>
-            }
-          </mat-select>
+        <app-field>
+          <label fieldLabel>Người xử lý</label>
+          <p-select formControlName="assigneeId" [options]="data.members | mutable" optionValue="id" placeholder="Chọn…" [fluid]="true">
+            <ng-template #selectedItem let-member>{{ member.fullName }} · {{ member.role | roleLabel }}</ng-template>
+            <ng-template #item let-member>{{ member.fullName }} · {{ member.role | roleLabel }}</ng-template>
+          </p-select>
           @if (form.controls.assigneeId.hasError('required')) {
-            <mat-error>Vui lòng giao người xử lý.</mat-error>
+            <app-error>Vui lòng giao người xử lý.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Hạn xử lý</mat-label>
-          <input matInput [matDatepicker]="picker" [min]="today" formControlName="dueDate" placeholder="dd/MM/yyyy" />
-          <mat-datepicker-toggle matIconSuffix [for]="picker" />
-          <mat-datepicker #picker />
-          @if (form.controls.dueDate.hasError('matDatepickerParse')) {
-            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
-          } @else if (form.controls.dueDate.hasError('required')) {
-            <mat-error>Vui lòng chọn hạn xử lý.</mat-error>
-          } @else if (form.controls.dueDate.hasError('matDatepickerMin')) {
-            <mat-error>Hạn xử lý không được ở quá khứ.</mat-error>
+        <app-field>
+          <label fieldLabel>Hạn xử lý</label>
+          <p-datepicker [minDate]="today" formControlName="dueDate" dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" [fluid]="true" />
+          @if (form.controls.dueDate.hasError('required')) {
+            <app-error>Vui lòng chọn hạn xử lý.</app-error>
+          } @else if (form.controls.dueDate.hasError('minDate')) {
+            <app-error>Hạn xử lý không được ở quá khứ.</app-error>
           }
-        </mat-form-field>
+        </app-field>
       </form>
 
       <h3 class="subtitle">Ảnh hiện trạng (bắt buộc)</h3>
@@ -113,17 +112,17 @@ const DEFAULT_DUE_DAYS = 7;
       @if (photoError()) {
         <p class="error" role="alert">Cần ít nhất 1 ảnh hiện trạng lỗi.</p>
       }
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="punch-form">Ghi nhận & giao việc</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="punch-form">Ghi nhận & giao việc</button>
+    </div>
   `,
   styles: `
     .origin {
       margin: 0 0 12px;
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-on-surface-variant);
+      font: var(--app-body-small);
+      color: var(--app-on-surface-variant);
     }
     .form {
       display: grid;
@@ -136,12 +135,12 @@ const DEFAULT_DUE_DAYS = 7;
     }
     .subtitle {
       margin: 4px 0 8px;
-      font: var(--mat-sys-title-small);
+      font: var(--app-title-small);
     }
     .error {
       margin: 8px 0 0;
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-error);
+      font: var(--app-body-small);
+      color: var(--app-error);
     }
     @media (max-width: 599.98px) {
       .form {
@@ -151,11 +150,12 @@ const DEFAULT_DUE_DAYS = 7;
   `,
 })
 export class PunchFormDialogComponent {
-  protected readonly data = inject<PunchFormDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<PunchFormDialogComponent, PunchFormResult>>(MatDialogRef);
+  protected readonly data = injectDialogData<PunchFormDialogData>();
+  private readonly dialogRef = injectDialogRef<PunchFormResult>();
 
   protected readonly severities = PUNCH_SEVERITIES;
   protected readonly severityLabels = PUNCH_SEVERITY_LABELS;
+  protected readonly severityOptions = toOptions(this.severities, this.severityLabels);
   protected readonly roleLabels = ROLE_LABELS;
   protected readonly today = new Date();
   protected readonly photoError = signal(false);
@@ -170,7 +170,7 @@ export class PunchFormDialogComponent {
     location: new FormControl(this.data.prefill?.location ?? '', { nonNullable: true, validators: [Validators.maxLength(200)] }),
     severity: new FormControl<PunchSeverity>('MEDIUM', { nonNullable: true }),
     assigneeId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    dueDate: new FormControl<Date | null>(addDays(new Date(), DEFAULT_DUE_DAYS), [Validators.required]),
+    dueDate: new FormControl<Date | null>(addDays(new Date(), DEFAULT_DUE_DAYS), [Validators.required, minDateValidator(this.today)]),
   });
 
   protected onFiles(files: File[]): void {

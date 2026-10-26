@@ -16,33 +16,38 @@
   max-width: 320px;
 }
 
+.quick {
+  display: flex;
+  gap: 6px;
+}
+
 .toolbar__spacer {
   flex: 1;
 }
 
 .table-wrap {
   overflow-x: auto;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font: var(--mat-sys-body-medium);
+  font: var(--app-body-medium);
 
   th,
   td {
     padding: 8px 12px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    border-bottom: 1px solid var(--app-outline-variant);
     text-align: left;
     vertical-align: middle;
   }
 
   th {
-    font: var(--mat-sys-label-large);
-    color: var(--mat-sys-on-surface-variant);
-    background: var(--mat-sys-surface-container-low);
+    font: var(--app-label-large);
+    color: var(--app-on-surface-variant);
+    background: var(--app-surface-container-low);
     white-space: nowrap;
   }
 
@@ -55,23 +60,24 @@
   cursor: pointer;
 
   &:hover {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
   }
 }
 
 .name {
+  min-width: 180px;
   font-weight: 500;
 }
 
 .sub {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .counts {
   display: inline-flex;
   gap: 10px;
-  font: var(--mat-sys-label-medium);
+  font: var(--app-label-medium);
   white-space: nowrap;
 
   span {
@@ -80,7 +86,7 @@
     gap: 2px;
   }
 
-  mat-icon {
+  app-icon {
     width: 16px;
     height: 16px;
     font-size: 16px;
@@ -92,11 +98,11 @@
 }
 
 .counts__fail {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .counts__pending {
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-surface-variant);
 }
 
 /* Punch list dạng thẻ: dễ bấm trên điện thoại tại công trường. */
@@ -114,9 +120,9 @@
   gap: 12px;
   width: 100%;
   padding: 12px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -124,12 +130,12 @@
 
   &:hover,
   &:focus-visible {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
   }
 }
 
 .card--overdue {
-  border-color: var(--mat-sys-error);
+  border-color: var(--app-error);
 }
 
 .card__thumb {
@@ -138,7 +144,7 @@
   height: 72px;
   border-radius: 8px;
   object-fit: cover;
-  background: var(--mat-sys-surface-container-high);
+  background: var(--app-surface-container-high);
 }
 
 .card__body {
@@ -152,7 +158,7 @@
 .card__title {
   margin: 0;
   overflow: hidden;
-  font: var(--mat-sys-title-small);
+  font: var(--app-title-small);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -168,9 +174,9 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  font: var(--mat-sys-label-medium);
+  font: var(--app-label-medium);
 
-  mat-icon {
+  app-icon {
     width: 16px;
     height: 16px;
     font-size: 16px;
@@ -178,7 +184,7 @@
 }
 
 .due--overdue {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 @media (max-width: 719.98px) {

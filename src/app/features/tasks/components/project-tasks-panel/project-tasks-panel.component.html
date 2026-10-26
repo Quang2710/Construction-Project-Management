@@ -7,19 +7,19 @@
     }
   </div>
   <div class="panel-header__actions">
-    <a mat-stroked-button [routerLink]="['/tasks']" [queryParams]="{ projectId: projectId() }" *hasRole="permissions.editTasks">
-      <mat-icon>view_kanban</mat-icon>
+    <a pButton outlined [routerLink]="['/tasks']" [queryParams]="{ projectId: projectId() }" *hasRole="permissions.editTasks">
+      <app-icon>view_kanban</app-icon>
       Mở bảng Kanban
     </a>
-    <button mat-flat-button type="button" *hasRole="permissions.editTasks" (click)="createTask()">
-      <mat-icon>add</mat-icon>
+    <button pButton type="button" *hasRole="permissions.editTasks" (click)="createTask()">
+      <app-icon>add</app-icon>
       Thêm công việc
     </button>
   </div>
 </div>
 
 @if (store.loading()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (store.error(); as error) {

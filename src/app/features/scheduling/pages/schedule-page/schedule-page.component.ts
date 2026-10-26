@@ -1,13 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, OnInit, viewChild } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { AppDialog } from '../../../../shared/ui/dialog/app-dialog.service';
 import {
   GanttBarClickEvent,
   GanttDragEvent,
@@ -31,6 +24,15 @@ import { WbsDialogComponent, WbsDialogData } from '../../components/wbs-dialog/w
 import { ScheduleStore, ScheduleViewType } from '../../data-access/schedule.store';
 import { WbsCreateRequest } from '../../models/wbs.model';
 import { SCHEDULE_COLORS, ScheduleItem, ScheduleOrigin, scheduleOrigin } from '../../utils/gantt-items';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 const VIEW_TYPES: readonly { value: ScheduleViewType; label: string }[] = [
   { value: 'day', label: 'Ngày' },
@@ -49,18 +51,20 @@ function toDate(value: number | Date | undefined): string | null {
 @Component({
   selector: 'app-schedule-page',
   imports: [
+    MutablePipe,
+    FormsModule,
     DatePipe,
     NgxGanttModule,
-    MatButtonModule,
-    MatButtonToggleModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatSelectModule,
-    MatTooltipModule,
+    SelectButtonModule,
     PageHeaderComponent,
     EmptyStateComponent,
     ErrorStateComponent,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressBarModule,
+    ...FIELD,
+    SelectModule,
   ],
   providers: [ScheduleStore],
   templateUrl: './schedule-page.component.html',
@@ -68,7 +72,7 @@ function toDate(value: number | Date | undefined): string | null {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SchedulePageComponent implements OnInit {
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
   private readonly taskDialog = inject(TaskDialogService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly theme = inject(ThemeService);

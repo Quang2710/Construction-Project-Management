@@ -1,7 +1,7 @@
 <app-page-header [title]="title()" subtitle="Các trường có dấu * là bắt buộc" />
 
 @if (store.loading()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (store.error(); as error) {
@@ -9,174 +9,159 @@
 } @else if (!store.loading()) {
   <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
     @if (submitError(); as error) {
-      <div class="submit-error" role="alert"><mat-icon>error</mat-icon> {{ error }}</div>
+      <div class="submit-error" role="alert"><app-icon>error</app-icon> {{ error }}</div>
     }
 
     <section class="section">
       <h2 class="section__title">Thông tin chung</h2>
       <div class="grid">
-        <mat-form-field>
-          <mat-label>Mã dự án</mat-label>
-          <input matInput formControlName="code" placeholder="VD: HN-GTHM" class="uppercase" required />
+        <app-field>
+          <label fieldLabel>Mã dự án</label>
+          <input pInputText formControlName="code" placeholder="VD: HN-GTHM" class="uppercase" required />
           @if (form.controls.code.hasError('required')) {
-            <mat-error>Vui lòng nhập mã dự án.</mat-error>
+            <app-error>Vui lòng nhập mã dự án.</app-error>
           } @else if (form.controls.code.hasError('pattern')) {
-            <mat-error>3–20 ký tự: chữ in hoa, số hoặc dấu gạch ngang.</mat-error>
+            <app-error>3–20 ký tự: chữ in hoa, số hoặc dấu gạch ngang.</app-error>
           } @else if (form.controls.code.hasError('duplicate')) {
-            <mat-error>Mã dự án đã tồn tại.</mat-error>
+            <app-error>Mã dự án đã tồn tại.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Trạng thái</mat-label>
-          <mat-select formControlName="status" required>
-            @for (status of statuses; track status) {
-              <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <app-field>
+          <label fieldLabel>Trạng thái</label>
+          <p-select formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value" placeholder="Chọn…" [fluid]="true" />
+        </app-field>
 
-        <mat-form-field class="span-2">
-          <mat-label>Tên dự án</mat-label>
-          <input matInput formControlName="name" maxlength="200" required />
+        <app-field class="span-2">
+          <label fieldLabel>Tên dự án</label>
+          <input pInputText formControlName="name" maxlength="200" required />
           @if (form.controls.name.hasError('required')) {
-            <mat-error>Vui lòng nhập tên dự án.</mat-error>
+            <app-error>Vui lòng nhập tên dự án.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field class="span-2">
-          <mat-label>Chủ đầu tư</mat-label>
-          <input matInput formControlName="clientName" maxlength="200" required />
+        <app-field class="span-2">
+          <label fieldLabel>Chủ đầu tư</label>
+          <input pInputText formControlName="clientName" maxlength="200" required />
           @if (form.controls.clientName.hasError('required')) {
-            <mat-error>Vui lòng nhập chủ đầu tư.</mat-error>
+            <app-error>Vui lòng nhập chủ đầu tư.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field class="span-2">
-          <mat-label>Mô tả</mat-label>
-          <textarea matInput formControlName="description" rows="3" maxlength="2000"></textarea>
-        </mat-form-field>
+        <app-field class="span-2">
+          <label fieldLabel>Mô tả</label>
+          <textarea pTextarea formControlName="description" rows="3" maxlength="2000"></textarea>
+        </app-field>
       </div>
     </section>
 
     <section class="section">
       <h2 class="section__title">Thời gian &amp; ngân sách</h2>
       <div class="grid">
-        <mat-form-field>
-          <mat-label>Ngày bắt đầu</mat-label>
-          <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="dd/MM/yyyy" required />
-          <mat-datepicker-toggle matIconSuffix [for]="startPicker" />
-          <mat-datepicker #startPicker />
-          @if (form.controls.startDate.hasError('matDatepickerParse')) {
-            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
-          } @else if (form.controls.startDate.hasError('required')) {
-            <mat-error>Vui lòng chọn ngày bắt đầu.</mat-error>
+        <app-field>
+          <label fieldLabel>Ngày bắt đầu</label>
+          <p-datepicker formControlName="startDate" dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" [fluid]="true" />
+          @if (form.controls.startDate.hasError('required')) {
+            <app-error>Vui lòng chọn ngày bắt đầu.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Ngày kết thúc</mat-label>
-          <input
-            matInput
-            [matDatepicker]="endPicker"
-            [min]="form.controls.startDate.value"
+        <app-field>
+          <label fieldLabel>Ngày kết thúc</label>
+          <p-datepicker
             formControlName="endDate"
-            placeholder="dd/MM/yyyy"
-            required
+            [minDate]="form.controls.startDate.value"
+            dateFormat="dd/mm/yy"
+            placeholder="dd/mm/yyyy"
+            [showIcon]="true"
+            iconDisplay="input"
+            [showButtonBar]="true"
+            [fluid]="true"
           />
-          <mat-datepicker-toggle matIconSuffix [for]="endPicker" />
-          <mat-datepicker #endPicker />
-          @if (form.controls.endDate.hasError('matDatepickerParse')) {
-            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
-          } @else if (form.controls.endDate.hasError('required')) {
-            <mat-error>Vui lòng chọn ngày kết thúc.</mat-error>
-          } @else if (form.controls.endDate.hasError('endBeforeStart') || form.controls.endDate.hasError('matDatepickerMin')) {
-            <mat-error>Ngày kết thúc phải sau ngày bắt đầu.</mat-error>
+          @if (form.controls.endDate.hasError('required')) {
+            <app-error>Vui lòng chọn ngày kết thúc.</app-error>
+          } @else if (form.controls.endDate.hasError('endBeforeStart') || form.controls.endDate.hasError('minDate')) {
+            <app-error>Ngày kết thúc phải sau ngày bắt đầu.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Ngân sách (VND)</mat-label>
-          <input matInput type="number" formControlName="budget" min="0" step="1000000" required />
-          <span matTextSuffix>₫</span>
+        <app-field>
+          <label fieldLabel>Ngân sách (VND)</label>
+          <input pInputText type="number" formControlName="budget" min="0" step="1000000" required />
+          <span fieldSuffix>₫</span>
           @if (budgetPreview(); as budget) {
-            <mat-hint>{{ budget | vnd: 'compact' }}</mat-hint>
+            <small fieldHint>{{ budget | vnd: 'compact' }}</small>
           }
           @if (form.controls.budget.hasError('required')) {
-            <mat-error>Vui lòng nhập ngân sách.</mat-error>
+            <app-error>Vui lòng nhập ngân sách.</app-error>
           } @else if (form.controls.budget.hasError('min')) {
-            <mat-error>Ngân sách tối thiểu 1.000.000 ₫.</mat-error>
+            <app-error>Ngân sách tối thiểu 1.000.000 ₫.</app-error>
           }
-        </mat-form-field>
+        </app-field>
       </div>
     </section>
 
     <section class="section">
       <h2 class="section__title">Nhân sự</h2>
       <div class="grid">
-        <mat-form-field>
-          <mat-label>Quản lý dự án</mat-label>
-          <mat-select formControlName="managerId">
-            <mat-option [value]="null">— Chưa phân công —</mat-option>
-            @for (user of store.managers(); track user.id) {
-              <mat-option [value]="user.id">{{ user.fullName }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <app-field>
+          <label fieldLabel>Quản lý dự án</label>
+          <p-select formControlName="managerId" [options]="store.managers()" optionValue="id" [showClear]="true" placeholder="— Chưa phân công —" [fluid]="true">
+            <ng-template #selectedItem let-user>{{ user.fullName }}</ng-template>
+            <ng-template #item let-user>{{ user.fullName }}</ng-template>
+          </p-select>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Kỹ sư phụ trách</mat-label>
-          <mat-select formControlName="memberIds" multiple>
-            @for (user of store.engineers(); track user.id) {
-              <mat-option [value]="user.id">{{ user.fullName }} · {{ user.jobTitle }}</mat-option>
-            }
-          </mat-select>
-          <mat-hint>Kỹ sư chỉ xem được dự án mà mình được gán</mat-hint>
-        </mat-form-field>
+        <app-field>
+          <label fieldLabel>Kỹ sư phụ trách</label>
+          <p-multiselect formControlName="memberIds" [options]="store.engineers()" optionValue="id" placeholder="Chọn…" [fluid]="true" optionLabel="fullName" display="chip" [showToggleAll]="false">
+            <ng-template #item let-user>{{ user.fullName }} · {{ user.jobTitle }}</ng-template>
+          </p-multiselect>
+          <small fieldHint>Kỹ sư chỉ xem được dự án mà mình được gán</small>
+        </app-field>
       </div>
     </section>
 
     <section class="section">
       <h2 class="section__title">Địa điểm công trình</h2>
       <div class="grid">
-        <mat-form-field class="span-2">
-          <mat-label>Địa chỉ</mat-label>
-          <input matInput formControlName="address" maxlength="300" required />
+        <app-field class="span-2">
+          <label fieldLabel>Địa chỉ</label>
+          <input pInputText formControlName="address" maxlength="300" required />
           @if (form.controls.address.hasError('required')) {
-            <mat-error>Vui lòng nhập địa chỉ công trình.</mat-error>
+            <app-error>Vui lòng nhập địa chỉ công trình.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Tỉnh/Thành phố</mat-label>
-          <mat-select formControlName="province" required>
-            @for (province of provinces; track province) {
-              <mat-option [value]="province">{{ province }}</mat-option>
-            }
-          </mat-select>
+        <app-field>
+          <label fieldLabel>Tỉnh/Thành phố</label>
+          <p-select formControlName="province" [options]="provinces | mutable" placeholder="Chọn…" [fluid]="true">
+            <ng-template #selectedItem let-province>{{ province }}</ng-template>
+            <ng-template #item let-province>{{ province }}</ng-template>
+          </p-select>
           @if (form.controls.province.hasError('required')) {
-            <mat-error>Vui lòng chọn tỉnh/thành phố.</mat-error>
+            <app-error>Vui lòng chọn tỉnh/thành phố.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
         <div class="coords">
-          <mat-form-field>
-            <mat-label>Vĩ độ</mat-label>
-            <input matInput type="number" formControlName="lat" step="0.000001" required />
+          <app-field>
+            <label fieldLabel>Vĩ độ</label>
+            <input pInputText type="number" formControlName="lat" step="0.000001" required />
             @if (form.controls.lat.invalid) {
-              <mat-error>Vĩ độ từ -90 đến 90.</mat-error>
+              <app-error>Vĩ độ từ -90 đến 90.</app-error>
             }
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Kinh độ</mat-label>
-            <input matInput type="number" formControlName="lng" step="0.000001" required />
+          </app-field>
+          <app-field>
+            <label fieldLabel>Kinh độ</label>
+            <input pInputText type="number" formControlName="lng" step="0.000001" required />
             @if (form.controls.lng.invalid) {
-              <mat-error>Kinh độ từ -180 đến 180.</mat-error>
+              <app-error>Kinh độ từ -180 đến 180.</app-error>
             }
-          </mat-form-field>
+          </app-field>
         </div>
       </div>
-      <p class="map-hint"><mat-icon>touch_app</mat-icon> Bấm lên bản đồ để chọn vị trí công trình.</p>
+      <p class="map-hint"><app-icon>touch_app</app-icon> Bấm lên bản đồ để chọn vị trí công trình.</p>
       <app-project-map class="map" [markers]="markers()" [editable]="true" (locationPick)="pickLocation($event)" />
       @if ((form.controls.lat.touched || form.controls.lng.touched) && (form.controls.lat.hasError('required') || form.controls.lng.hasError('required'))) {
         <p class="field-error">Vui lòng chọn vị trí công trình trên bản đồ hoặc nhập toạ độ.</p>
@@ -184,10 +169,10 @@
     </section>
 
     <div class="actions">
-      <a mat-button [routerLink]="id() ? ['/projects', id()] : ['/projects']">Huỷ</a>
-      <button mat-flat-button type="submit" [disabled]="store.saving()">
+      <a pButton text [routerLink]="id() ? ['/projects', id()] : ['/projects']">Huỷ</a>
+      <button pButton type="submit" [disabled]="store.saving()">
         @if (store.saving()) {
-          <mat-spinner diameter="18" />
+          <p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 18px; height: 18px" />
         } @else {
           <ng-container>{{ id() ? 'Lưu thay đổi' : 'Tạo dự án' }}</ng-container>
         }

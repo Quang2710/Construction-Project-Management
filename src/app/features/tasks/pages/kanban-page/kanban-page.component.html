@@ -1,40 +1,39 @@
 <app-page-header title="Công việc" subtitle="Bảng Kanban — kéo thả thẻ để cập nhật trạng thái">
-  <button mat-flat-button type="button" *hasRole="permissions.editTasks" (click)="createTask()">
-    <mat-icon>add</mat-icon>
+  <button pButton type="button" *hasRole="permissions.editTasks" (click)="createTask()">
+    <app-icon>add</app-icon>
     Thêm công việc
   </button>
 </app-page-header>
 
 <div class="toolbar">
-  <mat-form-field class="toolbar__project" subscriptSizing="dynamic">
-    <mat-label>Dự án</mat-label>
-    <mat-select [value]="store.projectId()" (valueChange)="store.setProject($event)">
-      <mat-option [value]="null">Tất cả dự án</mat-option>
-      @for (project of store.projects(); track project.id) {
-        <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <app-field class="toolbar__project" dense>
+    <label fieldLabel>Dự án</label>
+    <p-select [ngModel]="store.projectId()" (ngModelChange)="store.setProject($event)" [options]="store.projects()" optionValue="id" [showClear]="true" placeholder="Tất cả dự án" [filter]="true" filterBy="code,name" emptyFilterMessage="Không tìm thấy dự án" [fluid]="true">
+      <ng-template #selectedItem let-project>{{ project.code }} · {{ project.name }}</ng-template>
+      <ng-template #item let-project>{{ project.code }} · {{ project.name }}</ng-template>
+    </p-select>
+  </app-field>
 
-  <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
-    <mat-label>Lọc nhanh</mat-label>
-    <mat-icon matPrefix>filter_list</mat-icon>
+  <app-field class="toolbar__search" dense>
+    <label fieldLabel>Lọc nhanh</label>
+    <app-icon fieldPrefix>filter_list</app-icon>
     <input
       #quickFilter
-      matInput
+      pInputText
       placeholder="Tiêu đề, nhãn, người phụ trách"
       [value]="store.q()"
       (input)="store.setSearch(quickFilter.value)"
     />
-  </mat-form-field>
+  </app-field>
 
-  <mat-slide-toggle [checked]="store.onlyMine()" (change)="store.setOnlyMine($event.checked)">
-    Chỉ việc của tôi
-  </mat-slide-toggle>
+  <label class="switch">
+    <p-toggleswitch [ngModel]="store.onlyMine()" (ngModelChange)="store.setOnlyMine($event)" />
+    <span>Chỉ việc của tôi</span>
+  </label>
 </div>
 
 @if (store.loading()) {
-  <mat-progress-bar mode="indeterminate" class="loading" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" class="loading" />
 }
 
 @if (store.error(); as error) {

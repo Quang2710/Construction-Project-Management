@@ -41,16 +41,16 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
       flex: 1;
       height: 8px;
       border-radius: 999px;
-      background: var(--mat-sys-surface-container-highest);
+      background: var(--app-surface-container-highest);
     }
     .fill {
       height: 100%;
       border-radius: inherit;
-      background: var(--mat-sys-primary);
+      background: var(--app-primary);
       transition: width 300ms ease;
     }
     :host(.delayed) .fill {
-      background: var(--mat-sys-error);
+      background: var(--app-error);
     }
     .marker {
       position: absolute;
@@ -58,20 +58,20 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
       width: 2px;
       height: 14px;
       margin-left: -1px;
-      background: var(--mat-sys-on-surface);
+      background: var(--app-on-surface);
     }
     .legend {
       display: flex;
       justify-content: space-between;
       margin-top: 6px;
-      font: var(--mat-sys-body-small);
+      font: var(--app-body-small);
     }
     .legend__planned {
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--app-on-surface-variant);
     }
     .value {
       min-width: 36px;
-      font: var(--mat-sys-label-medium);
+      font: var(--app-label-medium);
       text-align: right;
     }
   `,

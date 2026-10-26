@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { IconComponent } from '../icon/icon.component';
 
 /**
  * Khung biểu đồ có nút chuyển sang dạng bảng (để không phụ thuộc vào màu sắc).
@@ -9,7 +9,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
  */
 @Component({
   selector: 'app-chart-card',
-  imports: [MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="card__header">
@@ -20,14 +24,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         }
       </div>
       <button
-        mat-icon-button
+        pButton text rounded severity="secondary"
         type="button"
-        [matTooltip]="showTable() ? 'Xem biểu đồ' : 'Xem dạng bảng'"
+        [pTooltip]="showTable() ? 'Xem biểu đồ' : 'Xem dạng bảng'" tooltipPosition="bottom"
         [attr.aria-label]="showTable() ? 'Xem biểu đồ' : 'Xem dạng bảng'"
         [attr.aria-pressed]="showTable()"
         (click)="showTable.set(!showTable())"
       >
-        <mat-icon>{{ showTable() ? 'bar_chart' : 'table_rows' }}</mat-icon>
+        <app-icon pButtonIcon>{{ showTable() ? 'bar_chart' : 'table_rows' }}</app-icon>
       </button>
     </header>
     <div class="card__body" [hidden]="showTable()"><ng-content select="[chart]" /></div>
@@ -41,9 +45,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       flex-direction: column;
       min-width: 0;
       padding: 16px 20px 20px;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: var(--mat-sys-corner-medium);
-      background: var(--mat-sys-surface);
+      border: 1px solid var(--app-outline-variant);
+      border-radius: var(--app-corner-medium);
+      background: var(--app-surface);
     }
     .card__header {
       display: flex;
@@ -54,12 +58,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     }
     .card__title {
       margin: 0;
-      font: var(--mat-sys-title-medium);
+      font: var(--app-title-medium);
     }
     .card__subtitle {
       margin: 2px 0 0;
-      font: var(--mat-sys-body-small);
-      color: var(--mat-sys-on-surface-variant);
+      font: var(--app-body-small);
+      color: var(--app-on-surface-variant);
     }
     .card__body {
       position: relative;

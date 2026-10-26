@@ -1,13 +1,17 @@
 import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
 import { AuthStore } from '../../../../core/auth/auth.store';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-forbidden-page',
-  imports: [RouterLink, MatButtonModule, MatIconModule],
+  imports: [
+    RouterLink,
+    ButtonModule,
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="error">
@@ -18,12 +22,12 @@ import { AuthStore } from '../../../../core/auth/auth.store';
         được cấp quyền.
       </p>
       <div class="error__actions">
-        <button mat-stroked-button type="button" (click)="location.back()">
-          <mat-icon>arrow_back</mat-icon>
+        <button pButton outlined type="button" (click)="location.back()">
+          <app-icon>arrow_back</app-icon>
           Quay lại
         </button>
-        <a mat-flat-button routerLink="/dashboard">
-          <mat-icon>home</mat-icon>
+        <a pButton routerLink="/dashboard">
+          <app-icon>home</app-icon>
           Về trang tổng quan
         </a>
       </div>

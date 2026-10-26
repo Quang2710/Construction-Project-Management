@@ -1,11 +1,11 @@
 @if (store.loading() && !store.inspection()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (store.error(); as error) {
   <app-error-state title="Không tải được phiếu nghiệm thu" [message]="error" (retry)="reload()" />
 } @else if (store.inspection(); as inspection) {
-  <a class="back" routerLink="/quality" [queryParams]="backQuery()"><mat-icon>arrow_back</mat-icon> Danh sách nghiệm thu</a>
+  <a class="back" routerLink="/quality" [queryParams]="backQuery()"><app-icon>arrow_back</app-icon> Danh sách nghiệm thu</a>
 
   <header class="header">
     <div>
@@ -20,40 +20,40 @@
     <div class="header__actions">
       @if (store.canEdit()) {
         @if (inspection.status === 'DRAFT') {
-          <button mat-stroked-button type="button" class="danger" [disabled]="store.busy()" (click)="remove()">
-            <mat-icon>delete</mat-icon> Xoá
+          <button pButton outlined type="button" severity="danger" [disabled]="store.busy()" (click)="remove()">
+            <app-icon>delete</app-icon> Xoá
           </button>
         }
-        <button mat-stroked-button type="button" [disabled]="store.busy() || (!store.dirty() && !header.dirty)" (click)="save()">
-          <mat-icon>save</mat-icon> Lưu
+        <button pButton outlined type="button" [disabled]="store.busy() || (!store.dirty() && !header.dirty)" (click)="save()">
+          <app-icon>save</app-icon> Lưu
         </button>
-        <button mat-flat-button type="button" [disabled]="store.busy()" (click)="submit()">
-          <mat-icon>send</mat-icon> Gửi duyệt
+        <button pButton type="button" [disabled]="store.busy()" (click)="submit()">
+          <app-icon>send</app-icon> Gửi duyệt
         </button>
       }
       @if (store.canDecide()) {
-        <button mat-stroked-button type="button" class="danger" [disabled]="store.busy()" (click)="decide('reject')">
-          <mat-icon>undo</mat-icon> Trả lại
+        <button pButton outlined type="button" severity="danger" [disabled]="store.busy()" (click)="decide('reject')">
+          <app-icon>undo</app-icon> Trả lại
         </button>
         <button
-          mat-flat-button
+          pButton
           type="button"
           [disabled]="store.busy() || store.approvalBlocker() !== null"
-          [matTooltip]="store.approvalBlocker() ?? ''"
+          [pTooltip]="store.approvalBlocker() ?? ''" tooltipPosition="bottom"
           (click)="decide('approve')"
         >
-          <mat-icon>verified</mat-icon> Duyệt cấp {{ inspection.currentLevel }}
+          <app-icon>verified</app-icon> Duyệt cấp {{ inspection.currentLevel }}
         </button>
       }
     </div>
   </header>
 
   @if (store.busy()) {
-    <mat-progress-bar mode="indeterminate" />
+    <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
   }
   @if (rejection(); as step) {
     <div class="banner banner--error" role="status">
-      <mat-icon>undo</mat-icon>
+      <app-icon>undo</app-icon>
       <span>
         Bị trả lại ở cấp {{ step.level }} bởi {{ step.by?.fullName }}: “{{ step.note }}”. Khắc phục, đánh giá lại rồi gửi duyệt (bắt đầu lại từ cấp 1).
       </span>
@@ -61,7 +61,7 @@
   }
   @if (store.canDecide() && store.approvalBlocker(); as blocker) {
     <div class="banner banner--warn" role="status">
-      <mat-icon>warning</mat-icon>
+      <app-icon>warning</app-icon>
       <span>{{ blocker }}</span>
     </div>
   }
@@ -71,28 +71,24 @@
       <section class="card">
         <h2 class="card__title">Thông tin chung</h2>
         <form [formGroup]="header" class="info">
-          <mat-form-field class="info__title">
-            <mat-label>Tên phiếu</mat-label>
-            <input matInput formControlName="title" maxlength="200" />
+          <app-field class="info__title">
+            <label fieldLabel>Tên phiếu</label>
+            <input pInputText formControlName="title" maxlength="200" />
             @if (header.controls.title.hasError('required') || header.controls.title.hasError('pattern')) {
-              <mat-error>Vui lòng nhập tên phiếu.</mat-error>
+              <app-error>Vui lòng nhập tên phiếu.</app-error>
             }
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Vị trí</mat-label>
-            <input matInput formControlName="location" maxlength="200" />
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Ngày nghiệm thu</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="inspectionDate" placeholder="dd/MM/yyyy" />
-            <mat-datepicker-toggle matIconSuffix [for]="picker" />
-            <mat-datepicker #picker />
-            @if (header.controls.inspectionDate.hasError('matDatepickerParse')) {
-              <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
-            } @else if (header.controls.inspectionDate.hasError('required')) {
-              <mat-error>Vui lòng chọn ngày nghiệm thu.</mat-error>
+          </app-field>
+          <app-field>
+            <label fieldLabel>Vị trí</label>
+            <input pInputText formControlName="location" maxlength="200" />
+          </app-field>
+          <app-field>
+            <label fieldLabel>Ngày nghiệm thu</label>
+            <p-datepicker formControlName="inspectionDate" dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" [fluid]="true" />
+            @if (header.controls.inspectionDate.hasError('required')) {
+              <app-error>Vui lòng chọn ngày nghiệm thu.</app-error>
             }
-          </mat-form-field>
+          </app-field>
         </form>
       </section>
 
@@ -107,7 +103,7 @@
             }
           </span>
           @if (store.canEdit() && store.pendingCount()) {
-            <button mat-button type="button" (click)="store.passRemaining()"><mat-icon>done_all</mat-icon> Đạt các mục còn lại</button>
+            <button pButton text type="button" (click)="store.passRemaining()"><app-icon>done_all</app-icon> Đạt các mục còn lại</button>
           }
         </div>
 
@@ -122,25 +118,33 @@
                   }
                 </div>
                 @if (store.canEdit()) {
-                  <mat-button-toggle-group
+                  <p-selectbutton
                     class="check__result"
-                    [value]="item.result"
-                    [hideSingleSelectionIndicator]="true"
+                    size="small"
+                    [options]="resultOptions | mutable"
+                    optionLabel="label"
+                    optionValue="value"
+                    [ngModel]="item.result"
+                    (onChange)="onResult(index, $event)"
                     [attr.aria-label]="'Kết quả tiêu chí ' + (index + 1)"
-                    (change)="onResult(index, $event)"
                   >
-                    <mat-button-toggle value="PASS" class="toggle--pass"><mat-icon>check</mat-icon> Đạt</mat-button-toggle>
-                    <mat-button-toggle value="FAIL" class="toggle--fail"><mat-icon>close</mat-icon> Không đạt</mat-button-toggle>
-                    <mat-button-toggle value="NA">N/A</mat-button-toggle>
-                  </mat-button-toggle-group>
+                    <ng-template pTemplate="item" let-option>
+                      <span class="result">
+                        @if (option.icon) {
+                          <app-icon>{{ option.icon }}</app-icon>
+                        }
+                        {{ option.label }}
+                      </span>
+                    </ng-template>
+                  </p-selectbutton>
                   <button
-                    mat-icon-button
+                    pButton text rounded severity="secondary"
                     type="button"
                     [attr.aria-label]="'Bỏ tiêu chí ' + (index + 1)"
-                    matTooltip="Bỏ tiêu chí"
+                    pTooltip="Bỏ tiêu chí" tooltipPosition="bottom"
                     (click)="store.removeItem(index)"
                   >
-                    <mat-icon>delete_outline</mat-icon>
+                    <app-icon pButtonIcon>delete_outline</app-icon>
                   </button>
                 } @else {
                   <span class="check__label">{{ item.result ? resultLabels[item.result] : 'Chưa đánh giá' }}</span>
@@ -148,10 +152,10 @@
               </div>
 
               @if (store.canEdit()) {
-                <mat-form-field class="check__note" subscriptSizing="dynamic">
-                  <mat-label>Ghi chú / số đo thực tế</mat-label>
-                  <input matInput [value]="item.note" maxlength="500" (input)="onNote(index, $event)" />
-                </mat-form-field>
+                <app-field class="check__note" dense>
+                  <label fieldLabel>Ghi chú / số đo thực tế</label>
+                  <input pInputText [value]="item.note" maxlength="500" (input)="onNote(index, $event)" />
+                </app-field>
               } @else if (item.note) {
                 <p class="check__note-text">{{ item.note }}</p>
               }
@@ -160,13 +164,13 @@
                 <div class="check__punch">
                   @for (punch of store.punchByItem().get(item.id ?? '') ?? []; track punch.id) {
                     <a class="punch-link" [routerLink]="['/quality/punch', punch.id]">
-                      <mat-icon>{{ punch.status === 'VERIFIED' ? 'task_alt' : 'report' }}</mat-icon>
+                      <app-icon>{{ punch.status === 'VERIFIED' ? 'task_alt' : 'report' }}</app-icon>
                       {{ punch.code }} · {{ punch.assignee?.fullName ?? 'Chưa giao' }} · hạn {{ punch.dueDate | date: 'dd/MM' }}
                     </a>
                   }
                   @if (canRaisePunch() && item.id) {
-                    <button mat-stroked-button type="button" [disabled]="store.busy()" (click)="raisePunch(item)">
-                      <mat-icon>add_a_photo</mat-icon> Ghi nhận lỗi
+                    <button pButton outlined type="button" [disabled]="store.busy()" (click)="raisePunch(item)">
+                      <app-icon>add_a_photo</app-icon> Ghi nhận lỗi
                     </button>
                   } @else if (!item.id && store.canEdit()) {
                     <span class="hint">Lưu checklist để ghi nhận lỗi cho tiêu chí mới.</span>
@@ -179,15 +183,15 @@
 
         @if (store.canEdit()) {
           <form [formGroup]="newCriterion" class="add" (ngSubmit)="addCriterion()">
-            <mat-form-field subscriptSizing="dynamic">
-              <mat-label>Tiêu chí bổ sung</mat-label>
-              <input matInput formControlName="criterion" maxlength="300" />
-            </mat-form-field>
-            <mat-form-field subscriptSizing="dynamic">
-              <mat-label>Yêu cầu kỹ thuật</mat-label>
-              <input matInput formControlName="requirement" maxlength="300" />
-            </mat-form-field>
-            <button mat-stroked-button type="submit"><mat-icon>add</mat-icon> Thêm</button>
+            <app-field dense>
+              <label fieldLabel>Tiêu chí bổ sung</label>
+              <input pInputText formControlName="criterion" maxlength="300" />
+            </app-field>
+            <app-field dense>
+              <label fieldLabel>Yêu cầu kỹ thuật</label>
+              <input pInputText formControlName="requirement" maxlength="300" />
+            </app-field>
+            <button pButton outlined type="submit"><app-icon>add</app-icon> Thêm</button>
           </form>
         }
       </section>
@@ -211,7 +215,7 @@
             @for (punch of store.punchItems(); track punch.id) {
               <li>
                 <a class="punch-link" [routerLink]="['/quality/punch', punch.id]">
-                  <mat-icon>{{ punch.status === 'VERIFIED' ? 'task_alt' : 'report' }}</mat-icon>
+                  <app-icon>{{ punch.status === 'VERIFIED' ? 'task_alt' : 'report' }}</app-icon>
                   {{ punch.code }} · {{ punch.title }}
                 </a>
                 <app-quality-status-chip [status]="punch.status" />

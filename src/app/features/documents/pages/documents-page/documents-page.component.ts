@@ -1,17 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipListboxChange, MatChipsModule } from '@angular/material/chips';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { AppDialog } from '../../../../shared/ui/dialog/app-dialog.service';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, firstValueFrom } from 'rxjs';
 import { PageHeaderComponent } from '../../../../shared/ui/page-header/page-header.component';
@@ -24,26 +15,37 @@ import {
 } from '../../components/drawing-upload-dialog/drawing-upload-dialog.component';
 import { DocumentsStore } from '../../data-access/documents.store';
 import { Discipline, DISCIPLINE_LABELS, DISCIPLINES, Drawing } from '../../models/document.model';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { SelectButtonChangeEvent, SelectButtonModule } from 'primeng/selectbutton';
+import { withAllOption } from '../../../../shared/utils/options';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 
 const ALL = 'ALL';
 
 @Component({
   selector: 'app-documents-page',
   imports: [
+    FormsModule,
     DatePipe,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatSelectModule,
+    SelectButtonModule,
+    PaginatorModule,
     PageHeaderComponent,
     EmptyStateComponent,
     ErrorStateComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ProgressSpinnerModule,
+    ...FIELD,
+    InputTextModule,
+    SelectModule,
   ],
   providers: [DocumentsStore],
   templateUrl: './documents-page.component.html',
@@ -52,7 +54,7 @@ const ALL = 'ALL';
 })
 export class DocumentsPageComponent implements OnInit {
   private readonly router = inject(Router);
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
   protected readonly store = inject(DocumentsStore);
 
   /** ?projectId= khi quay lại từ trang bản vẽ. */
@@ -61,6 +63,7 @@ export class DocumentsPageComponent implements OnInit {
   protected readonly allValue = ALL;
   protected readonly disciplines = DISCIPLINES;
   protected readonly disciplineLabels = DISCIPLINE_LABELS;
+  protected readonly disciplineFilterOptions = withAllOption(this.disciplines, this.disciplineLabels, 'Tất cả bộ môn');
   protected readonly search = new FormControl(this.store.query(), { nonNullable: true });
 
   constructor() {
@@ -82,13 +85,13 @@ export class DocumentsPageComponent implements OnInit {
     void this.router.navigate([], { queryParams: { projectId }, replaceUrl: true });
   }
 
-  protected onDiscipline(event: MatChipListboxChange): void {
+  protected onDiscipline(event: SelectButtonChangeEvent): void {
     const value: unknown = event.value;
     void this.store.setFilter({ discipline: typeof value === 'string' && value !== ALL ? (value as Discipline) : null });
   }
 
-  protected onPage(event: PageEvent): void {
-    void this.store.setFilter({ page: event.pageIndex + 1 });
+  protected onPage(event: PaginatorState): void {
+    void this.store.setFilter({ page: (event.page ?? 0) + 1 });
   }
 
   protected open(drawing: Drawing): void {

@@ -1,10 +1,10 @@
 <app-page-header title="Hồ sơ bản vẽ" subtitle="Quản lý bản vẽ theo phiên bản, xem PDF trực tiếp và so sánh thay đổi">
   @if (store.canManage() && store.projectId()) {
-    <button mat-flat-button type="button" [disabled]="store.uploading()" (click)="upload()">
+    <button pButton type="button" [disabled]="store.uploading()" (click)="upload()">
       @if (store.uploading()) {
-        <mat-spinner diameter="18" />
+        <p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 18px; height: 18px" />
       } @else {
-        <mat-icon>upload_file</mat-icon>
+        <app-icon>upload_file</app-icon>
       }
       Phát hành bản vẽ mới
     </button>
@@ -12,7 +12,7 @@
 </app-page-header>
 
 @if (store.projectsLoading()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 @if (store.projectsError(); as error) {
   <app-error-state [message]="error" (retry)="reload()" />
@@ -20,35 +20,23 @@
   <app-empty-state icon="folder_open" title="Chưa có dự án" message="Bạn chưa được gán vào dự án nào." />
 } @else if (store.projectId()) {
   <div class="toolbar">
-    <mat-form-field class="toolbar__project" subscriptSizing="dynamic">
-      <mat-label>Dự án</mat-label>
-      <mat-select [value]="store.projectId()" (valueChange)="onProject($event)">
-        @for (project of store.projects(); track project.id) {
-          <mat-option [value]="project.id">{{ project.code }} · {{ project.name }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
-      <mat-label>Tìm số hiệu, tên bản vẽ</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput [formControl]="search" />
-    </mat-form-field>
+    <app-field class="toolbar__project" dense>
+      <label fieldLabel>Dự án</label>
+      <p-select [ngModel]="store.projectId()" (ngModelChange)="onProject($event)" [options]="store.projects()" optionValue="id" placeholder="Chọn…" [filter]="true" filterBy="code,name" emptyFilterMessage="Không tìm thấy dự án" [fluid]="true">
+        <ng-template #selectedItem let-project>{{ project.code }} · {{ project.name }}</ng-template>
+        <ng-template #item let-project>{{ project.code }} · {{ project.name }}</ng-template>
+      </p-select>
+    </app-field>
+    <app-field class="toolbar__search" dense>
+      <label fieldLabel>Tìm số hiệu, tên bản vẽ</label>
+      <app-icon fieldPrefix>search</app-icon>
+      <input pInputText [formControl]="search" />
+    </app-field>
   </div>
-  <mat-chip-listbox
-    class="chips"
-    aria-label="Lọc theo bộ môn"
-    [value]="store.discipline() ?? allValue"
-    [hideSingleSelectionIndicator]="true"
-    (change)="onDiscipline($event)"
-  >
-    <mat-chip-option [value]="allValue">Tất cả bộ môn</mat-chip-option>
-    @for (discipline of disciplines; track discipline) {
-      <mat-chip-option [value]="discipline">{{ disciplineLabels[discipline] }}</mat-chip-option>
-    }
-  </mat-chip-listbox>
+  <p-selectbutton class="chips app-chips" [options]="disciplineFilterOptions" optionLabel="label" optionValue="value" [allowEmpty]="false" [ngModel]="store.discipline() ?? allValue" (onChange)="onDiscipline($event)" [attr.aria-label]="'Lọc theo bộ môn'" />
 
   @if (store.loading()) {
-    <mat-progress-bar mode="indeterminate" />
+    <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
   }
   @if (store.error(); as error) {
     <app-error-state [message]="error" (retry)="store.load()" />
@@ -69,7 +57,7 @@
           @for (drawing of store.drawings(); track drawing.id) {
             <tr class="row--clickable" tabindex="0" (click)="open(drawing)" (keydown.enter)="open(drawing)">
               <td>
-                <div class="name"><mat-icon class="pdf">picture_as_pdf</mat-icon> {{ drawing.code }} · {{ drawing.title }}</div>
+                <div class="name"><app-icon class="pdf">picture_as_pdf</app-icon> {{ drawing.code }} · {{ drawing.title }}</div>
                 <div class="sub">{{ drawing.currentRevision.description }}</div>
               </td>
               <td class="hide-sm">{{ disciplineLabels[drawing.discipline] }}</td>
@@ -88,12 +76,6 @@
         </tbody>
       </table>
     </div>
-    <mat-paginator
-      [length]="store.total()"
-      [pageIndex]="store.page() - 1"
-      [pageSize]="store.pageSize()"
-      [hidePageSize]="true"
-      (page)="onPage($event)"
-    />
+    <p-paginator [totalRecords]="store.total()" [first]="(store.page() - 1) * store.pageSize()" [rows]="store.pageSize()" [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} / {totalRecords}" (onPageChange)="onPage($event)" />
   }
 }

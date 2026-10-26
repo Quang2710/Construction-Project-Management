@@ -1,9 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, untracked } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { BreadcrumbService } from '../../../../core/layout/breadcrumb/breadcrumb.service';
 import { PhotoGalleryComponent } from '../../../../shared/ui/photo-gallery/photo-gallery.component';
 import { ErrorStateComponent } from '../../../../shared/ui/state/error-state.component';
@@ -12,30 +11,31 @@ import { QualityStatusChipComponent } from '../../components/quality-status-chip
 import { SeverityBadgeComponent } from '../../components/severity-badge/severity-badge.component';
 import { PunchDetailStore } from '../../data-access/punch-detail.store';
 import { PUNCH_ACTION_LABELS } from '../../models/quality.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 @Component({
   selector: 'app-punch-page',
   imports: [
     DatePipe,
     RouterLink,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
     PhotoGalleryComponent,
     ErrorStateComponent,
     QualityStatusChipComponent,
     SeverityBadgeComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
   ],
   providers: [PunchDetailStore],
   template: `
     @if (store.loading() && !store.item()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
 
     @if (store.error(); as error) {
       <app-error-state title="Không tải được lỗi cần xử lý" [message]="error" (retry)="reload()" />
     } @else if (store.item(); as item) {
-      <a class="back" routerLink="/quality" [queryParams]="backQuery()"><mat-icon>arrow_back</mat-icon> Punch list</a>
+      <a class="back" routerLink="/quality" [queryParams]="backQuery()"><app-icon>arrow_back</app-icon> Punch list</a>
 
       <header class="header">
         <div>
@@ -50,44 +50,44 @@ import { PUNCH_ACTION_LABELS } from '../../models/quality.model';
 
         <div class="header__actions">
           @if (store.canReassign()) {
-            <button mat-stroked-button type="button" [disabled]="store.busy()" (click)="reassign()">
-              <mat-icon>person_edit</mat-icon> Giao lại
+            <button pButton outlined type="button" [disabled]="store.busy()" (click)="reassign()">
+              <app-icon>person_edit</app-icon> Giao lại
             </button>
           }
           @if (store.canStart()) {
-            <button mat-stroked-button type="button" [disabled]="store.busy()" (click)="store.transition('start')">
-              <mat-icon>construction</mat-icon> Bắt đầu xử lý
+            <button pButton outlined type="button" [disabled]="store.busy()" (click)="store.transition('start')">
+              <app-icon>construction</app-icon> Bắt đầu xử lý
             </button>
           }
           @if (store.canResolve()) {
-            <button mat-flat-button type="button" [disabled]="store.busy()" (click)="resolve()">
-              <mat-icon>add_a_photo</mat-icon> Báo đã khắc phục
+            <button pButton type="button" [disabled]="store.busy()" (click)="resolve()">
+              <app-icon>add_a_photo</app-icon> Báo đã khắc phục
             </button>
           }
           @if (store.canReopen()) {
-            <button mat-stroked-button type="button" class="danger" [disabled]="store.busy()" (click)="reopen()">
-              <mat-icon>replay</mat-icon> Mở lại
+            <button pButton outlined type="button" severity="danger" [disabled]="store.busy()" (click)="reopen()">
+              <app-icon>replay</app-icon> Mở lại
             </button>
           }
           @if (store.canVerify()) {
-            <button mat-flat-button type="button" [disabled]="store.busy()" (click)="store.transition('verify')">
-              <mat-icon>task_alt</mat-icon> Xác nhận đóng
+            <button pButton type="button" [disabled]="store.busy()" (click)="store.transition('verify')">
+              <app-icon>task_alt</app-icon> Xác nhận đóng
             </button>
           }
         </div>
       </header>
 
       @if (store.busy()) {
-        <mat-progress-bar mode="indeterminate" />
+        <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
       }
       @if (item.isOverdue) {
         <div class="banner banner--error" role="status">
-          <mat-icon>alarm</mat-icon>
+          <app-icon>alarm</app-icon>
           <span>Đã quá hạn xử lý ({{ item.dueDate | date: 'dd/MM/yyyy' }}).</span>
         </div>
       } @else if (item.status === 'RESOLVED' && store.isAssignee()) {
         <div class="banner banner--info" role="status">
-          <mat-icon>hourglass_top</mat-icon>
+          <app-icon>hourglass_top</app-icon>
           <span>Đã báo khắc phục, đang chờ quản lý dự án xác nhận.</span>
         </div>
       }
@@ -122,11 +122,11 @@ import { PUNCH_ACTION_LABELS } from '../../models/quality.model';
 
           <div class="compare">
             <section class="card">
-              <h2 class="card__title compare__title"><mat-icon>report</mat-icon> Trước khi khắc phục</h2>
+              <h2 class="card__title compare__title"><app-icon>report</app-icon> Trước khi khắc phục</h2>
               <app-photo-gallery [photos]="item.beforePhotos" [site]="site()" />
             </section>
             <section class="card">
-              <h2 class="card__title compare__title"><mat-icon>task_alt</mat-icon> Sau khi khắc phục</h2>
+              <h2 class="card__title compare__title"><app-icon>task_alt</app-icon> Sau khi khắc phục</h2>
               @if (item.afterPhotos.length) {
                 <app-photo-gallery [photos]="item.afterPhotos" [site]="site()" />
               } @else {
@@ -174,7 +174,7 @@ import { PUNCH_ACTION_LABELS } from '../../models/quality.model';
     }
     .empty {
       margin: 0;
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--app-on-surface-variant);
     }
     @media (max-width: 599.98px) {
       .compare {

@@ -25,7 +25,7 @@
           <div class="cell__head">
             <span class="cell__day">{{ day.dayOfMonth }}</span>
             @if (day.missing) {
-              <mat-icon class="cell__missing" matTooltip="Chưa có nhật ký">priority_high</mat-icon>
+              <app-icon class="cell__missing" pTooltip="Chưa có nhật ký" tooltipPosition="bottom">priority_high</app-icon>
             }
           </div>
 
@@ -36,7 +36,7 @@
                   type="button"
                   class="entry"
                   [class]="'entry--' + diary.status.toLowerCase()"
-                  [matTooltip]="diary.project.name + ' · ' + statusLabels[diary.status]"
+                  [pTooltip]="diary.project.name + ' · ' + statusLabels[diary.status]" tooltipPosition="bottom"
                   (click)="openDiary($event, diary.id)"
                 >
                   <span class="entry__dot" aria-hidden="true"></span>

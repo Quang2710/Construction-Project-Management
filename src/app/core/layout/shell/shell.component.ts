@@ -1,8 +1,8 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { RouterOutlet } from '@angular/router';
+import { DrawerModule } from 'primeng/drawer';
 import { map } from 'rxjs';
 import { BreadcrumbComponent } from '../breadcrumb/breadcrumb.component';
 import { LayoutStore } from '../layout.store';
@@ -14,7 +14,13 @@ const COMPACT_QUERY = '(max-width: 959.98px)';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, MatSidenavModule, SidebarComponent, TopbarComponent, BreadcrumbComponent],
+  imports: [
+    RouterOutlet,
+    DrawerModule,
+    SidebarComponent,
+    TopbarComponent,
+    BreadcrumbComponent,
+  ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,7 +36,6 @@ export class ShellComponent {
   );
 
   protected readonly sidebarCollapsed = computed(() => !this.isCompact() && this.layout.sidebarCollapsed());
-  protected readonly sidenavOpened = computed(() => !this.isCompact() || this.layout.mobileNavOpen());
 
   protected toggleNav(): void {
     if (this.isCompact()) {

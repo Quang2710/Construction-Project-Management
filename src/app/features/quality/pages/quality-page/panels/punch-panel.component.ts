@@ -1,15 +1,7 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipListboxChange, MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSelectModule } from '@angular/material/select';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
@@ -27,6 +19,16 @@ import {
   PunchSeverity,
   PunchStatus,
 } from '../../../models/quality.model';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { FIELD } from '../../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectButtonChangeEvent, SelectButtonModule } from 'primeng/selectbutton';
+import { withAllOption } from '../../../../../shared/utils/options';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { SelectModule } from 'primeng/select';
+import { ToggleButtonModule } from 'primeng/togglebutton';
 
 const ALL = 'ALL';
 
@@ -34,71 +36,70 @@ const ALL = 'ALL';
   selector: 'app-punch-panel',
   imports: [
     DatePipe,
+    FormsModule,
     ReactiveFormsModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
-    MatSelectModule,
+    SelectButtonModule,
+    PaginatorModule,
+    SelectModule,
+    ToggleButtonModule,
     EmptyStateComponent,
     ErrorStateComponent,
     QualityStatusChipComponent,
     SeverityBadgeComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
+    ...FIELD,
+    InputTextModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toolbar">
-      <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
-        <mat-label>Tìm mã, lỗi, vị trí</mat-label>
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput [formControl]="search" />
-      </mat-form-field>
-      <mat-form-field subscriptSizing="dynamic">
-        <mat-label>Mức độ</mat-label>
-        <mat-select [value]="store.punchFilter().severity ?? allValue" (valueChange)="onSeverity($event)">
-          <mat-option [value]="allValue">Tất cả</mat-option>
-          @for (severity of severities; track severity) {
-            <mat-option [value]="severity">{{ severityLabels[severity] }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <app-field class="toolbar__search" dense>
+        <label fieldLabel>Tìm mã, lỗi, vị trí</label>
+        <app-icon fieldPrefix>search</app-icon>
+        <input pInputText [formControl]="search" />
+      </app-field>
+      <app-field dense>
+        <label fieldLabel>Mức độ</label>
+        <p-select
+          [options]="severityFilterOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="store.punchFilter().severity ?? allValue"
+          (ngModelChange)="onSeverity($event)"
+          [fluid]="true"
+        />
+      </app-field>
       <span class="toolbar__spacer"></span>
       @if (store.canEdit()) {
-        <button mat-flat-button type="button" [disabled]="store.busy() || !store.members().length" (click)="create()">
-          <mat-icon>add_a_photo</mat-icon> Ghi nhận lỗi
+        <button pButton type="button" [disabled]="store.busy() || !store.members().length" (click)="create()">
+          <app-icon>add_a_photo</app-icon> Ghi nhận lỗi
         </button>
       }
     </div>
     <div class="toolbar">
-      <mat-chip-listbox
-        aria-label="Lọc theo trạng thái"
-        [value]="store.punchFilter().status ?? allValue"
-        [hideSingleSelectionIndicator]="true"
-        (change)="onStatus($event)"
-      >
-        <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
-        @for (status of statuses; track status) {
-          <mat-chip-option [value]="status">{{ statusLabels[status] }}</mat-chip-option>
-        }
-      </mat-chip-listbox>
-      <mat-chip-listbox aria-label="Lọc nhanh" [multiple]="true">
-        <mat-chip-option [selected]="store.punchFilter().mine" (selectionChange)="store.setPunchFilter({ mine: $event.selected })">
-          Giao cho tôi
-        </mat-chip-option>
-        <mat-chip-option [selected]="store.punchFilter().overdue" (selectionChange)="store.setPunchFilter({ overdue: $event.selected })">
-          Quá hạn
-          @if (store.overdueCount()) {
-            ({{ store.overdueCount() }})
-          }
-        </mat-chip-option>
-      </mat-chip-listbox>
+      <p-selectbutton class="app-chips" [options]="statusFilterOptions" optionLabel="label" optionValue="value" [allowEmpty]="false" [ngModel]="store.punchFilter().status ?? allValue" (onChange)="onStatus($event)" [attr.aria-label]="'Lọc theo trạng thái'" />
+      <div class="quick" role="group" aria-label="Lọc nhanh">
+        <p-togglebutton
+          onLabel="Giao cho tôi"
+          offLabel="Giao cho tôi"
+          size="small"
+          [ngModel]="store.punchFilter().mine"
+          (onChange)="store.setPunchFilter({ mine: $event.checked })"
+        />
+        <p-togglebutton
+          [onLabel]="overdueLabel()"
+          [offLabel]="overdueLabel()"
+          size="small"
+          [ngModel]="store.punchFilter().overdue"
+          (onChange)="store.setPunchFilter({ overdue: $event.checked })"
+        />
+      </div>
     </div>
 
     @if (store.punchLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.punchError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadPunchItems()" />
@@ -122,7 +123,7 @@ const ALL = 'ALL';
                 <span class="card__meta sub">
                   <span>{{ item.assignee?.fullName ?? 'Chưa giao' }}</span>
                   <span class="due" [class.due--overdue]="item.isOverdue">
-                    <mat-icon>{{ item.isOverdue ? 'alarm' : 'event' }}</mat-icon>
+                    <app-icon>{{ item.isOverdue ? 'alarm' : 'event' }}</app-icon>
                     {{ item.dueDate | date: 'dd/MM' }}{{ item.isOverdue ? ' · quá hạn' : '' }}
                   </span>
                 </span>
@@ -131,13 +132,7 @@ const ALL = 'ALL';
           </li>
         }
       </ul>
-      <mat-paginator
-        [length]="store.punchTotal()"
-        [pageIndex]="store.punchFilter().page - 1"
-        [pageSize]="store.pageSize()"
-        [hidePageSize]="true"
-        (page)="onPage($event)"
-      />
+      <p-paginator [totalRecords]="store.punchTotal()" [first]="(store.punchFilter().page - 1) * store.pageSize()" [rows]="store.pageSize()" [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} / {totalRecords}" (onPageChange)="onPage($event)" />
     }
   `,
   styleUrl: './panels.scss',
@@ -150,8 +145,11 @@ export class PunchPanelComponent {
   protected readonly allValue = ALL;
   protected readonly statuses = PUNCH_STATUSES;
   protected readonly statusLabels = PUNCH_STATUS_LABELS;
+  protected readonly statusFilterOptions = withAllOption(this.statuses, this.statusLabels, 'Tất cả');
   protected readonly severities = PUNCH_SEVERITIES;
   protected readonly severityLabels = PUNCH_SEVERITY_LABELS;
+  protected readonly severityFilterOptions = withAllOption(this.severities, this.severityLabels, 'Mọi mức độ');
+  protected readonly overdueLabel = computed(() => (this.store.overdueCount() ? `Quá hạn (${this.store.overdueCount()})` : 'Quá hạn'));
   protected readonly search = new FormControl(this.store.punchFilter().q, { nonNullable: true });
 
   constructor() {
@@ -160,7 +158,7 @@ export class PunchPanelComponent {
       .subscribe((q) => void this.store.setPunchFilter({ q }));
   }
 
-  protected onStatus(event: MatChipListboxChange): void {
+  protected onStatus(event: SelectButtonChangeEvent): void {
     const value: unknown = event.value;
     void this.store.setPunchFilter({ status: typeof value === 'string' && value !== ALL ? (value as PunchStatus) : null });
   }
@@ -169,8 +167,8 @@ export class PunchPanelComponent {
     void this.store.setPunchFilter({ severity: value === ALL ? null : (value as PunchSeverity) });
   }
 
-  protected onPage(event: PageEvent): void {
-    void this.store.setPunchFilter({ page: event.pageIndex + 1 });
+  protected onPage(event: PaginatorState): void {
+    void this.store.setPunchFilter({ page: (event.page ?? 0) + 1 });
   }
 
   protected open(item: PunchItem): void {

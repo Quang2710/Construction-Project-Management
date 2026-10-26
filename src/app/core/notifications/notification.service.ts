@@ -1,27 +1,56 @@
 import { inject, Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { firstValueFrom } from 'rxjs';
+import { MessageService } from 'primeng/api';
 
+/** Kênh toast có nút hành động (xem ToastHostComponent). */
+export const ACTION_TOAST_KEY = 'action';
+
+export interface ActionToastData {
+  readonly id: string;
+  readonly actionLabel: string;
+}
+
+/** Thông báo ngắn (toast PrimeNG) ở góc dưới màn hình. */
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly messages = inject(MessageService);
+  private readonly pending = new Map<string, (clicked: boolean) => void>();
+  private counter = 0;
 
   success(message: string): void {
-    this.snackBar.open(message, 'Đóng', { duration: 3000, panelClass: 'snack-success' });
+    this.messages.add({ severity: 'success', summary: message, life: 3000 });
   }
 
   error(message: string): void {
-    this.snackBar.open(message, 'Đóng', { duration: 5000, panelClass: 'snack-error' });
+    this.messages.add({ severity: 'error', summary: message, life: 5000 });
   }
 
   info(message: string): void {
-    this.snackBar.open(message, 'Đóng', { duration: 3000 });
+    this.messages.add({ severity: 'info', summary: message, life: 3000 });
   }
 
-  /** Thông báo kèm nút hành động; trả về true nếu người dùng bấm nút. */
-  async action(message: string, actionLabel: string, duration = 6000): Promise<boolean> {
-    const ref = this.snackBar.open(message, actionLabel, { duration });
-    const dismissed = await firstValueFrom(ref.afterDismissed());
-    return dismissed.dismissedByAction;
+  /** Thông báo kèm nút hành động; trả về true nếu người dùng bấm nút. duration 0 = giữ tới khi người dùng chọn. */
+  action(message: string, actionLabel: string, duration = 6000): Promise<boolean> {
+    const id = `toast-${++this.counter}`;
+    const data: ActionToastData = { id, actionLabel };
+    return new Promise<boolean>((resolve) => {
+      this.pending.set(id, resolve);
+      this.messages.add({
+        key: ACTION_TOAST_KEY,
+        severity: 'contrast',
+        summary: message,
+        data,
+        life: duration || undefined,
+        sticky: duration === 0,
+      });
+    });
+  }
+
+  /** Gọi từ ToastHostComponent khi toast hành động được bấm hoặc tự đóng. */
+  resolveAction(id: string, clicked: boolean): void {
+    this.pending.get(id)?.(clicked);
+    this.pending.delete(id);
+    if (clicked) {
+      this.messages.clear(ACTION_TOAST_KEY);
+    }
   }
 }

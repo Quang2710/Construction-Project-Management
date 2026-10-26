@@ -1,10 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal, untracked } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { PERMISSIONS } from '../../../../core/auth/permissions';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { EmptyStateComponent } from '../../../../shared/ui/state/empty-state.component';
@@ -14,6 +13,7 @@ import { parseIsoDate } from '../../../../shared/utils/date.utils';
 import { SiteDiariesApiService } from '../../data-access/site-diaries-api.service';
 import { SiteDiary, WEATHER_ICONS, WEATHER_LABELS } from '../../models/site-diary.model';
 import { DiaryStatusChipComponent } from '../diary-status-chip/diary-status-chip.component';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 const RECENT_COUNT = 10;
 
@@ -23,13 +23,13 @@ const RECENT_COUNT = 10;
   imports: [
     DatePipe,
     RouterLink,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
     HasRoleDirective,
     EmptyStateComponent,
     ErrorStateComponent,
     DiaryStatusChipComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-diaries-panel.component.html',

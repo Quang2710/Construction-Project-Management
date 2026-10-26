@@ -1,12 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { AppDialog } from '../../../../shared/ui/dialog/app-dialog.service';
 import { firstValueFrom } from 'rxjs';
 import { Task } from '../../models/task.model';
 import { TaskDialogComponent, TaskDialogData, TaskDialogResult } from './task-dialog.component';
 
 @Injectable({ providedIn: 'root' })
 export class TaskDialogService {
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
 
   /**
    * Mở dialog xem/sửa (task) hoặc tạo mới (projectId tuỳ chọn).
@@ -17,12 +17,11 @@ export class TaskDialogService {
       data: { task: data.task ?? null, projectId: data.projectId ?? null },
       width: '920px',
       maxWidth: 'calc(100vw - 24px)',
-      maxHeight: 'calc(100dvh - 24px)',
-      autoFocus: false,
       panelClass: 'task-dialog-panel',
+      // Form dài: bấm ra ngoài không đóng để tránh mất dữ liệu đang nhập.
+      dismissable: false,
     });
-    const instance = ref.componentInstance;
     const result = await firstValueFrom(ref.afterClosed());
-    return result ?? instance.pendingResult();
+    return result ?? ref.componentInstance()?.pendingResult();
   }
 }

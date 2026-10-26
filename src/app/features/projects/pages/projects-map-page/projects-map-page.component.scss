@@ -37,9 +37,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  border: 1px solid var(--mat-sys-primary);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--app-primary);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface-container-low);
 }
 
 .selected__top {
@@ -49,33 +49,33 @@
 }
 
 .selected__code {
-  font: var(--mat-sys-label-large);
-  color: var(--mat-sys-primary);
+  font: var(--app-label-large);
+  color: var(--app-primary);
 }
 
 .selected__name {
   margin: 0;
-  font: var(--mat-sys-title-medium);
+  font: var(--app-title-medium);
 }
 
 .selected__address,
 .selected__budget {
   margin: 0;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .list {
   margin: 0;
   padding: 0;
   list-style: none;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
   overflow: hidden;
 }
 
 .list li + li {
-  border-top: 1px solid var(--mat-sys-outline-variant);
+  border-top: 1px solid var(--app-outline-variant);
 }
 
 .list__item {
@@ -85,7 +85,7 @@
   width: 100%;
   padding: 10px 12px;
   border: 0;
-  background: var(--mat-sys-surface);
+  background: var(--app-surface);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -93,13 +93,13 @@
 
   &:hover,
   &:focus-visible {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
     outline: none;
   }
 }
 
 .list__item--active {
-  background: var(--mat-sys-secondary-container);
+  background: var(--app-secondary-container);
 }
 
 .list__text {
@@ -109,12 +109,12 @@
 }
 
 .list__name {
-  font: var(--mat-sys-body-medium);
+  font: var(--app-body-medium);
 }
 
 .list__sub {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 @media (max-width: 959.98px) {

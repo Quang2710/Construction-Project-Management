@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { ChangeOrderCreate, CostItemSummary } from '../../models/cost.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 export interface ChangeOrderDialogData {
   readonly projectCode: string;
@@ -20,85 +22,82 @@ const MAX_AMOUNT = 1e13;
 @Component({
   selector: 'app-change-order-dialog',
   imports: [
+    MutablePipe,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
+    ButtonModule,
+    ...FIELD,
+    InputTextModule,
+    TextareaModule,
+    DialogCloseDirective,
+    SelectModule,
+    DatePickerModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Đề xuất phát sinh · {{ data.projectCode }}</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Đề xuất phát sinh · {{ data.projectCode }}</h2>
+    <div dialogContent>
       <form [formGroup]="form" id="change-order-form" class="form" (ngSubmit)="save()">
-        <mat-form-field class="full">
-          <mat-label>Tên phát sinh</mat-label>
-          <input matInput formControlName="title" maxlength="200" />
+        <app-field class="full">
+          <label fieldLabel>Tên phát sinh</label>
+          <input pInputText formControlName="title" maxlength="200" />
           @if (form.controls.title.hasError('required') || form.controls.title.hasError('pattern')) {
-            <mat-error>Vui lòng nhập tên phát sinh.</mat-error>
+            <app-error>Vui lòng nhập tên phát sinh.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Hạng mục</mat-label>
-          <mat-select formControlName="costItemId">
-            @for (item of data.items; track item.id) {
-              <mat-option [value]="item.id">{{ item.code }} · {{ item.name }}</mat-option>
-            }
-          </mat-select>
+        <app-field>
+          <label fieldLabel>Hạng mục</label>
+          <p-select formControlName="costItemId" [options]="data.items | mutable" optionValue="id" placeholder="Chọn…" [fluid]="true">
+            <ng-template #selectedItem let-item>{{ item.code }} · {{ item.name }}</ng-template>
+            <ng-template #item let-item>{{ item.code }} · {{ item.name }}</ng-template>
+          </p-select>
           @if (form.controls.costItemId.hasError('required')) {
-            <mat-error>Vui lòng chọn hạng mục.</mat-error>
+            <app-error>Vui lòng chọn hạng mục.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Ngày phát sinh</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="date" placeholder="dd/MM/yyyy" />
-          <mat-datepicker-toggle matIconSuffix [for]="picker" />
-          <mat-datepicker #picker />
-          @if (form.controls.date.hasError('matDatepickerParse')) {
-            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
-          } @else if (form.controls.date.hasError('required')) {
-            <mat-error>Vui lòng chọn ngày phát sinh.</mat-error>
+        <app-field>
+          <label fieldLabel>Ngày phát sinh</label>
+          <p-datepicker formControlName="date" dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" [fluid]="true" />
+          @if (form.controls.date.hasError('required')) {
+            <app-error>Vui lòng chọn ngày phát sinh.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Chi phí thực hiện tăng thêm</mat-label>
-          <input matInput type="number" min="0" step="1000000" formControlName="costAmount" />
-          <span matTextSuffix>₫</span>
-          <mat-hint>Cộng vào dự toán hạng mục khi được chấp thuận</mat-hint>
+        <app-field>
+          <label fieldLabel>Chi phí thực hiện tăng thêm</label>
+          <input pInputText type="number" min="0" step="1000000" formControlName="costAmount" />
+          <span fieldSuffix>₫</span>
+          <small fieldHint>Cộng vào dự toán hạng mục khi được chấp thuận</small>
           @if (form.controls.costAmount.hasError('required')) {
-            <mat-error>Vui lòng nhập chi phí phát sinh.</mat-error>
+            <app-error>Vui lòng nhập chi phí phát sinh.</app-error>
           } @else if (form.controls.costAmount.hasError('min') || form.controls.costAmount.hasError('max')) {
-            <mat-error>Giá trị phải từ 0 đến 10 triệu tỷ.</mat-error>
+            <app-error>Giá trị phải từ 0 đến 10 triệu tỷ.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Giá trị đề nghị chủ đầu tư thanh toán</mat-label>
-          <input matInput type="number" min="0" step="1000000" formControlName="revenueAmount" />
-          <span matTextSuffix>₫</span>
-          <mat-hint>Tăng giá trị hợp đồng khi được chấp thuận</mat-hint>
+        <app-field>
+          <label fieldLabel>Giá trị đề nghị chủ đầu tư thanh toán</label>
+          <input pInputText type="number" min="0" step="1000000" formControlName="revenueAmount" />
+          <span fieldSuffix>₫</span>
+          <small fieldHint>Tăng giá trị hợp đồng khi được chấp thuận</small>
           @if (form.controls.revenueAmount.hasError('required')) {
-            <mat-error>Vui lòng nhập giá trị đề nghị thanh toán.</mat-error>
+            <app-error>Vui lòng nhập giá trị đề nghị thanh toán.</app-error>
           } @else if (form.controls.revenueAmount.hasError('min') || form.controls.revenueAmount.hasError('max')) {
-            <mat-error>Giá trị phải từ 0 đến 10 triệu tỷ.</mat-error>
+            <app-error>Giá trị phải từ 0 đến 10 triệu tỷ.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field class="full">
-          <mat-label>Mô tả, căn cứ phát sinh</mat-label>
-          <textarea matInput formControlName="description" rows="3" maxlength="2000"></textarea>
-        </mat-form-field>
+        <app-field class="full">
+          <label fieldLabel>Mô tả, căn cứ phát sinh</label>
+          <textarea pTextarea formControlName="description" rows="3" maxlength="2000"></textarea>
+        </app-field>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="change-order-form">Gửi đề xuất</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="change-order-form">Gửi đề xuất</button>
+    </div>
   `,
   styles: `
     .form {
@@ -121,8 +120,8 @@ const MAX_AMOUNT = 1e13;
   `,
 })
 export class ChangeOrderDialogComponent {
-  protected readonly data = inject<ChangeOrderDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<ChangeOrderDialogComponent, ChangeOrderCreate>>(MatDialogRef);
+  protected readonly data = injectDialogData<ChangeOrderDialogData>();
+  private readonly dialogRef = injectDialogRef<ChangeOrderCreate>();
 
   protected readonly form = new FormGroup({
     title: new FormControl('', {

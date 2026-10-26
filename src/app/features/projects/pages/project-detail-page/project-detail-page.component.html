@@ -1,5 +1,5 @@
 @if (store.loading() && !store.project()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (store.error(); as error) {
@@ -13,18 +13,18 @@
       </div>
       <h1 class="header__title">{{ project.name }}</h1>
       <p class="header__client">
-        <mat-icon>business</mat-icon>{{ project.clientName }}
+        <app-icon>business</app-icon>{{ project.clientName }}
         <span class="dot">·</span>
-        <mat-icon>location_on</mat-icon>{{ project.location.province }}
+        <app-icon>location_on</app-icon>{{ project.location.province }}
       </p>
     </div>
     <div class="header__actions" *hasRole="permissions.manageProjects">
-      <button mat-stroked-button type="button" class="danger" [disabled]="store.deleting()" (click)="remove()">
-        <mat-icon>delete</mat-icon>
+      <button pButton outlined type="button" severity="danger" [disabled]="store.deleting()" (click)="remove()">
+        <app-icon>delete</app-icon>
         Xoá
       </button>
-      <a mat-flat-button [routerLink]="['/projects', project.id, 'edit']">
-        <mat-icon>edit</mat-icon>
+      <a pButton [routerLink]="['/projects', project.id, 'edit']">
+        <app-icon>edit</app-icon>
         Chỉnh sửa
       </a>
     </div>
@@ -34,7 +34,7 @@
     <div class="alerts">
       @if (project.isDelayed) {
         <div class="alert alert--warning">
-          <mat-icon>schedule</mat-icon>
+          <app-icon>schedule</app-icon>
           <span>
             Chậm tiến độ: thực tế {{ project.progress }}% so với kế hoạch {{ project.plannedProgress }}%
             @if (project.taskStats.overdue) {
@@ -45,16 +45,27 @@
       }
       @if (project.isOverBudget) {
         <div class="alert alert--error">
-          <mat-icon>money_off</mat-icon>
+          <app-icon>money_off</app-icon>
           <span>Vượt ngân sách: đã chi {{ budgetUsage() }}% ngân sách khi mới hoàn thành {{ project.progress }}% khối lượng.</span>
         </div>
       }
     </div>
   }
 
-  <mat-tab-group class="tabs" mat-stretch-tabs="false" mat-align-tabs="start" animationDuration="150ms">
-    <mat-tab label="Tổng quan">
-      <ng-template matTabContent>
+  <p-tabs class="tabs" [value]="0" [lazy]="true" [scrollable]="true">
+    <p-tablist>
+      <p-tab [value]="0">Tổng quan</p-tab>
+      <p-tab [value]="1">Công việc</p-tab>
+      @for (tab of placeholderTabs; track tab.label) {
+        @if (tab.label === 'Tài liệu') {
+          <p-tab value="Nhật ký">Nhật ký</p-tab>
+        }
+        <p-tab [value]="tab.label">{{ tab.label }}</p-tab>
+      }
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel [value]="0">
+        <ng-template #content>
         <div class="overview">
           <section class="card card--progress">
             <h2 class="card__title">Tiến độ</h2>
@@ -121,34 +132,37 @@
             <p class="map__coords">{{ project.location.lat | number: '1.4-4' }}, {{ project.location.lng | number: '1.4-4' }}</p>
           </section>
         </div>
-      </ng-template>
-    </mat-tab>
-
-    <mat-tab label="Công việc">
-      <ng-template matTabContent>
+      
+        </ng-template>
+      </p-tabpanel>
+      <p-tabpanel [value]="1">
+        <ng-template #content>
         <div class="tab-body">
           <app-project-tasks-panel [projectId]="project.id" (changed)="onTasksChanged()" />
         </div>
-      </ng-template>
-    </mat-tab>
-
-    @for (tab of placeholderTabs; track tab.label) {
-      @if (tab.label === 'Tài liệu') {
-        <mat-tab label="Nhật ký">
-          <ng-template matTabContent>
+      
+        </ng-template>
+      </p-tabpanel>
+      @for (tab of placeholderTabs; track tab.label) {
+        @if (tab.label === 'Tài liệu') {
+          <p-tabpanel value="Nhật ký">
+            <ng-template #content>
             <app-project-diaries-panel [projectId]="project.id" />
-          </ng-template>
-        </mat-tab>
-      }
-      <mat-tab [label]="tab.label">
-        <ng-template matTabContent>
+          
+            </ng-template>
+          </p-tabpanel>
+        }
+        <p-tabpanel [value]="tab.label">
+          <ng-template #content>
           <app-empty-state
             [icon]="tab.icon"
             [title]="tab.label + ' — đang phát triển'"
             [message]="tab.description + ' Chức năng sẽ có ở giai đoạn sau.'"
           />
-        </ng-template>
-      </mat-tab>
-    }
-  </mat-tab-group>
+        
+          </ng-template>
+        </p-tabpanel>
+      }
+    </p-tabpanels>
+  </p-tabs>
 }

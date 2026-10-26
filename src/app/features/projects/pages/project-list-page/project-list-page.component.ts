@@ -2,19 +2,17 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipListboxChange, MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSortModule, Sort } from '@angular/material/sort';
-import { MatTableModule } from '@angular/material/table';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { SortEvent } from 'primeng/api';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { TableModule } from 'primeng/table';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { InputTextModule } from 'primeng/inputtext';
 import { PERMISSIONS } from '../../../../core/auth/permissions';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { VndPipe } from '../../../../shared/pipes/vnd.pipe';
@@ -24,28 +22,23 @@ import { ErrorStateComponent } from '../../../../shared/ui/state/error-state.com
 import { ProgressCompareComponent } from '../../components/progress-compare/progress-compare.component';
 import { ProjectStatusChipComponent } from '../../components/project-status-chip/project-status-chip.component';
 import { ProjectsListStore } from '../../data-access/projects-list.store';
+import { fromAllOption, withAllOption } from '../../../../shared/utils/options';
 import { Project, PROJECT_STATUS_LABELS, PROJECT_STATUSES, ProjectStatus } from '../../models/project.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
 
 const ALL = 'ALL';
-const FULL_COLUMNS = ['code', 'name', 'startDate', 'budget', 'progress', 'status', 'alerts'];
-const COMPACT_COLUMNS = ['name', 'progress', 'status'];
 
 @Component({
   selector: 'app-project-list-page',
   imports: [
     RouterLink,
     DatePipe,
+    FormsModule,
     ReactiveFormsModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatProgressBarModule,
-    MatTooltipModule,
+    TableModule,
+    PaginatorModule,
+    SelectButtonModule,
     HasRoleDirective,
     VndPipe,
     PageHeaderComponent,
@@ -53,6 +46,12 @@ const COMPACT_COLUMNS = ['name', 'progress', 'status'];
     ErrorStateComponent,
     ProjectStatusChipComponent,
     ProgressCompareComponent,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ProgressBarModule,
+    ...FIELD,
+    InputTextModule,
   ],
   providers: [ProjectsListStore],
   templateUrl: './project-list-page.component.html',
@@ -65,20 +64,18 @@ export class ProjectListPageComponent {
 
   protected readonly permissions = PERMISSIONS;
   protected readonly allValue = ALL;
-  protected readonly statuses = PROJECT_STATUSES;
-  protected readonly statusLabels = PROJECT_STATUS_LABELS;
+  protected readonly statusOptions = withAllOption(PROJECT_STATUSES, PROJECT_STATUS_LABELS);
   protected readonly searchControl = new FormControl(this.store.q(), { nonNullable: true });
 
-  private readonly isCompact = toSignal(
+  protected readonly isCompact = toSignal(
     inject(BreakpointObserver)
       .observe('(max-width: 767.98px)')
       .pipe(map((state) => state.matches)),
     { initialValue: false },
   );
 
-  protected readonly columns = computed(() => (this.isCompact() ? COMPACT_COLUMNS : FULL_COLUMNS));
   protected readonly sortActive = computed(() => this.store.sort().replace(/^-/, ''));
-  protected readonly sortDirection = computed(() => (this.store.sort().startsWith('-') ? 'desc' : 'asc'));
+  protected readonly sortOrder = computed(() => (this.store.sort().startsWith('-') ? -1 : 1));
 
   constructor() {
     this.searchControl.valueChanges
@@ -86,17 +83,21 @@ export class ProjectListPageComponent {
       .subscribe((q) => this.store.setSearch(q));
   }
 
-  protected onStatusChange(event: MatChipListboxChange): void {
-    const value: unknown = event.value;
-    this.store.setStatus(typeof value === 'string' && value !== ALL ? (value as ProjectStatus) : null);
+  protected onStatusChange(value: unknown): void {
+    this.store.setStatus(fromAllOption<ProjectStatus>(value));
   }
 
-  protected onSort(sort: Sort): void {
-    this.store.setSort(sort.active, sort.direction);
+  /** Chỉ cập nhật khi người dùng đổi cột/chiều sắp xếp (tránh về trang 1 khi bảng phát lại sự kiện). */
+  protected onSort(event: SortEvent): void {
+    const field = event.field ?? this.sortActive();
+    const order = event.order === -1 ? -1 : 1;
+    if (field !== this.sortActive() || order !== this.sortOrder()) {
+      this.store.setSort(field, order === -1 ? 'desc' : 'asc');
+    }
   }
 
-  protected onPage(event: PageEvent): void {
-    this.store.setPage(event.pageIndex + 1, event.pageSize);
+  protected onPage(event: PaginatorState): void {
+    this.store.setPage((event.page ?? 0) + 1, event.rows ?? this.store.pageSize());
   }
 
   protected openProject(project: Project): void {

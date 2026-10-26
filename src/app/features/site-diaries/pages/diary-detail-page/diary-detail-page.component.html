@@ -1,5 +1,5 @@
 @if (store.loading() && !store.diary()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (store.error(); as error) {
@@ -18,39 +18,39 @@
     </div>
 
     <div class="header__actions">
-      <button mat-stroked-button type="button" [disabled]="exporting()" (click)="exportPdf()">
+      <button pButton outlined type="button" [disabled]="exporting()" (click)="exportPdf()">
         @if (exporting()) {
-          <mat-spinner diameter="18" />
+          <p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 18px; height: 18px" />
         } @else {
-          <mat-icon>picture_as_pdf</mat-icon>
+          <app-icon>picture_as_pdf</app-icon>
         }
         Xuất PDF
       </button>
       @if (store.canDelete()) {
-        <button mat-stroked-button type="button" class="danger" [disabled]="store.acting() !== null" (click)="remove()">
-          <mat-icon>delete</mat-icon>
+        <button pButton outlined type="button" severity="danger" [disabled]="store.acting() !== null" (click)="remove()">
+          <app-icon>delete</app-icon>
           Xoá
         </button>
       }
       @if (store.canEdit()) {
-        <a mat-stroked-button [routerLink]="['/site-diaries', diary.id, 'edit']">
-          <mat-icon>edit</mat-icon>
+        <a pButton outlined [routerLink]="['/site-diaries', diary.id, 'edit']">
+          <app-icon>edit</app-icon>
           Chỉnh sửa
         </a>
       }
       @if (store.canSubmit()) {
-        <button mat-flat-button type="button" [disabled]="store.acting() !== null" (click)="submit()">
-          <mat-icon>send</mat-icon>
+        <button pButton type="button" [disabled]="store.acting() !== null" (click)="submit()">
+          <app-icon>send</app-icon>
           Gửi duyệt
         </button>
       }
       @if (store.canReview()) {
-        <button mat-stroked-button type="button" class="danger" [disabled]="store.acting() !== null" (click)="review('reject')">
-          <mat-icon>undo</mat-icon>
+        <button pButton outlined type="button" severity="danger" [disabled]="store.acting() !== null" (click)="review('reject')">
+          <app-icon>undo</app-icon>
           Trả lại
         </button>
-        <button mat-flat-button type="button" [disabled]="store.acting() !== null" (click)="review('approve')">
-          <mat-icon>verified</mat-icon>
+        <button pButton type="button" [disabled]="store.acting() !== null" (click)="review('approve')">
+          <app-icon>verified</app-icon>
           Phê duyệt
         </button>
       }
@@ -59,12 +59,12 @@
 
   @if (diary.status === 'REJECTED' && diary.reviewNote) {
     <div class="banner banner--error" role="status">
-      <mat-icon>undo</mat-icon>
+      <app-icon>undo</app-icon>
       <div><strong>Bị trả lại:</strong> {{ diary.reviewNote }}</div>
     </div>
   } @else if (diary.status === 'SUBMITTED') {
     <div class="banner banner--info" role="status">
-      <mat-icon>hourglass_top</mat-icon>
+      <app-icon>hourglass_top</app-icon>
       <div>Đang chờ quản lý dự án duyệt. Nhật ký bị khoá chỉnh sửa.</div>
     </div>
   }
@@ -74,16 +74,16 @@
       <h2 class="card__title">Thời tiết</h2>
       <div class="weather">
         <div class="weather__slot">
-          <mat-icon>{{ weatherIcons[diary.weather.morning] }}</mat-icon>
+          <app-icon>{{ weatherIcons[diary.weather.morning] }}</app-icon>
           <span>Sáng: {{ weatherLabels[diary.weather.morning] }}</span>
         </div>
         <div class="weather__slot">
-          <mat-icon>{{ weatherIcons[diary.weather.afternoon] }}</mat-icon>
+          <app-icon>{{ weatherIcons[diary.weather.afternoon] }}</app-icon>
           <span>Chiều: {{ weatherLabels[diary.weather.afternoon] }}</span>
         </div>
         @if (diary.weather.minTemp !== null && diary.weather.maxTemp !== null) {
           <div class="weather__slot">
-            <mat-icon>thermostat</mat-icon>
+            <app-icon>thermostat</app-icon>
             <span>{{ diary.weather.minTemp }}–{{ diary.weather.maxTemp }} °C</span>
           </div>
         }
@@ -156,7 +156,7 @@
     </h2>
     @for (incident of diary.incidents; track $index) {
       <div class="incident" [class]="'incident--' + incident.severity.toLowerCase()">
-        <mat-icon>{{ incident.type === 'SAFETY' ? 'health_and_safety' : 'report' }}</mat-icon>
+        <app-icon>{{ incident.type === 'SAFETY' ? 'health_and_safety' : 'report' }}</app-icon>
         <div>
           <p class="incident__title">
             {{ incidentTypeLabels[incident.type] }} · Mức độ: {{ severityLabels[incident.severity] }}
@@ -168,7 +168,7 @@
         </div>
       </div>
     } @empty {
-      <p class="muted safe"><mat-icon>verified_user</mat-icon> Không có sự cố, đảm bảo an toàn lao động.</p>
+      <p class="muted safe"><app-icon>verified_user</app-icon> Không có sự cố, đảm bảo an toàn lao động.</p>
     }
   </section>
 

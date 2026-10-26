@@ -9,8 +9,8 @@
 }
 
 .summary {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .summary__pass {
@@ -18,7 +18,7 @@
 }
 
 .summary__fail {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .checklist {
@@ -32,7 +32,7 @@
 
 .check {
   padding: 12px;
-  border: 1px solid var(--mat-sys-outline-variant);
+  border: 1px solid var(--app-outline-variant);
   border-left-width: 4px;
   border-radius: 8px;
 }
@@ -42,12 +42,12 @@
 }
 
 .check--fail {
-  border-left-color: var(--mat-sys-error);
-  background: color-mix(in srgb, var(--mat-sys-error-container) 35%, transparent);
+  border-left-color: var(--app-error);
+  background: color-mix(in srgb, var(--app-error-container) 35%, transparent);
 }
 
 .check--na {
-  border-left-color: var(--mat-sys-outline);
+  border-left-color: var(--app-outline);
 }
 
 .check__head {
@@ -64,31 +64,38 @@
 
 .check__criterion {
   margin: 0;
-  font: var(--mat-sys-title-small);
+  font: var(--app-title-small);
 }
 
 .check__requirement {
   margin: 2px 0 0;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
-.check__result {
-  --mat-standard-button-toggle-height: 36px;
+.result {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  app-icon {
+    font-size: 16px;
+  }
 }
 
-.toggle--pass.mat-button-toggle-checked {
+// Màu nút đang chọn theo kết quả (lớp check--pass / check--fail trên dòng tiêu chí).
+.check--pass .check__result ::ng-deep .p-togglebutton-checked .p-togglebutton-content {
   background: var(--app-success-container);
   color: var(--app-on-success-container);
 }
 
-.toggle--fail.mat-button-toggle-checked {
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+.check--fail .check__result ::ng-deep .p-togglebutton-checked .p-togglebutton-content {
+  background: var(--app-error-container);
+  color: var(--app-on-error-container);
 }
 
 .check__label {
-  font: var(--mat-sys-label-large);
+  font: var(--app-label-large);
 }
 
 .check--pass .check__label {
@@ -96,7 +103,7 @@
 }
 
 .check--fail .check__label {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .check__note {
@@ -106,7 +113,7 @@
 
 .check__note-text {
   margin: 6px 0 0;
-  font: var(--mat-sys-body-small);
+  font: var(--app-body-small);
   font-style: italic;
 }
 
@@ -122,11 +129,11 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font: var(--mat-sys-label-large);
-  color: var(--mat-sys-primary);
+  font: var(--app-label-large);
+  color: var(--app-primary);
   text-decoration: none;
 
-  mat-icon {
+  app-icon {
     width: 18px;
     height: 18px;
     font-size: 18px;
@@ -152,8 +159,8 @@
 
 .hint {
   margin: 0;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .add {

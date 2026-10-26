@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import {
   INSPECTION_STATUS_LABELS,
   InspectionStatus,
   PUNCH_STATUS_LABELS,
   PunchStatus,
 } from '../../models/quality.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 /** Hai tập trạng thái (phiếu nghiệm thu, punch item) không trùng giá trị nên dùng chung một chip. */
 type QualityStatus = InspectionStatus | PunchStatus;
@@ -24,10 +24,12 @@ const CHIP: Readonly<Record<QualityStatus, { readonly label: string; readonly ic
 
 @Component({
   selector: 'app-quality-status-chip',
-  imports: [MatIconModule],
+  imports: [
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': '"chip chip--" + chip().tone' },
-  template: `<mat-icon>{{ chip().icon }}</mat-icon><span>{{ chip().label }}{{ suffix() }}</span>`,
+  template: `<app-icon>{{ chip().icon }}</app-icon><span>{{ chip().label }}{{ suffix() }}</span>`,
   styles: `
     :host {
       display: inline-flex;
@@ -35,21 +37,21 @@ const CHIP: Readonly<Record<QualityStatus, { readonly label: string; readonly ic
       gap: 4px;
       padding: 2px 10px 2px 6px;
       border-radius: 999px;
-      font: var(--mat-sys-label-medium);
+      font: var(--app-label-medium);
       white-space: nowrap;
     }
-    mat-icon {
+    app-icon {
       width: 16px;
       height: 16px;
       font-size: 16px;
     }
     :host(.chip--neutral) {
-      background: var(--mat-sys-surface-container-high);
-      color: var(--mat-sys-on-surface-variant);
+      background: var(--app-surface-container-high);
+      color: var(--app-on-surface-variant);
     }
     :host(.chip--pending) {
-      background: var(--mat-sys-tertiary-container);
-      color: var(--mat-sys-on-tertiary-container);
+      background: var(--app-tertiary-container);
+      color: var(--app-on-tertiary-container);
     }
     :host(.chip--progress) {
       background: var(--app-warning-container);
@@ -60,8 +62,8 @@ const CHIP: Readonly<Record<QualityStatus, { readonly label: string; readonly ic
       color: var(--app-on-success-container);
     }
     :host(.chip--danger) {
-      background: var(--mat-sys-error-container);
-      color: var(--mat-sys-on-error-container);
+      background: var(--app-error-container);
+      color: var(--app-on-error-container);
     }
   `,
 })

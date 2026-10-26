@@ -2,10 +2,10 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
   overflow: hidden;
-  background: var(--mat-sys-surface);
+  background: var(--app-surface);
 }
 
 .toolbar {
@@ -14,13 +14,13 @@
   align-items: center;
   gap: 2px;
   padding: 4px 8px;
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
-  background: var(--mat-sys-surface-container-low);
+  border-bottom: 1px solid var(--app-outline-variant);
+  background: var(--app-surface-container-low);
 }
 
 .toolbar__label {
   min-width: 56px;
-  font: var(--mat-sys-label-large);
+  font: var(--app-label-large);
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
@@ -34,7 +34,7 @@
   padding: 12px;
   overflow: auto;
   /* Bản vẽ luôn nền trắng, kể cả giao diện tối. */
-  background: var(--mat-sys-surface-container-highest);
+  background: var(--app-surface-container-highest);
   overscroll-behavior: contain;
   touch-action: pan-x pan-y;
 }
@@ -49,5 +49,5 @@
 .error {
   margin: 0;
   padding: 12px 16px;
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }

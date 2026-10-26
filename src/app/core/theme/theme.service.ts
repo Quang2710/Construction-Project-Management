@@ -1,10 +1,11 @@
 ﻿import { DOCUMENT, effect, inject, Injectable, signal } from '@angular/core';
 import { readStorage, writeStorage } from '../storage/local-storage';
+import { DARK_MODE_CLASS } from './app-theme.preset';
 
 export type ThemeMode = 'light' | 'dark';
 
 const THEME_STORAGE_KEY = 'cpm.theme';
-const DARK_CLASS = 'theme-dark';
+const DARK_CLASS = DARK_MODE_CLASS;
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {

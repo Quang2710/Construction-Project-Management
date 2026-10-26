@@ -11,7 +11,9 @@ const ROW_HEIGHT = 44;
 /** Cột ngang: dự toán vs thực tế theo hạng mục. */
 @Component({
   selector: 'app-cost-items-chart',
-  imports: [BaseChartDirective],
+  imports: [
+    BaseChartDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="chart" [style.height.px]="height()">

@@ -1,27 +1,32 @@
 <div class="toolbar" role="toolbar" aria-label="Điều khiển so sánh phiên bản">
-  <mat-button-toggle-group
-    [value]="mode()"
-    [hideSingleSelectionIndicator]="true"
-    aria-label="Chế độ so sánh"
-    (change)="setMode($event.value)"
+  <p-selectbutton
+    [options]="modeOptions | mutable"
+    optionLabel="label"
+    optionValue="value"
+    [allowEmpty]="false"
+    size="small"
+    [ngModel]="mode()"
+    (onChange)="setMode($event.value)"
+    [attr.aria-label]="'Chế độ so sánh'"
   >
-    <mat-button-toggle value="overlay"><mat-icon>layers</mat-icon> Chồng lớp</mat-button-toggle>
-    <mat-button-toggle value="side"><mat-icon>view_column_2</mat-icon> Cạnh nhau</mat-button-toggle>
-  </mat-button-toggle-group>
+    <ng-template #item let-option>
+      <span class="mode"><app-icon>{{ option.icon }}</app-icon> {{ option.label }}</span>
+    </ng-template>
+  </p-selectbutton>
   @if (pageCount() > 1) {
-    <button mat-icon-button type="button" aria-label="Trang trước" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
-      <mat-icon>chevron_left</mat-icon>
+    <button pButton text rounded severity="secondary" type="button" aria-label="Trang trước" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+      <app-icon pButtonIcon>chevron_left</app-icon>
     </button>
     <span class="toolbar__label">Trang {{ page() }}/{{ pageCount() }}</span>
-    <button mat-icon-button type="button" aria-label="Trang sau" [disabled]="page() >= pageCount()" (click)="goTo(page() + 1)">
-      <mat-icon>chevron_right</mat-icon>
+    <button pButton text rounded severity="secondary" type="button" aria-label="Trang sau" [disabled]="page() >= pageCount()" (click)="goTo(page() + 1)">
+      <app-icon pButtonIcon>chevron_right</app-icon>
     </button>
   }
   <span class="toolbar__spacer"></span>
-  <button mat-icon-button type="button" aria-label="Thu nhỏ" matTooltip="Thu nhỏ" (click)="zoom(1 / zoomStep)"><mat-icon>zoom_out</mat-icon></button>
+  <button pButton text rounded severity="secondary" type="button" aria-label="Thu nhỏ" pTooltip="Thu nhỏ" tooltipPosition="bottom" (click)="zoom(1 / zoomStep)"><app-icon pButtonIcon>zoom_out</app-icon></button>
   <span class="toolbar__label">{{ percent() }}%</span>
-  <button mat-icon-button type="button" aria-label="Phóng to" matTooltip="Phóng to" (click)="zoom(zoomStep)"><mat-icon>zoom_in</mat-icon></button>
-  <button mat-icon-button type="button" aria-label="Vừa khung" matTooltip="Vừa chiều rộng" (click)="fit()"><mat-icon>fit_screen</mat-icon></button>
+  <button pButton text rounded severity="secondary" type="button" aria-label="Phóng to" pTooltip="Phóng to" tooltipPosition="bottom" (click)="zoom(zoomStep)"><app-icon pButtonIcon>zoom_in</app-icon></button>
+  <button pButton text rounded severity="secondary" type="button" aria-label="Vừa khung" pTooltip="Vừa chiều rộng" tooltipPosition="bottom" (click)="fit()"><app-icon pButtonIcon>fit_screen</app-icon></button>
 </div>
 
 @if (mode() === 'overlay') {
@@ -36,7 +41,7 @@
 }
 
 @if (busy()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 @if (error()) {
   <p class="error" role="alert">{{ error() }}</p>

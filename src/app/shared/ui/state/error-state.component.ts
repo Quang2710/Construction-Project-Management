@@ -1,18 +1,21 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-error-state',
-  imports: [MatIconModule, MatButtonModule],
+  imports: [
+    ButtonModule,
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { role: 'alert', class: 'error' },
   template: `
-    <mat-icon class="icon">error_outline</mat-icon>
+    <app-icon class="icon">error_outline</app-icon>
     <p class="title">{{ title() }}</p>
     <p class="message">{{ message() }}</p>
-    <button mat-stroked-button type="button" (click)="retry.emit()">
-      <mat-icon>refresh</mat-icon>
+    <button pButton outlined type="button" (click)="retry.emit()">
+      <app-icon>refresh</app-icon>
       Thử lại
     </button>
   `,

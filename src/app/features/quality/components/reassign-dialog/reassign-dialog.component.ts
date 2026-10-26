@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ROLE_LABELS, UserSummary } from '../../../../shared/models/user.model';
 import { parseIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
+import { RoleLabelPipe } from '../../../../shared/pipes/role-label.pipe';
 
 export interface ReassignDialogData {
   readonly members: readonly UserSummary[];
@@ -23,40 +25,45 @@ export interface ReassignResult {
 
 @Component({
   selector: 'app-reassign-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatDatepickerModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    RoleLabelPipe,
+    MutablePipe,
+    ReactiveFormsModule,
+    ButtonModule,
+    ...FIELD,
+    InputTextModule,
+    DialogCloseDirective,
+    SelectModule,
+    DatePickerModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Giao lại / đổi hạn</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Giao lại / đổi hạn</h2>
+    <div dialogContent>
       <form [formGroup]="form" id="reassign-form" class="form" (ngSubmit)="save()">
-        <mat-form-field>
-          <mat-label>Người xử lý</mat-label>
-          <mat-select formControlName="assigneeId">
-            @for (member of data.members; track member.id) {
-              <mat-option [value]="member.id">{{ member.fullName }} · {{ roleLabels[member.role] }}</mat-option>
-            }
-          </mat-select>
+        <app-field>
+          <label fieldLabel>Người xử lý</label>
+          <p-select formControlName="assigneeId" [options]="data.members | mutable" optionValue="id" placeholder="Chọn…" [fluid]="true">
+            <ng-template #selectedItem let-member>{{ member.fullName }} · {{ member.role | roleLabel }}</ng-template>
+            <ng-template #item let-member>{{ member.fullName }} · {{ member.role | roleLabel }}</ng-template>
+          </p-select>
           @if (form.controls.assigneeId.hasError('required')) {
-            <mat-error>Vui lòng chọn người xử lý.</mat-error>
+            <app-error>Vui lòng chọn người xử lý.</app-error>
           }
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Hạn xử lý</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="dueDate" placeholder="dd/MM/yyyy" />
-          <mat-datepicker-toggle matIconSuffix [for]="picker" />
-          <mat-datepicker #picker />
-          @if (form.controls.dueDate.hasError('matDatepickerParse')) {
-            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
-          } @else if (form.controls.dueDate.hasError('required')) {
-            <mat-error>Vui lòng chọn hạn xử lý.</mat-error>
+        </app-field>
+        <app-field>
+          <label fieldLabel>Hạn xử lý</label>
+          <p-datepicker formControlName="dueDate" dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" [fluid]="true" />
+          @if (form.controls.dueDate.hasError('required')) {
+            <app-error>Vui lòng chọn hạn xử lý.</app-error>
           }
-        </mat-form-field>
+        </app-field>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="reassign-form">Lưu</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="reassign-form">Lưu</button>
+    </div>
   `,
   styles: `
     .form {
@@ -69,8 +76,8 @@ export interface ReassignResult {
   `,
 })
 export class ReassignDialogComponent {
-  protected readonly data = inject<ReassignDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<ReassignDialogComponent, ReassignResult>>(MatDialogRef);
+  protected readonly data = injectDialogData<ReassignDialogData>();
+  private readonly dialogRef = injectDialogRef<ReassignResult>();
   protected readonly roleLabels = ROLE_LABELS;
 
   protected readonly form = new FormGroup({

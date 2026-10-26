@@ -3,9 +3,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border: 1px solid var(--mat-sys-outline-variant);
+  border: 1px solid var(--app-outline-variant);
   border-radius: 12px;
-  background: var(--mat-sys-surface);
+  background: var(--app-surface);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
   cursor: pointer;
   user-select: none;
@@ -13,13 +13,13 @@
 
   &:hover,
   &:focus-visible {
-    border-color: var(--mat-sys-primary);
+    border-color: var(--app-primary);
     outline: none;
   }
 }
 
 :host(.overdue) {
-  border-left: 4px solid var(--mat-sys-error);
+  border-left: 4px solid var(--app-error);
 }
 
 :host(.pending) {
@@ -35,14 +35,14 @@
 }
 
 .card__project {
-  font: var(--mat-sys-label-small);
-  color: var(--mat-sys-primary);
+  font: var(--app-label-small);
+  color: var(--app-primary);
   letter-spacing: 0.04em;
 }
 
 .card__title {
   margin: 0;
-  font: var(--mat-sys-title-small);
+  font: var(--app-title-small);
 }
 
 .card__milestone {
@@ -50,7 +50,7 @@
   height: 16px;
   font-size: 16px;
   vertical-align: -3px;
-  color: var(--mat-sys-primary);
+  color: var(--app-primary);
 }
 
 .card__labels {
@@ -62,21 +62,21 @@
 .label {
   padding: 0 8px;
   border-radius: 6px;
-  background: var(--mat-sys-surface-container-high);
-  font: var(--mat-sys-label-small);
-  color: var(--mat-sys-on-surface-variant);
+  background: var(--app-surface-container-high);
+  font: var(--app-label-small);
+  color: var(--app-on-surface-variant);
 }
 
 .progress {
   height: 4px;
   border-radius: 999px;
-  background: var(--mat-sys-surface-container-highest);
+  background: var(--app-surface-container-highest);
 }
 
 .progress__fill {
   height: 100%;
   border-radius: inherit;
-  background: var(--mat-sys-primary);
+  background: var(--app-primary);
 }
 
 .due,
@@ -84,10 +84,10 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 
-  mat-icon {
+  app-icon {
     width: 16px;
     height: 16px;
     font-size: 16px;
@@ -95,7 +95,7 @@
 }
 
 :host(.overdue) .due {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
   font-weight: 600;
 }
 
@@ -106,6 +106,6 @@
 }
 
 .percent {
-  font: var(--mat-sys-label-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-label-small);
+  color: var(--app-on-surface-variant);
 }

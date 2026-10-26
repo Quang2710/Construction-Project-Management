@@ -22,27 +22,27 @@
 
 .table-wrap {
   overflow-x: auto;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font: var(--mat-sys-body-medium);
+  font: var(--app-body-medium);
 
   th,
   td {
     padding: 8px 12px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    border-bottom: 1px solid var(--app-outline-variant);
     text-align: left;
     vertical-align: middle;
   }
 
   th {
-    font: var(--mat-sys-label-large);
-    color: var(--mat-sys-on-surface-variant);
-    background: var(--mat-sys-surface-container-low);
+    font: var(--app-label-large);
+    color: var(--app-on-surface-variant);
+    background: var(--app-surface-container-low);
     white-space: nowrap;
   }
 
@@ -55,7 +55,7 @@
   cursor: pointer;
 
   &:hover {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
   }
 }
 
@@ -71,16 +71,16 @@
   width: 20px;
   height: 20px;
   font-size: 20px;
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .sub {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .rev {
-  font: var(--mat-sys-label-large);
+  font: var(--app-label-large);
   white-space: nowrap;
 }
 

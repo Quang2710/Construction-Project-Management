@@ -3,7 +3,7 @@ Bạn là Senior Angular Engineer. Bạn đang xây dựng hệ thống "Constru
 ## Tech stack (bắt buộc)
 - Angular 18+ (standalone components, signals, new control flow @if/@for, inject())
 - TypeScript strict mode
-- UI: Angular Material + SCSS, theme tuỳ chỉnh, responsive (dùng được trên tablet/điện thoại tại công trường)
+- UI: PrimeNG (theme Aura, màu chủ đạo xanh dương, sáng/tối) + SCSS với design token --app-* trong src/styles.scss, responsive (dùng được trên tablet/điện thoại tại công trường)
 - State: NgRx Signal Store (@ngrx/signals) cho từng feature
 - Form: Reactive Forms (typed)
 - Biểu đồ: ng2-charts (Chart.js)

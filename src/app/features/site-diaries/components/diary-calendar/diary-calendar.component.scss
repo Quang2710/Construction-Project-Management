@@ -1,8 +1,8 @@
 .calendar {
   overflow: hidden;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface);
 }
 
 .row {
@@ -11,15 +11,15 @@
 }
 
 .row + .row {
-  border-top: 1px solid var(--mat-sys-outline-variant);
+  border-top: 1px solid var(--app-outline-variant);
 }
 
 .weekday {
   padding: 8px;
-  font: var(--mat-sys-label-medium);
+  font: var(--app-label-medium);
   text-align: center;
-  color: var(--mat-sys-on-surface-variant);
-  background: var(--mat-sys-surface-container-low);
+  color: var(--app-on-surface-variant);
+  background: var(--app-surface-container-low);
 }
 
 .cell {
@@ -30,35 +30,35 @@
   transition: background 120ms ease;
 
   & + .cell {
-    border-left: 1px solid var(--mat-sys-outline-variant);
+    border-left: 1px solid var(--app-outline-variant);
   }
 
   &:hover {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
   }
 
   &:focus-visible {
-    box-shadow: inset 0 0 0 2px var(--mat-sys-primary);
+    box-shadow: inset 0 0 0 2px var(--app-primary);
   }
 }
 
 .cell--outside {
-  background: var(--mat-sys-surface-container-lowest);
+  background: var(--app-surface-container-lowest);
 
   .cell__day {
-    color: var(--mat-sys-outline);
+    color: var(--app-outline);
   }
 }
 
 .cell--sunday .cell__day {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .cell--selected {
-  background: var(--mat-sys-secondary-container);
+  background: var(--app-secondary-container);
 
   &:hover {
-    background: var(--mat-sys-secondary-container);
+    background: var(--app-secondary-container);
   }
 }
 
@@ -83,12 +83,12 @@
   min-width: 26px;
   height: 26px;
   border-radius: 999px;
-  font: var(--mat-sys-label-large);
+  font: var(--app-label-large);
 }
 
 .cell--today .cell__day {
-  background: var(--mat-sys-primary);
-  color: var(--mat-sys-on-primary);
+  background: var(--app-primary);
+  color: var(--app-on-primary);
 }
 
 .cell__missing {
@@ -115,9 +115,9 @@
   padding: 1px 6px;
   border: 0;
   border-radius: 6px;
-  background: var(--mat-sys-surface-container-high);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-label-small);
+  background: var(--app-surface-container-high);
+  color: var(--app-on-surface);
+  font: var(--app-label-small);
   text-align: left;
   cursor: pointer;
 
@@ -131,11 +131,11 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--mat-sys-outline);
+  background: var(--app-outline);
 }
 
 .entry--submitted .entry__dot {
-  background: var(--mat-sys-tertiary);
+  background: var(--app-tertiary);
 }
 
 .entry--approved .entry__dot {
@@ -143,7 +143,7 @@
 }
 
 .entry--rejected .entry__dot {
-  background: var(--mat-sys-error);
+  background: var(--app-error);
 }
 
 .entry__code {
@@ -154,8 +154,8 @@
 
 .more {
   padding-left: 6px;
-  font: var(--mat-sys-label-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-label-small);
+  color: var(--app-on-surface-variant);
 }
 
 // Điện thoại: chỉ hiện chấm trạng thái, xem chi tiết ở danh sách ngày bên dưới.

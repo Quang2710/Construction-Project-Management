@@ -12,16 +12,16 @@ import { PROJECT_STATUS_LABELS, ProjectStatus } from '../../models/project.model
       align-items: center;
       padding: 2px 10px;
       border-radius: 999px;
-      font: var(--mat-sys-label-medium);
+      font: var(--app-label-medium);
       white-space: nowrap;
     }
     :host(.chip--planning) {
-      background: var(--mat-sys-tertiary-container);
-      color: var(--mat-sys-on-tertiary-container);
+      background: var(--app-tertiary-container);
+      color: var(--app-on-tertiary-container);
     }
     :host(.chip--in_progress) {
-      background: var(--mat-sys-primary-container);
-      color: var(--mat-sys-on-primary-container);
+      background: var(--app-primary-container);
+      color: var(--app-on-primary-container);
     }
     :host(.chip--on_hold) {
       background: var(--app-warning-container);
@@ -32,8 +32,8 @@ import { PROJECT_STATUS_LABELS, ProjectStatus } from '../../models/project.model
       color: var(--app-on-success-container);
     }
     :host(.chip--cancelled) {
-      background: var(--mat-sys-surface-container-highest);
-      color: var(--mat-sys-on-surface-variant);
+      background: var(--app-surface-container-highest);
+      color: var(--app-on-surface-variant);
     }
   `,
 })

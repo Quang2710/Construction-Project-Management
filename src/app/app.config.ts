@@ -10,11 +10,6 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { provideDateFnsAdapter } from '@angular/material-date-fns-adapter';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { MatIconRegistry } from '@angular/material/icon';
-import { MatPaginatorIntl } from '@angular/material/paginator';
 import {
   provideRouter,
   TitleStrategy,
@@ -23,17 +18,19 @@ import {
   withRouterConfig,
 } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
-import { vi } from 'date-fns/locale';
+import { MessageService } from 'primeng/api';
+import { providePrimeNG } from 'primeng/config';
+import { DialogService } from 'primeng/dynamicdialog';
 import { environment } from '../environments/environment';
-
 import { routes } from './app.routes';
 import { AuthStore } from './core/auth/auth.store';
 import { AppTitleStrategy } from './core/config/app-title.strategy';
-import { ViPaginatorIntl } from './core/config/vi-paginator-intl';
+import { PRIMENG_VI } from './core/config/primeng-vi';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { offlineCacheInterceptor } from './core/offline/offline-cache.interceptor';
 import { PwaService } from './core/pwa/pwa.service';
+import { AppThemePreset, DARK_MODE_CLASS } from './core/theme/app-theme.preset';
 import { ThemeService } from './core/theme/theme.service';
 import { OutboxService } from './core/offline/outbox.service';
 import { DIARY_OUTBOX_KIND } from './features/site-diaries/data-access/diary-outbox.kind';
@@ -55,21 +52,17 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, offlineCacheInterceptor])),
     { provide: LOCALE_ID, useValue: 'vi' },
     { provide: TitleStrategy, useClass: AppTitleStrategy },
-    { provide: MatPaginatorIntl, useClass: ViPaginatorIntl },
-    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
-    // Datepicker hiển thị và nhập theo định dạng dd/MM/yyyy.
-    { provide: MAT_DATE_LOCALE, useValue: vi },
-    provideDateFnsAdapter({
-      parse: { dateInput: ['dd/MM/yyyy', 'd/M/yyyy', 'yyyy-MM-dd'] },
-      display: {
-        dateInput: 'dd/MM/yyyy',
-        monthYearLabel: 'MM/yyyy',
-        dateA11yLabel: 'PPP',
-        monthYearA11yLabel: 'MMMM yyyy',
-      },
+    // PrimeNG: theme Aura xanh dương, giao diện tối theo class .app-dark trên <html>, chuỗi tiếng Việt.
+    providePrimeNG({
+      theme: { preset: AppThemePreset, options: { darkModeSelector: `.${DARK_MODE_CLASS}` } },
+      ripple: false,
+      translation: PRIMENG_VI,
+      // Dropdown/lịch gắn vào body để không bị cắt trong dialog hay bảng cuộn ngang.
+      overlayAppendTo: 'body',
     }),
+    DialogService,
+    MessageService,
     provideAppInitializer(() => {
-      inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
       inject(ThemeService);
     }),
     // Khôi phục phiên đăng nhập trước khi router chạy guard lần đầu.

@@ -14,9 +14,9 @@
 .table-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface);
 }
 
 .table-card__loading {
@@ -27,13 +27,9 @@
   z-index: 2;
 }
 
-.table-scroll {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  transition: opacity 150ms ease;
+p-table {
+  display: block;
+  transition: opacity var(--app-transition);
 
   &.is-loading {
     opacity: 0.6;
@@ -44,7 +40,7 @@ table {
   cursor: pointer;
 
   &:hover {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
   }
 }
 
@@ -54,19 +50,21 @@ table {
 }
 
 .project-link {
+  display: inline-block;
+  min-width: 160px;
   color: inherit;
   font-weight: 500;
   text-decoration: none;
 
   &:hover {
-    color: var(--mat-sys-primary);
+    color: var(--app-primary);
     text-decoration: underline;
   }
 }
 
 .cell-sub {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .cell-nowrap {
@@ -94,5 +92,5 @@ table {
 }
 
 .alert-icon--budget {
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }

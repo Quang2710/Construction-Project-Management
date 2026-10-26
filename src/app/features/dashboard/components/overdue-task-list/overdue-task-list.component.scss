@@ -5,7 +5,7 @@
 }
 
 .list li + li {
-  border-top: 1px solid var(--mat-sys-outline-variant);
+  border-top: 1px solid var(--app-outline-variant);
 }
 
 .row {
@@ -23,14 +23,14 @@
 
   &:hover,
   &:focus-visible {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-surface-container-low);
     outline: none;
   }
 }
 
 .row__icon {
   flex-shrink: 0;
-  color: var(--mat-sys-error);
+  color: var(--app-error);
 }
 
 .row__main {
@@ -47,14 +47,14 @@
 }
 
 .row__sub {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 .row__late {
   flex-shrink: 0;
-  font: var(--mat-sys-label-medium);
-  color: var(--mat-sys-error);
+  font: var(--app-label-medium);
+  color: var(--app-error);
 }
 
 @media (max-width: 599.98px) {

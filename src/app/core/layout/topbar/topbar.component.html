@@ -1,58 +1,70 @@
 <header class="topbar">
-  <button mat-icon-button type="button" aria-label="Ẩn/hiện menu" (click)="menuToggle.emit()">
-    <mat-icon>menu</mat-icon>
+  <button pButton text rounded severity="secondary" type="button" aria-label="Ẩn/hiện menu" (click)="menuToggle.emit()">
+    <app-icon pButtonIcon>menu</app-icon>
   </button>
 
   <span class="topbar__spacer"></span>
 
-  <app-network-indicator />
-  @if (auth.user()) {
-    <app-notification-bell />
-  }
+  <div class="topbar__actions">
+    <app-network-indicator />
+    @if (auth.user()) {
+      <app-notification-bell />
+    }
 
-  <button
-    mat-icon-button
-    type="button"
-    [attr.aria-label]="theme.mode() === 'dark' ? 'Chuyển giao diện sáng' : 'Chuyển giao diện tối'"
-    [matTooltip]="theme.mode() === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'"
-    (click)="theme.toggle()"
-  >
-    <mat-icon>{{ theme.mode() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
-  </button>
+    <button
+      pButton
+      text
+      rounded
+      severity="secondary"
+      type="button"
+      [attr.aria-label]="theme.mode() === 'dark' ? 'Chuyển giao diện sáng' : 'Chuyển giao diện tối'"
+      [pTooltip]="theme.mode() === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'"
+      tooltipPosition="bottom"
+      (click)="theme.toggle()"
+    >
+      <app-icon pButtonIcon>{{ theme.mode() === 'dark' ? 'light_mode' : 'dark_mode' }}</app-icon>
+    </button>
+  </div>
 
   @if (auth.user(); as user) {
-    <button class="user" type="button" [matMenuTriggerFor]="userMenu" aria-label="Tài khoản">
+    <button class="user" type="button" aria-label="Tài khoản" aria-haspopup="menu" (click)="userMenu.toggle($event)">
       <app-user-avatar [name]="user.fullName" />
       <span class="user__info">
         <span class="user__name">{{ user.fullName }}</span>
         <span class="user__role">{{ auth.roleLabel() }}</span>
       </span>
-      <mat-icon class="user__caret">expand_more</mat-icon>
+      <app-icon class="user__caret">expand_more</app-icon>
     </button>
 
-    <mat-menu #userMenu="matMenu" xPosition="before">
-      <div class="menu-header">
-        <span class="menu-header__name">{{ user.fullName }}</span>
-        <span class="menu-header__email">{{ user.email }}</span>
-        <span class="menu-header__role">{{ auth.roleLabel() }}</span>
+    <p-popover #userMenu styleClass="app-popover">
+      <div class="menu" role="menu">
+        <div class="menu__header">
+          <app-user-avatar [name]="user.fullName" />
+          <div>
+            <p class="menu__name">{{ user.fullName }}</p>
+            <p class="menu__meta">{{ user.email }}</p>
+            <p class="menu__meta">{{ auth.roleLabel() }}</p>
+          </div>
+        </div>
+        <div class="app-menu">
+          @if (pwa.installAvailable()) {
+            <button type="button" class="app-menu__item" role="menuitem" (click)="userMenu.hide(); pwa.install()">
+              <app-icon>install_mobile</app-icon>
+              <span>Cài đặt ứng dụng</span>
+            </button>
+          }
+          @if (demoData.enabled) {
+            <button type="button" class="app-menu__item" role="menuitem" [disabled]="resetting()" (click)="userMenu.hide(); resetDemoData()">
+              <app-icon>restart_alt</app-icon>
+              <span>Reset dữ liệu demo</span>
+            </button>
+          }
+          <button type="button" class="app-menu__item app-menu__item--danger" role="menuitem" (click)="userMenu.hide(); logout()">
+            <app-icon>logout</app-icon>
+            <span>Đăng xuất</span>
+          </button>
+        </div>
       </div>
-      <mat-divider />
-      @if (pwa.installAvailable()) {
-        <button mat-menu-item type="button" (click)="pwa.install()">
-          <mat-icon>install_mobile</mat-icon>
-          <span>Cài đặt ứng dụng</span>
-        </button>
-      }
-      @if (demoData.enabled) {
-        <button mat-menu-item type="button" [disabled]="resetting()" (click)="resetDemoData()">
-          <mat-icon>restart_alt</mat-icon>
-          <span>Reset dữ liệu demo</span>
-        </button>
-      }
-      <button mat-menu-item type="button" (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        <span>Đăng xuất</span>
-      </button>
-    </mat-menu>
+    </p-popover>
   }
 </header>

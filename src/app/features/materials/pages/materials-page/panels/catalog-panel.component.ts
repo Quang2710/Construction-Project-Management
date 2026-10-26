@@ -1,11 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { AppDialog } from '../../../../../shared/ui/dialog/app-dialog.service';
 import { firstValueFrom } from 'rxjs';
 import { VndPipe } from '../../../../../shared/pipes/vnd.pipe';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
@@ -20,39 +14,43 @@ import {
   MaterialCategory,
   MaterialUpsertRequest,
 } from '../../../models/material.model';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { TooltipModule } from 'primeng/tooltip';
+import { FIELD } from '../../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+import { toOptions } from '../../../../../shared/utils/options';
 
 @Component({
   selector: 'app-catalog-panel',
   imports: [
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTooltipModule,
+    FormsModule,
     VndPipe,
     EmptyStateComponent,
+    ButtonModule,
+    IconComponent,
+    TooltipModule,
+    ...FIELD,
+    InputTextModule,
+    SelectModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toolbar">
-      <mat-form-field class="toolbar__search" subscriptSizing="dynamic">
-        <mat-label>Tìm vật tư</mat-label>
-        <mat-icon matPrefix>search</mat-icon>
-        <input #search matInput [value]="query()" (input)="query.set(search.value)" />
-      </mat-form-field>
-      <mat-form-field subscriptSizing="dynamic">
-        <mat-label>Nhóm</mat-label>
-        <mat-select [value]="category()" (valueChange)="category.set($event)">
-          <mat-option [value]="null">Tất cả nhóm</mat-option>
-          @for (item of categories; track item) {
-            <mat-option [value]="item">{{ categoryLabels[item] }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <app-field class="toolbar__search" dense>
+        <label fieldLabel>Tìm vật tư</label>
+        <app-icon fieldPrefix>search</app-icon>
+        <input #search pInputText [value]="query()" (input)="query.set(search.value)" />
+      </app-field>
+      <app-field dense>
+        <label fieldLabel>Nhóm</label>
+        <p-select [ngModel]="category()" (ngModelChange)="category.set($event)" [options]="categoryOptions" optionLabel="label" optionValue="value" [showClear]="true" placeholder="Tất cả nhóm" [fluid]="true" />
+      </app-field>
       <span class="toolbar__spacer"></span>
       @if (store.canManage()) {
-        <button mat-flat-button type="button" (click)="edit(null)"><mat-icon>add</mat-icon> Thêm vật tư</button>
+        <button pButton type="button" (click)="edit(null)"><app-icon>add</app-icon> Thêm vật tư</button>
       }
     </div>
 
@@ -85,12 +83,12 @@ import {
                 <td>{{ material.unit }}</td>
                 <td class="num">{{ material.unitPrice | vnd }}</td>
                 <td class="actions">
-                  <button mat-icon-button type="button" matTooltip="Nhãn QR" aria-label="Nhãn QR" (click)="showQr(material)">
-                    <mat-icon>qr_code_2</mat-icon>
+                  <button pButton text rounded severity="secondary" type="button" pTooltip="Nhãn QR" tooltipPosition="bottom" aria-label="Nhãn QR" (click)="showQr(material)">
+                    <app-icon pButtonIcon>qr_code_2</app-icon>
                   </button>
                   @if (store.canManage()) {
-                    <button mat-icon-button type="button" matTooltip="Sửa" aria-label="Sửa" (click)="edit(material)">
-                      <mat-icon>edit</mat-icon>
+                    <button pButton text rounded severity="secondary" type="button" pTooltip="Sửa" tooltipPosition="bottom" aria-label="Sửa" (click)="edit(material)">
+                      <app-icon pButtonIcon>edit</app-icon>
                     </button>
                   }
                 </td>
@@ -110,10 +108,11 @@ import {
   `,
 })
 export class CatalogPanelComponent {
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(AppDialog);
   protected readonly store = inject(MaterialsStore);
   protected readonly categories = MATERIAL_CATEGORIES;
   protected readonly categoryLabels = MATERIAL_CATEGORY_LABELS;
+  protected readonly categoryOptions = toOptions(this.categories, this.categoryLabels);
   protected readonly query = signal('');
   protected readonly category = signal<MaterialCategory | null>(null);
 

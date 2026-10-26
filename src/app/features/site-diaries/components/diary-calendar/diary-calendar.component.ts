@@ -1,16 +1,19 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { TooltipModule } from 'primeng/tooltip';
 import { CalendarCell } from '../../data-access/diary-calendar.store';
 import { DIARY_STATUS_LABELS, SiteDiary } from '../../models/site-diary.model';
 import { WEEKDAY_LABELS } from '../../utils/calendar.utils';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
 const MAX_VISIBLE = 3;
 
 /** Lưới lịch tháng; mỗi ô liệt kê nhật ký trong ngày (mã dự án + trạng thái). */
 @Component({
   selector: 'app-diary-calendar',
-  imports: [MatIconModule, MatTooltipModule],
+  imports: [
+    IconComponent,
+    TooltipModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './diary-calendar.component.html',
   styleUrl: './diary-calendar.component.scss',

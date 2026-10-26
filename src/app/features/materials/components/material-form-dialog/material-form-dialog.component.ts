@@ -1,10 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { VndPipe } from '../../../../shared/pipes/vnd.pipe';
 import {
   Material,
@@ -13,67 +8,79 @@ import {
   MaterialCategory,
   MaterialUpsertRequest,
 } from '../../models/material.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { ButtonModule } from 'primeng/button';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { toOptions } from '../../../../shared/utils/options';
 
 @Component({
   selector: 'app-material-form-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, VndPipe],
+  imports: [
+    ReactiveFormsModule,
+    VndPipe,
+    ButtonModule,
+    ...FIELD,
+    InputTextModule,
+    TextareaModule,
+    DialogCloseDirective,
+    SelectModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>{{ data ? 'Sửa vật tư' : 'Thêm vật tư' }}</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>{{ data ? 'Sửa vật tư' : 'Thêm vật tư' }}</h2>
+    <div dialogContent>
       <form [formGroup]="form" id="material-form" class="form" (ngSubmit)="save()">
-        <mat-form-field>
-          <mat-label>Mã vật tư (nội dung mã QR)</mat-label>
-          <input matInput formControlName="code" class="upper" maxlength="30" />
+        <app-field>
+          <label fieldLabel>Mã vật tư (nội dung mã QR)</label>
+          <input pInputText formControlName="code" class="upper" maxlength="30" />
           @if (form.controls.code.hasError('required')) {
-            <mat-error>Vui lòng nhập mã.</mat-error>
+            <app-error>Vui lòng nhập mã.</app-error>
           } @else if (form.controls.code.hasError('pattern')) {
-            <mat-error>2–30 ký tự: chữ in hoa, số, dấu chấm hoặc gạch ngang.</mat-error>
+            <app-error>2–30 ký tự: chữ in hoa, số, dấu chấm hoặc gạch ngang.</app-error>
           }
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Tên vật tư</mat-label>
-          <input matInput formControlName="name" maxlength="200" />
+        </app-field>
+        <app-field>
+          <label fieldLabel>Tên vật tư</label>
+          <input pInputText formControlName="name" maxlength="200" />
           @if (form.controls.name.hasError('required')) {
-            <mat-error>Vui lòng nhập tên.</mat-error>
+            <app-error>Vui lòng nhập tên.</app-error>
           }
-        </mat-form-field>
+        </app-field>
         <div class="row">
-          <mat-form-field>
-            <mat-label>Nhóm</mat-label>
-            <mat-select formControlName="category">
-              @for (category of categories; track category) {
-                <mat-option [value]="category">{{ categoryLabels[category] }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Đơn vị tính</mat-label>
-            <input matInput formControlName="unit" maxlength="20" />
+          <app-field>
+            <label fieldLabel>Nhóm</label>
+            <p-select formControlName="category" [options]="categoryOptions" optionLabel="label" optionValue="value" placeholder="Chọn…" [fluid]="true" />
+          </app-field>
+          <app-field>
+            <label fieldLabel>Đơn vị tính</label>
+            <input pInputText formControlName="unit" maxlength="20" />
             @if (form.controls.unit.hasError('required')) {
-              <mat-error>Nhập ĐVT.</mat-error>
+              <app-error>Nhập ĐVT.</app-error>
             }
-          </mat-form-field>
+          </app-field>
         </div>
-        <mat-form-field>
-          <mat-label>Đơn giá</mat-label>
-          <input matInput type="number" min="0" formControlName="unitPrice" />
-          <span matTextSuffix>₫</span>
-          <mat-hint>{{ form.controls.unitPrice.value | vnd }}</mat-hint>
+        <app-field>
+          <label fieldLabel>Đơn giá</label>
+          <input pInputText type="number" min="0" formControlName="unitPrice" />
+          <span fieldSuffix>₫</span>
+          <small fieldHint>{{ form.controls.unitPrice.value | vnd }}</small>
           @if (form.controls.unitPrice.invalid) {
-            <mat-error>Đơn giá ≥ 0.</mat-error>
+            <app-error>Đơn giá ≥ 0.</app-error>
           }
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Mô tả</mat-label>
-          <textarea matInput rows="2" formControlName="description" maxlength="1000"></textarea>
-        </mat-form-field>
+        </app-field>
+        <app-field>
+          <label fieldLabel>Mô tả</label>
+          <textarea pTextarea rows="2" formControlName="description" maxlength="1000"></textarea>
+        </app-field>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="material-form">Lưu</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="material-form">Lưu</button>
+    </div>
   `,
   styles: `
     .form {
@@ -93,10 +100,11 @@ import {
   `,
 })
 export class MaterialFormDialogComponent {
-  protected readonly data = inject<Material | null>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<MaterialFormDialogComponent, MaterialUpsertRequest>>(MatDialogRef);
+  protected readonly data = injectDialogData<Material | null>();
+  private readonly dialogRef = injectDialogRef<MaterialUpsertRequest>();
   protected readonly categories = MATERIAL_CATEGORIES;
   protected readonly categoryLabels = MATERIAL_CATEGORY_LABELS;
+  protected readonly categoryOptions = toOptions(this.categories, this.categoryLabels);
 
   protected readonly form = new FormGroup({
     code: new FormControl(this.data?.code ?? '', {

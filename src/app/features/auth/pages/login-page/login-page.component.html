@@ -1,7 +1,7 @@
 <div class="login">
   <aside class="hero">
     <div class="hero__brand">
-      <span class="hero__logo"><mat-icon>foundation</mat-icon></span>
+      <span class="hero__logo"><app-icon>foundation</app-icon></span>
       <span>{{ appName }}</span>
     </div>
     <div class="hero__body">
@@ -11,9 +11,9 @@
       </p>
     </div>
     <ul class="hero__features">
-      <li><mat-icon>view_timeline</mat-icon> Tiến độ Gantt &amp; Kanban</li>
-      <li><mat-icon>inventory_2</mat-icon> Vật tư &amp; ngân sách</li>
-      <li><mat-icon>menu_book</mat-icon> Nhật ký công trường</li>
+      <li><app-icon>view_timeline</app-icon> Tiến độ Gantt &amp; Kanban</li>
+      <li><app-icon>inventory_2</app-icon> Vật tư &amp; ngân sách</li>
+      <li><app-icon>menu_book</app-icon> Nhật ký công trường</li>
     </ul>
   </aside>
 
@@ -24,52 +24,52 @@
 
       @if (auth.error(); as error) {
         <div class="alert" role="alert">
-          <mat-icon>error</mat-icon>
+          <app-icon>error</app-icon>
           <span>{{ error }}</span>
         </div>
       }
 
       <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <mat-form-field appearance="outline" class="field">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" autocomplete="username" (input)="auth.clearError()" />
-          <mat-icon matPrefix>mail</mat-icon>
+        <app-field class="field">
+          <label fieldLabel>Email</label>
+          <input pInputText type="email" formControlName="email" autocomplete="username" (input)="auth.clearError()" />
+          <app-icon fieldPrefix>mail</app-icon>
           @if (form.controls.email.hasError('required')) {
-            <mat-error>Vui lòng nhập email.</mat-error>
+            <app-error>Vui lòng nhập email.</app-error>
           } @else if (form.controls.email.hasError('email')) {
-            <mat-error>Email không đúng định dạng.</mat-error>
+            <app-error>Email không đúng định dạng.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field appearance="outline" class="field">
-          <mat-label>Mật khẩu</mat-label>
+        <app-field class="field">
+          <label fieldLabel>Mật khẩu</label>
           <input
-            matInput
+            pInputText
             [type]="hidePassword() ? 'password' : 'text'"
             formControlName="password"
             autocomplete="current-password"
             (input)="auth.clearError()"
           />
-          <mat-icon matPrefix>lock</mat-icon>
+          <app-icon fieldPrefix>lock</app-icon>
           <button
-            mat-icon-button
-            matSuffix
+            pButton text rounded severity="secondary"
+            fieldSuffix
             type="button"
             [attr.aria-label]="hidePassword() ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'"
             (click)="hidePassword.set(!hidePassword())"
           >
-            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+            <app-icon pButtonIcon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</app-icon>
           </button>
           @if (form.controls.password.hasError('required')) {
-            <mat-error>Vui lòng nhập mật khẩu.</mat-error>
+            <app-error>Vui lòng nhập mật khẩu.</app-error>
           } @else if (form.controls.password.hasError('minlength')) {
-            <mat-error>Mật khẩu phải có ít nhất 6 ký tự.</mat-error>
+            <app-error>Mật khẩu phải có ít nhất 6 ký tự.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <button mat-flat-button class="submit" type="submit" [disabled]="submitting()">
+        <button pButton class="submit" type="submit" [disabled]="submitting()">
           @if (submitting()) {
-            <mat-spinner diameter="20" />
+            <p-progress-spinner strokeWidth="6" ariaLabel="Đang xử lý" style="width: 20px; height: 20px" />
           } @else {
             Đăng nhập
           }
@@ -83,19 +83,19 @@
             @for (account of demoAccounts; track account.id) {
               <li>
                 <button class="demo__item" type="button" [disabled]="submitting()" (click)="loginAs(account)">
-                  <mat-icon class="demo__icon">{{ demoRoleIcons[account.role] }}</mat-icon>
+                  <app-icon class="demo__icon">{{ demoRoleIcons[account.role] }}</app-icon>
                   <span class="demo__info">
                     <span class="demo__role">{{ account.role | roleLabel }}</span>
                     <span class="demo__email">{{ account.email }}</span>
                   </span>
-                  <mat-icon class="demo__go">arrow_forward</mat-icon>
+                  <app-icon class="demo__go">arrow_forward</app-icon>
                 </button>
               </li>
             }
           </ul>
           <p class="demo__hint">Mật khẩu chung: <code>{{ demoAccounts[0].password }}</code></p>
-          <button mat-stroked-button type="button" class="demo__reset" [disabled]="resetting()" (click)="resetDemoData()">
-            <mat-icon>restart_alt</mat-icon>
+          <button pButton outlined type="button" class="demo__reset" [disabled]="resetting()" (click)="resetDemoData()">
+            <app-icon>restart_alt</app-icon>
             Reset dữ liệu demo
           </button>
         </section>

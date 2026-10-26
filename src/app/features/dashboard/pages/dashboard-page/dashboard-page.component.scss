@@ -1,20 +1,20 @@
 .welcome {
   padding: 20px 24px;
-  border-radius: var(--mat-sys-corner-large);
-  background: var(--mat-sys-primary-container);
-  color: var(--mat-sys-on-primary-container);
+  border-radius: var(--app-corner-large);
+  background: var(--app-primary-container);
+  color: var(--app-on-primary-container);
 }
 
 .welcome__date {
   margin: 0;
-  font: var(--mat-sys-label-large);
+  font: var(--app-label-large);
   text-transform: capitalize;
   opacity: 0.8;
 }
 
 .welcome__title {
   margin: 4px 0;
-  font: var(--mat-sys-headline-small);
+  font: var(--app-headline-small);
 }
 
 .welcome__role {
@@ -28,8 +28,8 @@
   margin-top: 12px;
   padding: 12px 16px;
   border-radius: 12px;
-  background: var(--mat-sys-tertiary-container);
-  color: var(--mat-sys-on-tertiary-container);
+  background: var(--app-tertiary-container);
+  color: var(--app-on-tertiary-container);
 }
 
 .loading {
@@ -53,13 +53,13 @@
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font: var(--mat-sys-body-medium);
+  font: var(--app-body-medium);
   font-variant-numeric: tabular-nums;
 
   th,
   td {
     padding: 6px 8px;
-    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    border-bottom: 1px solid var(--app-outline-variant);
     text-align: right;
   }
 
@@ -71,18 +71,18 @@
   th {
     position: sticky;
     top: 0;
-    background: var(--mat-sys-surface);
-    font: var(--mat-sys-label-large);
-    color: var(--mat-sys-on-surface-variant);
+    background: var(--app-surface);
+    font: var(--app-label-large);
+    color: var(--app-on-surface-variant);
   }
 }
 
 .overdue {
   margin-top: 16px;
   padding: 16px 20px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface);
 }
 
 .overdue__header {
@@ -99,16 +99,16 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  font: var(--mat-sys-title-medium);
+  font: var(--app-title-medium);
 
-  mat-icon {
-    color: var(--mat-sys-error);
+  app-icon {
+    color: var(--app-error);
   }
 }
 
 .overdue__more {
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 }
 
 @media (max-width: 1199.98px) {

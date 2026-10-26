@@ -11,20 +11,20 @@
   gap: 8px;
   padding: 12px 16px;
   border-radius: 12px;
-  background: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  background: var(--app-error-container);
+  color: var(--app-on-error-container);
 }
 
 .section {
   padding: 16px 20px 4px;
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-surface);
+  border: 1px solid var(--app-outline-variant);
+  border-radius: var(--app-corner-medium);
+  background: var(--app-surface);
 }
 
 .section__title {
   margin: 0 0 16px;
-  font: var(--mat-sys-title-medium);
+  font: var(--app-title-medium);
 }
 
 .grid {
@@ -52,10 +52,10 @@
   align-items: center;
   gap: 6px;
   margin: 0 0 8px;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-on-surface-variant);
+  font: var(--app-body-small);
+  color: var(--app-on-surface-variant);
 
-  mat-icon {
+  app-icon {
     width: 18px;
     height: 18px;
     font-size: 18px;
@@ -69,8 +69,8 @@
 
 .field-error {
   margin: -8px 0 16px;
-  font: var(--mat-sys-body-small);
-  color: var(--mat-sys-error);
+  font: var(--app-body-small);
+  color: var(--app-error);
 }
 
 .actions {

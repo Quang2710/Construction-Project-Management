@@ -5,19 +5,19 @@
     }
   </p>
   <div class="header__actions">
-    <a mat-stroked-button routerLink="/site-diaries" [queryParams]="{ projectId: projectId() }">
-      <mat-icon>calendar_month</mat-icon>
+    <a pButton outlined routerLink="/site-diaries" [queryParams]="{ projectId: projectId() }">
+      <app-icon>calendar_month</app-icon>
       Xem lịch nhật ký
     </a>
-    <a mat-flat-button *hasRole="permissions.editDiaries" routerLink="/site-diaries/new" [queryParams]="{ projectId: projectId() }">
-      <mat-icon>add</mat-icon>
+    <a pButton *hasRole="permissions.editDiaries" routerLink="/site-diaries/new" [queryParams]="{ projectId: projectId() }">
+      <app-icon>add</app-icon>
       Lập nhật ký hôm nay
     </a>
   </div>
 </div>
 
 @if (loading()) {
-  <mat-progress-bar mode="indeterminate" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
 }
 
 @if (error(); as message) {
@@ -33,9 +33,9 @@
             <strong>{{ dateOf(diary) | date: 'dd/MM' }}</strong>
             <span>{{ dateOf(diary) | date: 'EEE' }}</span>
           </span>
-          <mat-icon class="item__weather" [attr.aria-label]="weatherLabels[diary.weather.morning]">
+          <app-icon class="item__weather" [attr.aria-label]="weatherLabels[diary.weather.morning]">
             {{ weatherIcons[diary.weather.morning] }}
-          </mat-icon>
+          </app-icon>
           <span class="item__main">
             <span>{{ diary.totalWorkers }} công nhân · {{ diary.workItems.length }} hạng mục · {{ diary.photos.length }} ảnh</span>
             <span class="item__sub">

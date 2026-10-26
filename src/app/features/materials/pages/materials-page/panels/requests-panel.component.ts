@@ -1,10 +1,5 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipListboxChange, MatChipsModule } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { VndPipe } from '../../../../../shared/pipes/vnd.pipe';
 import { EmptyStateComponent } from '../../../../../shared/ui/state/empty-state.component';
 import { ErrorStateComponent } from '../../../../../shared/ui/state/error-state.component';
@@ -17,45 +12,43 @@ import {
   MaterialRequestStatus,
 } from '../../../models/material.model';
 import { MaterialsDialogsService } from '../materials-dialogs.service';
+import { ButtonModule } from 'primeng/button';
+import { IconComponent } from '../../../../../shared/ui/icon/icon.component';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { FormsModule } from '@angular/forms';
+import { SelectButtonChangeEvent, SelectButtonModule } from 'primeng/selectbutton';
+import { withAllOption } from '../../../../../shared/utils/options';
+import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 
 const ALL = 'ALL';
 
 @Component({
   selector: 'app-requests-panel',
   imports: [
+    FormsModule,
     DatePipe,
-    MatButtonModule,
-    MatChipsModule,
-    MatIconModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
+    SelectButtonModule,
+    PaginatorModule,
     VndPipe,
     EmptyStateComponent,
     ErrorStateComponent,
     RequestStatusChipComponent,
+    ButtonModule,
+    IconComponent,
+    ProgressBarModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toolbar">
-      <mat-chip-listbox
-        aria-label="Lọc theo trạng thái"
-        [value]="store.requestsStatus() ?? allValue"
-        [hideSingleSelectionIndicator]="true"
-        (change)="onStatus($event)"
-      >
-        <mat-chip-option [value]="allValue">Tất cả</mat-chip-option>
-        @for (status of statuses; track status) {
-          <mat-chip-option [value]="status">{{ statusLabels[status] }}</mat-chip-option>
-        }
-      </mat-chip-listbox>
+      <p-selectbutton class="app-chips" [options]="statusFilterOptions" optionLabel="label" optionValue="value" [allowEmpty]="false" [ngModel]="store.requestsStatus() ?? allValue" (onChange)="onStatus($event)" [attr.aria-label]="'Lọc theo trạng thái'" />
       <span class="toolbar__spacer"></span>
       @if (store.canHandle()) {
-        <button mat-flat-button type="button" (click)="create()"><mat-icon>add</mat-icon> Lập phiếu yêu cầu</button>
+        <button pButton type="button" (click)="create()"><app-icon>add</app-icon> Lập phiếu yêu cầu</button>
       }
     </div>
 
     @if (store.requestsLoading()) {
-      <mat-progress-bar mode="indeterminate" />
+      <p-progressbar mode="indeterminate" styleClass="app-loading-bar" />
     }
     @if (store.requestsError(); as error) {
       <app-error-state [message]="error" (retry)="store.loadRequests()" />
@@ -89,13 +82,7 @@ const ALL = 'ALL';
           </tbody>
         </table>
       </div>
-      <mat-paginator
-        [length]="store.requestsTotal()"
-        [pageIndex]="store.requestsPage() - 1"
-        [pageSize]="store.pageSize()"
-        [hidePageSize]="true"
-        (page)="onPage($event)"
-      />
+      <p-paginator [totalRecords]="store.requestsTotal()" [first]="(store.requestsPage() - 1) * store.pageSize()" [rows]="store.pageSize()" [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} / {totalRecords}" (onPageChange)="onPage($event)" />
     }
   `,
   styleUrl: './panels.scss',
@@ -106,18 +93,19 @@ export class RequestsPanelComponent implements OnInit {
   protected readonly allValue = ALL;
   protected readonly statuses = MATERIAL_REQUEST_STATUSES;
   protected readonly statusLabels = MATERIAL_REQUEST_STATUS_LABELS;
+  protected readonly statusFilterOptions = withAllOption(this.statuses, this.statusLabels, 'Tất cả');
 
   ngOnInit(): void {
     void this.store.loadRequests();
   }
 
-  protected onStatus(event: MatChipListboxChange): void {
+  protected onStatus(event: SelectButtonChangeEvent): void {
     const value: unknown = event.value;
     void this.store.setRequestsFilter(typeof value === 'string' && value !== ALL ? (value as MaterialRequestStatus) : null);
   }
 
-  protected onPage(event: PageEvent): void {
-    void this.store.setRequestsFilter(this.store.requestsStatus(), event.pageIndex + 1);
+  protected onPage(event: PaginatorState): void {
+    void this.store.setRequestsFilter(this.store.requestsStatus(), (event.page ?? 0) + 1);
   }
 
   protected create(): void {

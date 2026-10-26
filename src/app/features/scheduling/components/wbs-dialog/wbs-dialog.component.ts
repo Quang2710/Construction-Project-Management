@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { WbsCreateRequest, WbsNode } from '../../models/wbs.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 export interface WbsDialogData {
   readonly nodes: readonly WbsNode[];
@@ -13,34 +14,40 @@ export interface WbsDialogData {
 
 @Component({
   selector: 'app-wbs-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    MutablePipe,
+    ReactiveFormsModule,
+    ButtonModule,
+    ...FIELD,
+    InputTextModule,
+    DialogCloseDirective,
+    SelectModule,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Thêm hạng mục WBS</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Thêm hạng mục WBS</h2>
+    <div dialogContent>
       <form [formGroup]="form" id="wbs-form" (ngSubmit)="save()" class="form">
-        <mat-form-field>
-          <mat-label>Tên hạng mục</mat-label>
-          <input matInput formControlName="name" maxlength="200" cdkFocusInitial />
+        <app-field>
+          <label fieldLabel>Tên hạng mục</label>
+          <input pInputText formControlName="name" maxlength="200" />
           @if (form.controls.name.hasError('required')) {
-            <mat-error>Vui lòng nhập tên hạng mục.</mat-error>
+            <app-error>Vui lòng nhập tên hạng mục.</app-error>
           }
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Thuộc hạng mục</mat-label>
-          <mat-select formControlName="parentId">
-            <mat-option [value]="null">— Cấp cao nhất —</mat-option>
-            @for (node of data.nodes; track node.id) {
-              <mat-option [value]="node.id">{{ node.code }}. {{ node.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        </app-field>
+        <app-field>
+          <label fieldLabel>Thuộc hạng mục</label>
+          <p-select formControlName="parentId" [options]="data.nodes | mutable" optionValue="id" [showClear]="true" placeholder="— Cấp cao nhất —" [fluid]="true">
+            <ng-template #selectedItem let-node>{{ node.code }}. {{ node.name }}</ng-template>
+            <ng-template #item let-node>{{ node.code }}. {{ node.name }}</ng-template>
+          </p-select>
+        </app-field>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="wbs-form">Thêm</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="wbs-form">Thêm</button>
+    </div>
   `,
   styles: `
     .form {
@@ -52,8 +59,8 @@ export interface WbsDialogData {
   `,
 })
 export class WbsDialogComponent {
-  protected readonly data = inject<WbsDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<WbsDialogComponent, WbsCreateRequest>>(MatDialogRef);
+  protected readonly data = injectDialogData<WbsDialogData>();
+  private readonly dialogRef = injectDialogRef<WbsCreateRequest>();
 
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),

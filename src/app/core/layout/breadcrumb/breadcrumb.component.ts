@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { getRouteBreadcrumb } from '../../auth/route-data';
 import { BreadcrumbService } from './breadcrumb.service';
+import { IconComponent } from '../../../shared/ui/icon/icon.component';
 
 export interface BreadcrumbItem {
   readonly label: string;
@@ -29,13 +29,16 @@ function buildBreadcrumbs(root: ActivatedRouteSnapshot): BreadcrumbItem[] {
 
 @Component({
   selector: 'app-breadcrumb',
-  imports: [RouterLink, MatIconModule],
+  imports: [
+    RouterLink,
+    IconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a class="breadcrumb__home" routerLink="/dashboard" aria-label="Trang chủ"><mat-icon>home</mat-icon></a>
+      <a class="breadcrumb__home" routerLink="/dashboard" aria-label="Trang chủ"><app-icon>home</app-icon></a>
       @for (item of items(); track item.url; let last = $last) {
-        <mat-icon class="breadcrumb__sep">chevron_right</mat-icon>
+        <app-icon class="breadcrumb__sep">chevron_right</app-icon>
         @if (last) {
           <span class="breadcrumb__current" aria-current="page">{{ item.label }}</span>
         } @else {
@@ -51,10 +54,10 @@ function buildBreadcrumbs(root: ActivatedRouteSnapshot): BreadcrumbItem[] {
       flex-wrap: wrap;
       gap: 4px;
       margin-bottom: 16px;
-      font: var(--mat-sys-body-medium);
-      color: var(--mat-sys-on-surface-variant);
+      font: var(--app-body-medium);
+      color: var(--app-on-surface-variant);
     }
-    .breadcrumb mat-icon {
+    .breadcrumb app-icon {
       width: 20px;
       height: 20px;
       font-size: 20px;
@@ -67,10 +70,10 @@ function buildBreadcrumbs(root: ActivatedRouteSnapshot): BreadcrumbItem[] {
     }
     .breadcrumb__home:hover,
     .breadcrumb__link:hover {
-      color: var(--mat-sys-primary);
+      color: var(--app-primary);
     }
     .breadcrumb__current {
-      color: var(--mat-sys-on-surface);
+      color: var(--app-on-surface);
       font-weight: 500;
     }
   `,

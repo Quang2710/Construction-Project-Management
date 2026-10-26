@@ -1,13 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { COST_CATEGORIES, COST_CATEGORY_LABELS, CostCategory, CostEntryCreate, CostItemSummary } from '../../models/cost.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { toOptions } from '../../../../shared/utils/options';
+import { maxDateValidator } from '../../../../shared/utils/date-validators';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 export interface CostEntryDialogData {
   readonly projectCode: string;
@@ -18,93 +21,85 @@ export interface CostEntryDialogData {
 @Component({
   selector: 'app-cost-entry-dialog',
   imports: [
+    MutablePipe,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
+    ButtonModule,
+    ...FIELD,
+    InputTextModule,
+    DialogCloseDirective,
+    SelectModule,
+    DatePickerModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>Ghi nhận chi phí · {{ data.projectCode }}</h2>
-    <mat-dialog-content>
+    <h2 dialogTitle>Ghi nhận chi phí · {{ data.projectCode }}</h2>
+    <div dialogContent>
       <form [formGroup]="form" id="cost-entry-form" class="form" (ngSubmit)="save()">
-        <mat-form-field class="full">
-          <mat-label>Hạng mục</mat-label>
-          <mat-select formControlName="costItemId">
-            @for (item of data.items; track item.id) {
-              <mat-option [value]="item.id">{{ item.code }} · {{ item.name }}</mat-option>
-            }
-          </mat-select>
+        <app-field class="full">
+          <label fieldLabel>Hạng mục</label>
+          <p-select formControlName="costItemId" [options]="data.items | mutable" optionValue="id" placeholder="Chọn…" [fluid]="true">
+            <ng-template #selectedItem let-item>{{ item.code }} · {{ item.name }}</ng-template>
+            <ng-template #item let-item>{{ item.code }} · {{ item.name }}</ng-template>
+          </p-select>
           @if (form.controls.costItemId.hasError('required')) {
-            <mat-error>Vui lòng chọn hạng mục.</mat-error>
+            <app-error>Vui lòng chọn hạng mục.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Loại chi phí</mat-label>
-          <mat-select formControlName="category">
-            @for (category of categories; track category) {
-              <mat-option [value]="category">{{ categoryLabels[category] }}</mat-option>
-            }
-          </mat-select>
+        <app-field>
+          <label fieldLabel>Loại chi phí</label>
+          <p-select formControlName="category" [options]="categoryOptions" optionLabel="label" optionValue="value" placeholder="Chọn…" [fluid]="true" />
           @if (form.controls.category.hasError('required')) {
-            <mat-error>Vui lòng chọn loại chi phí.</mat-error>
+            <app-error>Vui lòng chọn loại chi phí.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Ngày chứng từ</mat-label>
-          <input matInput [matDatepicker]="picker" [max]="today" formControlName="date" placeholder="dd/MM/yyyy" />
-          <mat-datepicker-toggle matIconSuffix [for]="picker" />
-          <mat-datepicker #picker />
-          @if (form.controls.date.hasError('matDatepickerParse')) {
-            <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
-          } @else if (form.controls.date.hasError('required')) {
-            <mat-error>Vui lòng chọn ngày chứng từ.</mat-error>
-          } @else if (form.controls.date.hasError('matDatepickerMax')) {
-            <mat-error>Ngày chứng từ không được ở tương lai.</mat-error>
+        <app-field>
+          <label fieldLabel>Ngày chứng từ</label>
+          <p-datepicker [maxDate]="today" formControlName="date" dateFormat="dd/mm/yy" placeholder="dd/mm/yyyy" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" [fluid]="true" />
+          @if (form.controls.date.hasError('required')) {
+            <app-error>Vui lòng chọn ngày chứng từ.</app-error>
+          } @else if (form.controls.date.hasError('maxDate')) {
+            <app-error>Ngày chứng từ không được ở tương lai.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field class="full">
-          <mat-label>Nội dung chi</mat-label>
-          <input matInput formControlName="description" maxlength="300" />
+        <app-field class="full">
+          <label fieldLabel>Nội dung chi</label>
+          <input pInputText formControlName="description" maxlength="300" />
           @if (form.controls.description.hasError('required') || form.controls.description.hasError('pattern')) {
-            <mat-error>Vui lòng nhập nội dung chi.</mat-error>
+            <app-error>Vui lòng nhập nội dung chi.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Số tiền</mat-label>
-          <input matInput type="number" min="0" step="1000" formControlName="amount" />
-          <span matTextSuffix>₫</span>
+        <app-field>
+          <label fieldLabel>Số tiền</label>
+          <input pInputText type="number" min="0" step="1000" formControlName="amount" />
+          <span fieldSuffix>₫</span>
           @if (form.controls.amount.hasError('required')) {
-            <mat-error>Vui lòng nhập số tiền.</mat-error>
+            <app-error>Vui lòng nhập số tiền.</app-error>
           } @else if (form.controls.amount.hasError('min')) {
-            <mat-error>Số tiền phải lớn hơn 0.</mat-error>
+            <app-error>Số tiền phải lớn hơn 0.</app-error>
           } @else if (form.controls.amount.hasError('max')) {
-            <mat-error>Số tiền vượt quá giới hạn cho phép.</mat-error>
+            <app-error>Số tiền vượt quá giới hạn cho phép.</app-error>
           }
-        </mat-form-field>
+        </app-field>
 
-        <mat-form-field>
-          <mat-label>Số chứng từ / hoá đơn</mat-label>
-          <input matInput formControlName="documentNo" maxlength="50" />
-        </mat-form-field>
+        <app-field>
+          <label fieldLabel>Số chứng từ / hoá đơn</label>
+          <input pInputText formControlName="documentNo" maxlength="50" />
+        </app-field>
 
-        <mat-form-field class="full">
-          <mat-label>Nhà cung cấp / đơn vị nhận tiền</mat-label>
-          <input matInput formControlName="vendor" maxlength="200" />
-        </mat-form-field>
+        <app-field class="full">
+          <label fieldLabel>Nhà cung cấp / đơn vị nhận tiền</label>
+          <input pInputText formControlName="vendor" maxlength="200" />
+        </app-field>
       </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button type="button" mat-dialog-close>Huỷ</button>
-      <button mat-flat-button type="submit" form="cost-entry-form">Ghi nhận</button>
-    </mat-dialog-actions>
+    </div>
+    <div dialogActions>
+      <button pButton text type="button" appDialogClose>Huỷ</button>
+      <button pButton type="submit" form="cost-entry-form">Ghi nhận</button>
+    </div>
   `,
   styles: `
     .form {
@@ -124,17 +119,18 @@ export interface CostEntryDialogData {
   `,
 })
 export class CostEntryDialogComponent {
-  protected readonly data = inject<CostEntryDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<CostEntryDialogComponent, CostEntryCreate>>(MatDialogRef);
+  protected readonly data = injectDialogData<CostEntryDialogData>();
+  private readonly dialogRef = injectDialogRef<CostEntryCreate>();
 
   protected readonly categories = COST_CATEGORIES;
   protected readonly categoryLabels = COST_CATEGORY_LABELS;
+  protected readonly categoryOptions = toOptions(this.categories, this.categoryLabels);
   protected readonly today = new Date();
 
   protected readonly form = new FormGroup({
     costItemId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     category: new FormControl<CostCategory | null>(null, [Validators.required]),
-    date: new FormControl<Date | null>(new Date(), [Validators.required]),
+    date: new FormControl<Date | null>(new Date(), [Validators.required, maxDateValidator(this.today)]),
     // pattern: không chấp nhận chuỗi chỉ có khoảng trắng.
     description: new FormControl('', {
       nonNullable: true,

@@ -9,16 +9,16 @@
 }
 
 <div *hasRole="['CLIENT']" class="notice">
-  <mat-icon>visibility</mat-icon>
+  <app-icon>visibility</app-icon>
   <span>Bạn đang ở chế độ <strong>chỉ xem</strong>. Mọi thay đổi dữ liệu cần thực hiện qua Ban quản lý dự án.</span>
 </div>
 <div *hasRole="['SITE_ENGINEER']" class="notice">
-  <mat-icon>engineering</mat-icon>
+  <app-icon>engineering</app-icon>
   <span>Số liệu chỉ tính trên các dự án bạn được gán.</span>
 </div>
 
 @if (store.loading()) {
-  <mat-progress-bar mode="indeterminate" class="loading" />
+  <p-progressbar mode="indeterminate" styleClass="app-loading-bar" class="loading" />
 }
 
 @if (store.error(); as error) {
@@ -97,7 +97,7 @@
 
     <section class="overdue">
       <header class="overdue__header">
-        <h2 class="overdue__title"><mat-icon>notifications_active</mat-icon> Cảnh báo công việc trễ hạn</h2>
+        <h2 class="overdue__title"><app-icon>notifications_active</app-icon> Cảnh báo công việc trễ hạn</h2>
         @if (summary.kpis.overdueTasks > summary.overdueTasks.length) {
           <span class="overdue__more">Hiển thị {{ summary.overdueTasks.length }}/{{ summary.kpis.overdueTasks }} việc trễ nhất</span>
         }

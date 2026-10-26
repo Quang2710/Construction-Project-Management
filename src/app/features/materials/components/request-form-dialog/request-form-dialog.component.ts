@@ -1,17 +1,20 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { addDays } from 'date-fns';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { VndPipe } from '../../../../shared/pipes/vnd.pipe';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { Material, MaterialRequestCreate } from '../../models/material.model';
+import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { FIELD } from '../../../../shared/ui/field/field.component';
+import { minDateValidator } from '../../../../shared/utils/date-validators';
+import { MutablePipe } from '../../../../shared/pipes/mutable.pipe';
 
 export interface RequestFormDialogData {
   readonly projectCode: string;
@@ -37,23 +40,25 @@ function itemGroup(materialId = '', quantity: number | null = null): FormGroup<I
 @Component({
   selector: 'app-request-form-dialog',
   imports: [
+    MutablePipe,
     ReactiveFormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatSelectModule,
     VndPipe,
+    ButtonModule,
+    IconComponent,
+    ...FIELD,
+    InputTextModule,
+    TextareaModule,
+    DialogCloseDirective,
+    SelectModule,
+    DatePickerModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './request-form-dialog.component.html',
   styleUrl: './request-form-dialog.component.scss',
 })
 export class RequestFormDialogComponent {
-  protected readonly data = inject<RequestFormDialogData>(MAT_DIALOG_DATA);
-  private readonly dialogRef = inject<MatDialogRef<RequestFormDialogComponent, RequestFormResult>>(MatDialogRef);
+  protected readonly data = injectDialogData<RequestFormDialogData>();
+  private readonly dialogRef = injectDialogRef<RequestFormResult>();
   protected readonly today = new Date();
 
   protected readonly form = new FormGroup({
@@ -62,7 +67,7 @@ export class RequestFormDialogComponent {
         ? this.data.prefill.map((item) => itemGroup(item.materialId, item.quantity))
         : [itemGroup()],
     ),
-    neededBy: new FormControl<Date | null>(addDays(new Date(), 3), [Validators.required]),
+    neededBy: new FormControl<Date | null>(addDays(new Date(), 3), [Validators.required, minDateValidator(this.today)]),
     note: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
   });
 
