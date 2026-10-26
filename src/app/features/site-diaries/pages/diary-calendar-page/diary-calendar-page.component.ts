@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { PERMISSIONS } from '../../../../core/auth/permissions';
+import { NetworkStatusService } from '../../../../core/offline/network-status.service';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { PageHeaderComponent } from '../../../../shared/ui/page-header/page-header.component';
 import { ErrorStateComponent } from '../../../../shared/ui/state/error-state.component';
@@ -17,6 +18,7 @@ import { parseIsoDate, todayIso } from '../../../../shared/utils/date.utils';
 import { DiaryCalendarComponent } from '../../components/diary-calendar/diary-calendar.component';
 import { DiaryStatusChipComponent } from '../../components/diary-status-chip/diary-status-chip.component';
 import { DiaryCalendarStore } from '../../data-access/diary-calendar.store';
+import { DiaryOutboxService } from '../../data-access/diary-outbox.service';
 import { DIARY_STATUS_LABELS, DIARY_STATUSES, DiaryStatus, WEATHER_ICONS, WEATHER_LABELS } from '../../models/site-diary.model';
 
 const ALL = 'ALL';
@@ -48,6 +50,8 @@ export class DiaryCalendarPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthStore);
   protected readonly store = inject(DiaryCalendarStore);
+  protected readonly outbox = inject(DiaryOutboxService);
+  protected readonly network = inject(NetworkStatusService);
 
   /** ?projectId= khi mở từ trang chi tiết dự án. */
   readonly projectId = input<string>();

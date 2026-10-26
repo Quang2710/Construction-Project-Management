@@ -1,6 +1,8 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withProps, withState } from '@ngrx/signals';
 import { firstValueFrom } from 'rxjs';
+import { NetworkStatusService } from '../../../core/offline/network-status.service';
 import { UploadsApiService } from '../../../shared/data-access/uploads-api.service';
 import { toApiError } from '../../../shared/utils/api-error';
 import { getCurrentPosition } from '../../../shared/utils/geo.utils';
@@ -8,11 +10,13 @@ import { compressImage } from '../../../shared/utils/image.utils';
 import { ProjectsApiService } from '../../projects/data-access/projects-api.service';
 import { Project } from '../../projects/models/project.model';
 import { DiaryContent, DiaryPhoto, GeoPoint, SiteDiary } from '../models/site-diary.model';
+import { DiaryOutboxService, PendingPhoto } from './diary-outbox.service';
 import { SiteDiariesApiService } from './site-diaries-api.service';
 
 export const MAX_PHOTOS = 30;
 
-export type PhotoDraftStatus = 'uploading' | 'done' | 'error';
+/** offline: chụp khi mất mạng, giữ file gốc để tải lên lúc đồng bộ. */
+export type PhotoDraftStatus = 'uploading' | 'done' | 'error' | 'offline';
 
 /** Ảnh trong form: có thể đang tải lên (preview bằng object URL) hoặc đã có trên server. */
 export interface PhotoDraft {
@@ -30,7 +34,9 @@ export interface PhotoDraft {
 }
 
 export type DiarySaveResult =
-  | { readonly ok: true; readonly diary: SiteDiary }
+  | { readonly ok: true; readonly queued: false; readonly diary: SiteDiary }
+  /** Mất mạng: đã đưa vào hàng đợi, tự đồng bộ khi có mạng. */
+  | { readonly ok: true; readonly queued: true }
   | { readonly ok: false; readonly code: string; readonly message: string };
 
 interface DiaryFormState {
@@ -82,11 +88,14 @@ export const DiaryFormStore = signalStore(
     _diariesApi: inject(SiteDiariesApiService),
     _projectsApi: inject(ProjectsApiService),
     _uploadsApi: inject(UploadsApiService),
+    _network: inject(NetworkStatusService),
+    _outbox: inject(DiaryOutboxService),
   })),
   withComputed(({ photos, diary }) => ({
     isEdit: computed(() => diary() !== null),
     uploading: computed(() => photos().some((photo) => photo.status === 'uploading')),
     failedUploads: computed(() => photos().filter((photo) => photo.status === 'error').length),
+    offlinePhotos: computed(() => photos().filter((photo) => photo.status === 'offline').length),
     canAddPhotos: computed(() => photos().length < MAX_PHOTOS),
   })),
   withMethods((store) => {
@@ -104,6 +113,10 @@ export const DiaryFormStore = signalStore(
 
     async function upload(draft: PhotoDraft): Promise<void> {
       if (!draft.file) {
+        return;
+      }
+      if (store._network.offline()) {
+        updatePhoto(draft.localId, { status: 'offline', error: null });
         return;
       }
       updatePhoto(draft.localId, { status: 'uploading', error: null });
@@ -129,7 +142,32 @@ export const DiaryFormStore = signalStore(
           },
         });
       } catch (error) {
-        updatePhoto(draft.localId, { status: 'error', error: toApiError(error).message });
+        const offline = error instanceof HttpErrorResponse && error.status === 0;
+        updatePhoto(draft.localId, offline ? { status: 'offline', error: null } : { status: 'error', error: toApiError(error).message });
+      }
+    }
+
+    /** Ảnh đã tải xong, kèm chú thích mới nhất. */
+    function uploadedPhotos(): DiaryPhoto[] {
+      return store
+        .photos()
+        .flatMap((draft) => (draft.status === 'done' && draft.photo ? [{ ...draft.photo, caption: draft.caption.trim() }] : []));
+    }
+
+    /** Đưa nhật ký vào hàng đợi offline kèm file gốc của các ảnh chưa tải được. */
+    async function queue(projectId: string, date: string, content: DiaryContent, submit: boolean): Promise<DiarySaveResult> {
+      const current = store.diary();
+      const pendingPhotos: PendingPhoto[] = store.photos().flatMap((draft) =>
+        draft.status === 'offline' && draft.file
+          ? [{ blob: draft.file, fileName: draft.fileName, caption: draft.caption.trim(), takenAt: draft.takenAt, location: draft.location }]
+          : [],
+      );
+      const projectCode = current?.project.code ?? store.projects().find((project) => project.id === projectId)?.code ?? '';
+      try {
+        await store._outbox.enqueue({ diaryId: current?.id ?? null, projectId, projectCode, date, content, pendingPhotos, submit });
+        return { ok: true, queued: true };
+      } catch {
+        return { ok: false, code: 'OFFLINE_QUEUE', message: 'Không lưu được nhật ký vào bộ nhớ máy. Vui lòng thử lại.' };
       }
     }
 
@@ -201,16 +239,20 @@ export const DiaryFormStore = signalStore(
         updatePhoto(localId, { caption, photo: draft?.photo ? { ...draft.photo, caption } : null });
       },
 
-      /** Ảnh đã tải xong, kèm chú thích mới nhất. */
-      uploadedPhotos(): DiaryPhoto[] {
-        return store
-          .photos()
-          .flatMap((draft) => (draft.status === 'done' && draft.photo ? [{ ...draft.photo, caption: draft.caption.trim() }] : []));
-      },
+      uploadedPhotos,
 
       async save(projectId: string, date: string, content: DiaryContent, submit: boolean): Promise<DiarySaveResult> {
         const current = store.diary();
         patchState(store, { saving: true, error: null });
+        // Có mạng trở lại: tải nốt các ảnh chụp lúc offline trước khi lưu.
+        if (!store._network.offline()) {
+          await Promise.all(store.photos().filter((photo) => photo.status === 'offline').map(upload));
+        }
+        if (store._network.offline() || store.photos().some((photo) => photo.status === 'offline')) {
+          const photos = uploadedPhotos();
+          patchState(store, { saving: false });
+          return queue(projectId, date, { ...content, photos }, submit);
+        }
         try {
           let diary = current
             ? await firstValueFrom(store._diariesApi.update(current.id, content))
@@ -220,8 +262,13 @@ export const DiaryFormStore = signalStore(
             diary = await firstValueFrom(store._diariesApi.submit(diary.id));
             patchState(store, { diary });
           }
-          return { ok: true, diary };
+          return { ok: true, queued: false, diary };
         } catch (error) {
+          // Mất mạng giữa chừng: chuyển sang hàng đợi offline. Nếu đã tạo được mà gửi duyệt lỗi,
+          // queue() lấy id từ store.diary() nên lần đồng bộ sẽ cập nhật + gửi duyệt, không tạo trùng.
+          if (error instanceof HttpErrorResponse && error.status === 0) {
+            return queue(projectId, date, { ...content, photos: uploadedPhotos() }, submit);
+          }
           const apiError = toApiError(error);
           patchState(store, { error: apiError.message });
           return { ok: false, code: apiError.code, message: apiError.message };

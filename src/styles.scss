@@ -86,6 +86,12 @@ html {
   }
 }
 
+// Menu trạng thái mạng / hàng đợi đồng bộ.
+.network-menu.mat-mdc-menu-panel {
+  width: min(360px, calc(100vw - 16px));
+  max-width: none;
+}
+
 // Kéo thả Kanban: bản xem trước được gắn vào body nên style phải ở global.
 .cdk-drag-preview {
   box-shadow: 0 12px 28px rgb(0 0 0 / 0.25);

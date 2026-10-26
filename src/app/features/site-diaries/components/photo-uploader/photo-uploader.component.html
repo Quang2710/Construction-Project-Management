@@ -26,6 +26,11 @@
           <img [src]="photo.previewUrl" [alt]="photo.caption || photo.fileName" />
           @if (photo.status === 'uploading') {
             <div class="overlay"><mat-spinner diameter="28" /><span>Đang tải lên…</span></div>
+          } @else if (photo.status === 'offline') {
+            <div class="overlay overlay--offline">
+              <mat-icon>cloud_off</mat-icon>
+              <span>Tải lên khi có mạng</span>
+            </div>
           } @else if (photo.status === 'error') {
             <div class="overlay overlay--error">
               <mat-icon>error</mat-icon>

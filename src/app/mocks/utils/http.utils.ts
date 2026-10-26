@@ -18,10 +18,15 @@ export function errorResponse(status: ErrorStatus, code: string, message: string
 }
 
 /**
- * Giả lập độ trễ mạng 200–800ms và (tuỳ cờ environment) lỗi 500 ngẫu nhiên.
+ * Giả lập độ trễ mạng 200–800ms, mất mạng khi trình duyệt offline (DevTools > Offline)
+ * và (tuỳ cờ environment) lỗi 500 ngẫu nhiên.
  * Trả về response lỗi nếu request "thất bại", ngược lại trả về null.
  */
 export async function simulateNetwork(): Promise<HttpResponse<ApiError> | null> {
+  // MSW trả lời ngay trong trình duyệt nên vẫn "có mạng" khi máy offline; giả lập như BE thật không với tới được.
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return HttpResponse.error() as HttpResponse<ApiError>;
+  }
   const { minDelayMs, maxDelayMs, randomErrors, errorRate } = mockSettings;
   await delay(Math.round(minDelayMs + Math.random() * (maxDelayMs - minDelayMs)));
   if (randomErrors && Math.random() < errorRate) {

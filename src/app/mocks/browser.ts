@@ -8,6 +8,7 @@ export async function startMockServer(quiet: boolean): Promise<void> {
     quiet,
     // Request không thuộc API (asset, font...) đi thẳng ra mạng.
     onUnhandledRequest: 'bypass',
-    serviceWorker: { url: 'mockServiceWorker.js' },
+    // Worker gộp MSW + Angular Service Worker (một scope chỉ có một service worker), xem public/app-sw.js.
+    serviceWorker: { url: 'app-sw.js' },
   });
 }

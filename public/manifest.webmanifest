@@ -1,0 +1,22 @@
+{
+  "name": "CPM Xây dựng – Quản lý dự án",
+  "short_name": "CPM Xây dựng",
+  "description": "Quản lý dự án xây dựng: tiến độ, nhật ký công trường, chất lượng, vật tư, chi phí.",
+  "lang": "vi",
+  "display": "standalone",
+  "orientation": "any",
+  "scope": "./",
+  "start_url": "./",
+  "theme_color": "#b45309",
+  "background_color": "#fff8f6",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Lập nhật ký", "url": "./site-diaries/new", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Punch list", "url": "./quality?tab=punch", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

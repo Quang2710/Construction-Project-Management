@@ -5,6 +5,7 @@
 
   <span class="topbar__spacer"></span>
 
+  <app-network-indicator />
   @if (auth.user()) {
     <app-notification-bell />
   }
@@ -36,6 +37,12 @@
         <span class="menu-header__role">{{ auth.roleLabel() }}</span>
       </div>
       <mat-divider />
+      @if (pwa.installAvailable()) {
+        <button mat-menu-item type="button" (click)="pwa.install()">
+          <mat-icon>install_mobile</mat-icon>
+          <span>Cài đặt ứng dụng</span>
+        </button>
+      }
       @if (demoData.enabled) {
         <button mat-menu-item type="button" [disabled]="resetting()" (click)="resetDemoData()">
           <mat-icon>restart_alt</mat-icon>

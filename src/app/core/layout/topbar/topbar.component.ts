@@ -10,6 +10,8 @@ import { UserAvatarComponent } from '../../../shared/ui/user-avatar/user-avatar.
 import { AuthStore } from '../../auth/auth.store';
 import { DemoDataService } from '../../demo/demo-data.service';
 import { NotificationService } from '../../notifications/notification.service';
+import { PwaService } from '../../pwa/pwa.service';
+import { NetworkIndicatorComponent } from '../network-indicator/network-indicator.component';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 import { ThemeService } from '../../theme/theme.service';
 
@@ -22,6 +24,7 @@ import { ThemeService } from '../../theme/theme.service';
     MatDividerModule,
     MatTooltipModule,
     UserAvatarComponent,
+    NetworkIndicatorComponent,
     NotificationBellComponent,
   ],
   templateUrl: './topbar.component.html',
@@ -35,6 +38,7 @@ export class TopbarComponent {
   protected readonly auth = inject(AuthStore);
   protected readonly theme = inject(ThemeService);
   protected readonly demoData = inject(DemoDataService);
+  protected readonly pwa = inject(PwaService);
 
   readonly menuToggle = output<void>();
 

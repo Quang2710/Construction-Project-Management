@@ -1,0 +1,101 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border: 0;
+  border-radius: 999px;
+  font: var(--mat-sys-label-large);
+  cursor: pointer;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.chip--offline,
+.chip--failed {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.chip--pending,
+.chip--syncing,
+.chip--cached {
+  background: var(--app-warning-container);
+  color: var(--app-on-warning-container);
+}
+
+.head {
+  padding: 8px 16px;
+}
+
+.head__title {
+  margin: 0;
+  font: var(--mat-sys-title-small);
+}
+
+.head__sub {
+  margin: 4px 0 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.section {
+  margin: 8px 16px 4px;
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 16px;
+}
+
+.entry__icon {
+  flex: none;
+  color: var(--app-warning);
+}
+
+.entry__icon--failed {
+  color: var(--mat-sys-error);
+}
+
+.entry__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry__label,
+.entry__meta {
+  margin: 0;
+}
+
+.entry__label {
+  font: var(--mat-sys-body-medium);
+}
+
+.entry__meta {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.entry__error {
+  color: var(--mat-sys-error);
+}
+
+/* Màn hình hẹp: chỉ còn icon để topbar không tràn. */
+@media (max-width: 599.98px) {
+  .chip__text {
+    display: none;
+  }
+
+  .chip {
+    padding: 0 8px;
+  }
+}

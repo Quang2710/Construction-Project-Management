@@ -13,6 +13,19 @@
   </a>
 </app-page-header>
 
+@if (outbox.entries().length) {
+  <div class="outbox" role="status">
+    <mat-icon>{{ network.online() ? 'schedule_send' : 'cloud_off' }}</mat-icon>
+    <span>
+      {{ outbox.entries().length }} nhật ký lập khi mất mạng đang chờ đồng bộ:
+      @for (entry of outbox.entries(); track entry.id; let last = $last) {
+        <strong [class.outbox__failed]="entry.status === 'failed'">{{ entry.label }}</strong>{{ last ? '' : ', ' }}
+      }
+      — sẽ tự gửi khi có mạng (xem chi tiết ở biểu tượng trên thanh trên cùng).
+    </span>
+  </div>
+}
+
 <div class="toolbar">
   <div class="month-nav">
     <button mat-icon-button type="button" aria-label="Tháng trước" (click)="store.shiftMonth(-1)">

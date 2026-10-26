@@ -9,6 +9,8 @@ const MIN_RETRY_MS = 1_000;
 const MAX_RETRY_MS = 30_000;
 /** Mã đóng do server gửi khi token không hợp lệ: không tự kết nối lại. */
 const UNAUTHORIZED_CLOSE_CODE = 4401;
+/** Mã client tự đóng khi thiết bị mất mạng. */
+const OFFLINE_CLOSE_CODE = 4000;
 
 /**
  * Kết nối WebSocket nhận thông báo real-time. Fake BE: MSW chặn WebSocket ngay trong trang;
@@ -33,12 +35,25 @@ export class RealtimeService {
       this.open();
     }
   };
+  /** Mất mạng: đóng chủ động (kết nối giả lập của MSW không tự rớt), chờ sự kiện "online". */
+  private readonly onOffline = (): void => {
+    this.clearRetry();
+    const socket = this.socket;
+    this.socket = null;
+    // Client chỉ được dùng mã 1000 hoặc 3000–4999.
+    socket?.close(OFFLINE_CLOSE_CODE, 'offline');
+    if (this.token) {
+      this.status.set('closed');
+    }
+  };
 
   constructor() {
     this.document.defaultView?.addEventListener('online', this.onOnline);
+    this.document.defaultView?.addEventListener('offline', this.onOffline);
     inject(DestroyRef).onDestroy(() => {
       this.disconnect();
       this.document.defaultView?.removeEventListener('online', this.onOnline);
+      this.document.defaultView?.removeEventListener('offline', this.onOffline);
     });
   }
 
@@ -67,6 +82,10 @@ export class RealtimeService {
       return;
     }
     this.clearRetry();
+    if (!view.navigator.onLine) {
+      this.status.set('closed');
+      return;
+    }
     const protocol = view.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const url = `${protocol}//${view.location.host}${environment.realtimePath}?token=${encodeURIComponent(this.token)}`;
     this.status.set('connecting');
@@ -103,7 +122,7 @@ export class RealtimeService {
   }
 
   private scheduleRetry(): void {
-    if (!this.token) {
+    if (!this.token || !this.document.defaultView?.navigator.onLine) {
       return;
     }
     // Thêm nhiễu ngẫu nhiên để nhiều tab/thiết bị không kết nối lại cùng lúc.

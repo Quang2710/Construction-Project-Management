@@ -1,3 +1,19 @@
+/* Nhật ký lập khi mất mạng, chờ đồng bộ. */
+.outbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--app-warning-container);
+  color: var(--app-on-warning-container);
+}
+
+.outbox__failed {
+  color: var(--mat-sys-error);
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;

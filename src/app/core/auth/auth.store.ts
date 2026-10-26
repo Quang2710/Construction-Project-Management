@@ -1,9 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { firstValueFrom } from 'rxjs';
 import { LoginRequest } from '../../shared/models/auth.model';
 import { ROLE_LABELS, User, UserRole } from '../../shared/models/user.model';
 import { toApiError } from '../../shared/utils/api-error';
+import { OfflineCacheService } from '../offline/offline-cache.service';
 import { readStorage, writeStorage } from '../storage/local-storage';
 import { AuthApiService } from './auth-api.service';
 
@@ -30,6 +32,7 @@ export const AuthStore = signalStore(
   withState(initialState),
   withProps(() => ({
     _api: inject(AuthApiService),
+    _offlineCache: inject(OfflineCacheService),
   })),
   withComputed(({ user, token, status }) => ({
     isAuthenticated: computed(() => user() !== null && token() !== null),
@@ -43,6 +46,8 @@ export const AuthStore = signalStore(
   withMethods((store) => {
     function clearSession(): void {
       writeStorage(TOKEN_STORAGE_KEY, null);
+      // Dữ liệu cache offline thuộc phiên vừa kết thúc.
+      void store._offlineCache.clear();
       patchState(store, { user: null, token: null, status: 'unauthenticated' });
     }
 
@@ -77,7 +82,12 @@ export const AuthStore = signalStore(
         try {
           const user = await firstValueFrom(store._api.me());
           patchState(store, { user, status: 'authenticated' });
-        } catch {
+        } catch (error) {
+          if (error instanceof HttpErrorResponse && error.status === 0) {
+            // Mất mạng và chưa có cache /auth/me: giữ token đã lưu để lần mở sau (có mạng) khôi phục được.
+            patchState(store, { token: null, status: 'unauthenticated' });
+            return;
+          }
           clearSession();
         }
       },

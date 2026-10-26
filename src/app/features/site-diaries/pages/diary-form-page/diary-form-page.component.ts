@@ -314,6 +314,12 @@ export class DiaryFormPageComponent implements HasUnsavedChanges {
     }
     const value = this.form.getRawValue();
     const result = await this.store.save(value.projectId, value.date ? toIsoDate(value.date) : '', this.toContent(), submit);
+    if (result.ok && result.queued) {
+      this.saved.set(true);
+      this.notification.info('Đang mất mạng: nhật ký đã lưu trên máy và sẽ tự đồng bộ khi có mạng trở lại.');
+      await this.router.navigate(['/site-diaries']);
+      return;
+    }
     if (result.ok) {
       this.saved.set(true);
       this.notification.success(submit ? 'Đã lưu và gửi nhật ký để duyệt.' : 'Đã lưu nhật ký nháp.');
