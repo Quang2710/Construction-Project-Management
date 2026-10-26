@@ -81,8 +81,13 @@ export const NotificationCenterStore = signalStore(
         items: [item, ...store.items()].slice(0, BELL_SIZE),
         unreadCount: store.unreadCount() + (item.read ? 0 : 1),
       });
-      void store._toast.action(item.title, item.link ? 'Xem' : 'Đóng').then((clicked) => {
-        if (clicked && item.link) {
+      // Không có liên kết thì toast thường là đủ (đã có nút X), tránh nút "Đóng" trùng chức năng.
+      if (!item.link) {
+        store._toast.info(item.title);
+        return;
+      }
+      void store._toast.action(item.title, 'Xem').then((clicked) => {
+        if (clicked) {
           void open(item);
         }
       });

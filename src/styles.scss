@@ -186,6 +186,11 @@ code {
 // Trường nhập <app-field> (shared/ui/field): nhãn trên, ô nhập rộng hết khung, lỗi/gợi ý dưới.
 // =============================================================================
 
+:root {
+  // Khoảng từ đỉnh <app-field> tới đỉnh ô nhập (nhãn 16px + gap 6px): dùng để canh nút đặt cạnh trường.
+  --app-field-control-offset: 22px;
+}
+
 .app-field {
   display: flex;
   flex-direction: column;
@@ -233,8 +238,9 @@ code {
   }
 }
 
-.app-field__prefix,
-.app-field__suffix {
+// Tăng độ ưu tiên để thắng `.p-button { position: relative }` khi gắn fieldSuffix thẳng lên nút pButton.
+.app-field__control > .app-field__prefix,
+.app-field__control > .app-field__suffix {
   position: absolute;
   top: 50%;
   z-index: 1;
@@ -249,6 +255,7 @@ code {
     font-size: 20px;
   }
 
+  &:is(button, a),
   button,
   a {
     pointer-events: auto;

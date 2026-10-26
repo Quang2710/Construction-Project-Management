@@ -8,7 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { injectDialogData, injectDialogRef, DialogCloseDirective } from '../../../../shared/ui/dialog/app-dialog.service';
 import { ButtonModule } from 'primeng/button';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
@@ -74,7 +74,7 @@ const SCAN_INTERVAL_MS = 300;
           <label fieldLabel>Nhập mã vật tư</label>
           <input pInputText [formControl]="code" class="upper" placeholder="VD: TH-CB400-D16" />
         </app-field>
-        <button pButton type="submit" [disabled]="code.invalid">Tra cứu</button>
+        <button pButton type="submit" [disabled]="!code.value.trim()">Tra cứu</button>
       </form>
     </div>
     <div dialogActions>
@@ -129,7 +129,7 @@ const SCAN_INTERVAL_MS = 300;
     }
     .manual {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       gap: 8px;
     }
     .manual__field {
@@ -149,7 +149,7 @@ export class QrScanDialogComponent {
   private readonly video = viewChild.required<ElementRef<HTMLVideoElement>>('video');
 
   protected readonly camera = signal<CameraState>('starting');
-  protected readonly code = new FormControl('', { nonNullable: true, validators: [Validators.required] });
+  protected readonly code = new FormControl('', { nonNullable: true });
 
   private stream: MediaStream | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
