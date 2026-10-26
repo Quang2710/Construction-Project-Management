@@ -15,7 +15,7 @@ import { EmptyStateComponent } from '../../../../shared/ui/state/empty-state.com
 import { ErrorStateComponent } from '../../../../shared/ui/state/error-state.component';
 import { parseIsoDate } from '../../../../shared/utils/date.utils';
 import { DiaryStatusChipComponent } from '../../components/diary-status-chip/diary-status-chip.component';
-import { PhotoGalleryComponent } from '../../components/photo-gallery/photo-gallery.component';
+import { PhotoGalleryComponent } from '../../../../shared/ui/photo-gallery/photo-gallery.component';
 import { ReviewDialogComponent, ReviewDialogData } from '../../components/review-dialog/review-dialog.component';
 import { DiaryDetailStore } from '../../data-access/diary-detail.store';
 import {

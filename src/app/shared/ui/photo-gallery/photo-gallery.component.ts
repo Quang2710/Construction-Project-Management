@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { distanceMeters, formatDistance } from '../../../../shared/utils/geo.utils';
-import { DiaryPhoto } from '../../models/site-diary.model';
+import { Photo } from '../../models/photo.model';
+import { distanceMeters, formatDistance } from '../../utils/geo.utils';
 import { PhotoLightboxComponent, PhotoLightboxData } from '../photo-lightbox/photo-lightbox.component';
 
 interface GalleryItem {
-  readonly photo: DiaryPhoto;
+  readonly photo: Photo;
   readonly distance: string | null;
   readonly far: boolean;
 }
@@ -100,7 +100,7 @@ interface GalleryItem {
 export class PhotoGalleryComponent {
   private readonly dialog = inject(MatDialog);
 
-  readonly photos = input.required<readonly DiaryPhoto[]>();
+  readonly photos = input.required<readonly Photo[]>();
   readonly site = input<{ lat: number; lng: number } | null>(null);
 
   protected readonly items = computed<GalleryItem[]>(() => {

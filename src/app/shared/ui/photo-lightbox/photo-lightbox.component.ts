@@ -3,11 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { distanceMeters, formatDistance, osmUrl } from '../../../../shared/utils/geo.utils';
-import { DiaryPhoto } from '../../models/site-diary.model';
+import { Photo } from '../../models/photo.model';
+import { distanceMeters, formatDistance, osmUrl } from '../../utils/geo.utils';
 
 export interface PhotoLightboxData {
-  readonly photos: readonly DiaryPhoto[];
+  readonly photos: readonly Photo[];
   readonly index: number;
   /** Vị trí công trình để tính khoảng cách nơi chụp. */
   readonly site: { readonly lat: number; readonly lng: number } | null;

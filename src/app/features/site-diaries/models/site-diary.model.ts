@@ -1,4 +1,5 @@
 import { ListParams } from '../../../shared/models/api.model';
+import { Photo } from '../../../shared/models/photo.model';
 import { UserSummary } from '../../../shared/models/user.model';
 
 export const DIARY_STATUSES = ['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED'] as const;
@@ -114,24 +115,9 @@ export interface IncidentEntry {
   readonly actionTaken: string;
 }
 
-export interface GeoPoint {
-  readonly lat: number;
-  readonly lng: number;
-  /** Sai số (m) do Geolocation API trả về. */
-  readonly accuracy: number | null;
-}
+export type { GeoPoint } from '../../../shared/models/photo.model';
 
-export interface DiaryPhoto {
-  readonly id: string;
-  /** URL tải ảnh (fake BE phục vụ từ IndexedDB). */
-  readonly url: string;
-  readonly fileName: string;
-  readonly mimeType: string;
-  readonly size: number;
-  readonly caption: string;
-  readonly takenAt: string;
-  readonly location: GeoPoint | null;
-}
+export type DiaryPhoto = Photo;
 
 export type DiaryAction = 'CREATED' | 'UPDATED' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
 
