@@ -1,0 +1,240 @@
+@if (store.loading() && !store.inspection()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+@if (store.error(); as error) {
+  <app-error-state title="Không tải được phiếu nghiệm thu" [message]="error" (retry)="reload()" />
+} @else if (store.inspection(); as inspection) {
+  <a class="back" routerLink="/quality" [queryParams]="backQuery()"><mat-icon>arrow_back</mat-icon> Danh sách nghiệm thu</a>
+
+  <header class="header">
+    <div>
+      <div class="header__meta">
+        <span class="header__code">{{ inspection.project.code }} · {{ inspection.code }}</span>
+        <app-quality-status-chip [status]="inspection.status" [level]="inspection.currentLevel" />
+      </div>
+      <h1 class="header__title">{{ inspection.title }}</h1>
+      <p class="header__sub">{{ inspection.wbsName }} · Người lập: {{ inspection.createdBy.fullName }}</p>
+    </div>
+
+    <div class="header__actions">
+      @if (store.canEdit()) {
+        @if (inspection.status === 'DRAFT') {
+          <button mat-stroked-button type="button" class="danger" [disabled]="store.busy()" (click)="remove()">
+            <mat-icon>delete</mat-icon> Xoá
+          </button>
+        }
+        <button mat-stroked-button type="button" [disabled]="store.busy() || (!store.dirty() && !header.dirty)" (click)="save()">
+          <mat-icon>save</mat-icon> Lưu
+        </button>
+        <button mat-flat-button type="button" [disabled]="store.busy()" (click)="submit()">
+          <mat-icon>send</mat-icon> Gửi duyệt
+        </button>
+      }
+      @if (store.canDecide()) {
+        <button mat-stroked-button type="button" class="danger" [disabled]="store.busy()" (click)="decide('reject')">
+          <mat-icon>undo</mat-icon> Trả lại
+        </button>
+        <button
+          mat-flat-button
+          type="button"
+          [disabled]="store.busy() || store.approvalBlocker() !== null"
+          [matTooltip]="store.approvalBlocker() ?? ''"
+          (click)="decide('approve')"
+        >
+          <mat-icon>verified</mat-icon> Duyệt cấp {{ inspection.currentLevel }}
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (store.busy()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  @if (rejection(); as step) {
+    <div class="banner banner--error" role="status">
+      <mat-icon>undo</mat-icon>
+      <span>
+        Bị trả lại ở cấp {{ step.level }} bởi {{ step.by?.fullName }}: “{{ step.note }}”. Khắc phục, đánh giá lại rồi gửi duyệt (bắt đầu lại từ cấp 1).
+      </span>
+    </div>
+  }
+  @if (store.canDecide() && store.approvalBlocker(); as blocker) {
+    <div class="banner banner--warn" role="status">
+      <mat-icon>warning</mat-icon>
+      <span>{{ blocker }}</span>
+    </div>
+  }
+
+  <div class="layout">
+    <div class="side">
+      <section class="card">
+        <h2 class="card__title">Thông tin chung</h2>
+        <form [formGroup]="header" class="info">
+          <mat-form-field class="info__title">
+            <mat-label>Tên phiếu</mat-label>
+            <input matInput formControlName="title" maxlength="200" />
+            @if (header.controls.title.hasError('required') || header.controls.title.hasError('pattern')) {
+              <mat-error>Vui lòng nhập tên phiếu.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Vị trí</mat-label>
+            <input matInput formControlName="location" maxlength="200" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Ngày nghiệm thu</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="inspectionDate" placeholder="dd/MM/yyyy" />
+            <mat-datepicker-toggle matIconSuffix [for]="picker" />
+            <mat-datepicker #picker />
+            @if (header.controls.inspectionDate.hasError('matDatepickerParse')) {
+              <mat-error>Ngày không đúng định dạng dd/MM/yyyy.</mat-error>
+            } @else if (header.controls.inspectionDate.hasError('required')) {
+              <mat-error>Vui lòng chọn ngày nghiệm thu.</mat-error>
+            }
+          </mat-form-field>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="card__header">
+          <h2 class="card__title">Checklist ({{ store.items().length }} tiêu chí)</h2>
+          <span class="summary">
+            <span class="summary__pass">{{ counts().pass }} đạt</span> ·
+            <span class="summary__fail">{{ counts().fail }} không đạt</span> · {{ counts().na }} N/A
+            @if (store.pendingCount()) {
+              · <strong>{{ store.pendingCount() }} chưa đánh giá</strong>
+            }
+          </span>
+          @if (store.canEdit() && store.pendingCount()) {
+            <button mat-button type="button" (click)="store.passRemaining()"><mat-icon>done_all</mat-icon> Đạt các mục còn lại</button>
+          }
+        </div>
+
+        <ol class="checklist">
+          @for (item of store.items(); track $index; let index = $index) {
+            <li class="check" [class]="'check check--' + (item.result ?? 'pending').toLowerCase()">
+              <div class="check__head">
+                <div class="check__text">
+                  <p class="check__criterion">{{ index + 1 }}. {{ item.criterion }}</p>
+                  @if (item.requirement) {
+                    <p class="check__requirement">{{ item.requirement }}</p>
+                  }
+                </div>
+                @if (store.canEdit()) {
+                  <mat-button-toggle-group
+                    class="check__result"
+                    [value]="item.result"
+                    [hideSingleSelectionIndicator]="true"
+                    [attr.aria-label]="'Kết quả tiêu chí ' + (index + 1)"
+                    (change)="onResult(index, $event)"
+                  >
+                    <mat-button-toggle value="PASS" class="toggle--pass"><mat-icon>check</mat-icon> Đạt</mat-button-toggle>
+                    <mat-button-toggle value="FAIL" class="toggle--fail"><mat-icon>close</mat-icon> Không đạt</mat-button-toggle>
+                    <mat-button-toggle value="NA">N/A</mat-button-toggle>
+                  </mat-button-toggle-group>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    [attr.aria-label]="'Bỏ tiêu chí ' + (index + 1)"
+                    matTooltip="Bỏ tiêu chí"
+                    (click)="store.removeItem(index)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                } @else {
+                  <span class="check__label">{{ item.result ? resultLabels[item.result] : 'Chưa đánh giá' }}</span>
+                }
+              </div>
+
+              @if (store.canEdit()) {
+                <mat-form-field class="check__note" subscriptSizing="dynamic">
+                  <mat-label>Ghi chú / số đo thực tế</mat-label>
+                  <input matInput [value]="item.note" maxlength="500" (input)="onNote(index, $event)" />
+                </mat-form-field>
+              } @else if (item.note) {
+                <p class="check__note-text">{{ item.note }}</p>
+              }
+
+              @if (item.result === 'FAIL') {
+                <div class="check__punch">
+                  @for (punch of store.punchByItem().get(item.id ?? '') ?? []; track punch.id) {
+                    <a class="punch-link" [routerLink]="['/quality/punch', punch.id]">
+                      <mat-icon>{{ punch.status === 'VERIFIED' ? 'task_alt' : 'report' }}</mat-icon>
+                      {{ punch.code }} · {{ punch.assignee?.fullName ?? 'Chưa giao' }} · hạn {{ punch.dueDate | date: 'dd/MM' }}
+                    </a>
+                  }
+                  @if (canRaisePunch() && item.id) {
+                    <button mat-stroked-button type="button" [disabled]="store.busy()" (click)="raisePunch(item)">
+                      <mat-icon>add_a_photo</mat-icon> Ghi nhận lỗi
+                    </button>
+                  } @else if (!item.id && store.canEdit()) {
+                    <span class="hint">Lưu checklist để ghi nhận lỗi cho tiêu chí mới.</span>
+                  }
+                </div>
+              }
+            </li>
+          }
+        </ol>
+
+        @if (store.canEdit()) {
+          <form [formGroup]="newCriterion" class="add" (ngSubmit)="addCriterion()">
+            <mat-form-field subscriptSizing="dynamic">
+              <mat-label>Tiêu chí bổ sung</mat-label>
+              <input matInput formControlName="criterion" maxlength="300" />
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic">
+              <mat-label>Yêu cầu kỹ thuật</mat-label>
+              <input matInput formControlName="requirement" maxlength="300" />
+            </mat-form-field>
+            <button mat-stroked-button type="submit"><mat-icon>add</mat-icon> Thêm</button>
+          </form>
+        }
+      </section>
+    </div>
+
+    <aside class="side">
+      <section class="card">
+        <h2 class="card__title">Quy trình duyệt</h2>
+        <app-approval-timeline [approvals]="inspection.approvals" [status]="inspection.status" [currentLevel]="inspection.currentLevel" />
+      </section>
+
+      <section class="card">
+        <div class="card__header">
+          <h2 class="card__title">Punch list liên quan</h2>
+          <span class="summary">{{ store.openPunchCount() }} đang mở</span>
+        </div>
+        @if (store.punchItems().length === 0) {
+          <p class="hint">Chưa có lỗi nào được ghi nhận từ phiếu này.</p>
+        } @else {
+          <ul class="punch-list">
+            @for (punch of store.punchItems(); track punch.id) {
+              <li>
+                <a class="punch-link" [routerLink]="['/quality/punch', punch.id]">
+                  <mat-icon>{{ punch.status === 'VERIFIED' ? 'task_alt' : 'report' }}</mat-icon>
+                  {{ punch.code }} · {{ punch.title }}
+                </a>
+                <app-quality-status-chip [status]="punch.status" />
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="card">
+        <h2 class="card__title">Lịch sử</h2>
+        <ul class="history">
+          @for (entry of history(); track $index) {
+            <li>
+              <span class="history__action">{{ actionLabels[entry.action] }}{{ entry.level ? ' cấp ' + entry.level : '' }}</span>
+              <span class="history__meta"> · {{ entry.by.fullName }} · {{ entry.at | date: 'HH:mm dd/MM/yyyy' }}</span>
+              @if (entry.note) {
+                <div class="history__note">“{{ entry.note }}”</div>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    </aside>
+  </div>
+}

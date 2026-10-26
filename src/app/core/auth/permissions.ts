@@ -22,6 +22,10 @@ export const PERMISSIONS = {
   viewCosts: ['ADMIN', 'PROJECT_MANAGER', 'CLIENT'],
   /** Ghi chi phí, phát sinh, cập nhật thanh toán; xem lãi/lỗ. */
   manageCosts: ['ADMIN', 'PROJECT_MANAGER'],
+  /** Lập phiếu nghiệm thu, ghi nhận punch item (duyệt theo INSPECTION_APPROVAL_LEVELS). */
+  editQuality: ['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'],
+  /** Xác nhận đóng / mở lại / giao lại punch item. */
+  verifyPunch: ['ADMIN', 'PROJECT_MANAGER'],
 } as const satisfies Record<string, readonly UserRole[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

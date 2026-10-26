@@ -35,7 +35,7 @@ function placeholderRoute(item: NavItem): Route {
   };
 }
 
-const IMPLEMENTED_PATHS = new Set(['dashboard', 'projects', 'tasks', 'schedule', 'site-diaries', 'materials', 'map', 'budget']);
+const IMPLEMENTED_PATHS = new Set(['dashboard', 'projects', 'tasks', 'schedule', 'site-diaries', 'materials', 'map', 'budget', 'quality']);
 
 export const routes: Routes = [
   {
@@ -73,6 +73,10 @@ export const routes: Routes = [
       moduleRoute('site-diaries', {
         title: undefined,
         loadChildren: () => import('./features/site-diaries/site-diaries.routes').then((m) => m.SITE_DIARIES_ROUTES),
+      }),
+      moduleRoute('quality', {
+        title: undefined,
+        loadChildren: () => import('./features/quality/quality.routes').then((m) => m.QUALITY_ROUTES),
       }),
       moduleRoute('materials', {
         loadComponent: () =>

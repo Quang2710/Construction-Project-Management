@@ -1,14 +1,11 @@
 import { http, HttpResponse } from 'msw';
-import { environment } from '../../../environments/environment';
 import { PERMISSIONS } from '../../core/auth/permissions';
 import {
   DiaryAction,
   DiaryContent,
-  DiaryPhoto,
   DiaryStatus,
   EDITABLE_DIARY_STATUSES,
   EquipmentEntry,
-  GeoPoint,
   INCIDENT_SEVERITIES,
   INCIDENT_TYPES,
   IncidentEntry,
@@ -29,47 +26,15 @@ import { authenticate } from '../utils/auth.utils';
 import { apiUrl, errorResponse, readJsonBody, simulateNetwork } from '../utils/http.utils';
 import { applyListQuery, parseListQuery } from '../utils/list-query';
 import { canViewProject, newId, toDiaryDto } from '../utils/serializers';
+import { isNumberInRange, isOneOf, isRecord, isText, parseList, parsePhoto } from '../utils/validation';
 
 const MAX_PAGE_SIZE = 500;
-const FILE_URL_PREFIX = `${environment.apiBaseUrl}/files/`;
 
 type Failure = { readonly ok: false; readonly response: HttpResponse<ApiError> };
 type Success<T> = { readonly ok: true; readonly value: T };
 
 function fail(status: 403 | 404 | 409 | 422, code: string, message: string): Failure {
   return { ok: false, response: errorResponse(status, code, message) };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isText(value: unknown, min: number, max: number): value is string {
-  return typeof value === 'string' && value.trim().length >= min && value.trim().length <= max;
-}
-
-function isNumberInRange(value: unknown, min: number, max: number): value is number {
-  return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
-}
-
-function isOneOf<T extends string>(values: readonly T[], value: unknown): value is T {
-  return typeof value === 'string' && (values as readonly string[]).includes(value);
-}
-
-/** Kiểm tra từng phần tử của mảng; trả về null nếu có phần tử sai. */
-function parseList<T>(value: unknown, max: number, parse: (item: Record<string, unknown>) => T | null): T[] | null {
-  if (!Array.isArray(value) || value.length > max) {
-    return null;
-  }
-  const result: T[] = [];
-  for (const item of value) {
-    const parsed = isRecord(item) ? parse(item) : null;
-    if (!parsed) {
-      return null;
-    }
-    result.push(parsed);
-  }
-  return result;
 }
 
 function parseLabor(item: Record<string, unknown>): LaborEntry | null {
@@ -106,43 +71,6 @@ function parseIncident(item: Record<string, unknown>): IncidentEntry | null {
   }
   const actionTaken = typeof item['actionTaken'] === 'string' ? item['actionTaken'].trim().slice(0, 1000) : '';
   return { type, severity, description: item['description'].trim(), actionTaken };
-}
-
-function parseLocation(value: unknown): GeoPoint | null | undefined {
-  if (value === null || value === undefined) {
-    return null;
-  }
-  if (!isRecord(value) || !isNumberInRange(value['lat'], -90, 90) || !isNumberInRange(value['lng'], -180, 180)) {
-    return undefined;
-  }
-  const accuracy = value['accuracy'];
-  return { lat: value['lat'], lng: value['lng'], accuracy: typeof accuracy === 'number' ? accuracy : null };
-}
-
-function parsePhoto(item: Record<string, unknown>): DiaryPhoto | null {
-  const location = parseLocation(item['location']);
-  if (
-    location === undefined ||
-    !isText(item['id'], 1, 100) ||
-    typeof item['url'] !== 'string' ||
-    !item['url'].startsWith(FILE_URL_PREFIX) ||
-    !isText(item['fileName'], 1, 255) ||
-    !isText(item['mimeType'], 1, 100) ||
-    !isNumberInRange(item['size'], 0, 50 * 1024 * 1024) ||
-    typeof item['takenAt'] !== 'string'
-  ) {
-    return null;
-  }
-  return {
-    id: item['id'],
-    url: item['url'],
-    fileName: item['fileName'],
-    mimeType: item['mimeType'],
-    size: item['size'],
-    caption: typeof item['caption'] === 'string' ? item['caption'].trim().slice(0, 200) : '',
-    takenAt: item['takenAt'],
-    location,
-  };
 }
 
 /** Kiểm tra nội dung nhật ký giống BE thật, thông báo lỗi tiếng Việt. */

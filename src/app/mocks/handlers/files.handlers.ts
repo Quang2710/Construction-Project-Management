@@ -21,13 +21,24 @@ function isBlobLike(value: unknown): value is Blob {
   );
 }
 
+function svgResponse(id: string, caption: string, projectId: string, isoDate: string): HttpResponse<string> {
+  const project = db.projects.findById(projectId);
+  const svg = placeholderPhotoSvg(id, caption, `${project?.code ?? ''} · ${isoDate.slice(0, 10).split('-').reverse().join('/')}`);
+  return new HttpResponse(svg, { headers: { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'max-age=3600' } });
+}
+
+/** Ảnh seed (nhật ký, punch list) không có file thật: vẽ ảnh minh hoạ SVG. */
 function seedPhoto(id: string): HttpResponse<string> | null {
   for (const diary of db.siteDiaries.all()) {
     const photo = diary.photos.find((item) => item.id === id);
     if (photo) {
-      const project = db.projects.findById(diary.projectId);
-      const svg = placeholderPhotoSvg(id, photo.caption, `${project?.code ?? ''} · ${diary.date.split('-').reverse().join('/')}`);
-      return new HttpResponse(svg, { headers: { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'max-age=3600' } });
+      return svgResponse(id, photo.caption, diary.projectId, diary.date);
+    }
+  }
+  for (const punch of db.punchItems.all()) {
+    const photo = [...punch.beforePhotos, ...punch.afterPhotos].find((item) => item.id === id);
+    if (photo) {
+      return svgResponse(id, photo.caption, punch.projectId, photo.takenAt);
     }
   }
   return null;

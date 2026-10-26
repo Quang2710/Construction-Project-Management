@@ -6,6 +6,13 @@ import {
   StockTransactionType,
 } from '../../features/materials/models/material.model';
 import { Project } from '../../features/projects/models/project.model';
+import {
+  ApprovalDecision,
+  Inspection,
+  InspectionAction,
+  PunchAction,
+  PunchItem,
+} from '../../features/quality/models/quality.model';
 import { WbsNode } from '../../features/scheduling/models/wbs.model';
 import { DiaryAction, SiteDiary } from '../../features/site-diaries/models/site-diary.model';
 import { Task } from '../../features/tasks/models/task.model';
@@ -130,6 +137,44 @@ export type ChangeOrderRecord = Omit<ChangeOrder, 'costItemName' | 'createdBy'> 
 
 export type PaymentRecord = Omit<PaymentMilestone, 'isOverdue'>;
 
+export interface InspectionApprovalRecord {
+  readonly level: number;
+  readonly decision: ApprovalDecision | null;
+  readonly byId: string | null;
+  readonly at: string | null;
+  readonly note: string;
+}
+
+export interface InspectionHistoryRecord {
+  readonly action: InspectionAction;
+  readonly level: number | null;
+  readonly byId: string;
+  readonly at: string;
+  readonly note: string;
+}
+
+export type InspectionRecord = Omit<Inspection, 'project' | 'wbsName' | 'approvals' | 'history' | 'createdBy' | 'stats'> & {
+  readonly createdById: string;
+  readonly approvals: readonly InspectionApprovalRecord[];
+  readonly history: readonly InspectionHistoryRecord[];
+};
+
+export interface PunchHistoryRecord {
+  readonly action: PunchAction;
+  readonly byId: string;
+  readonly at: string;
+  readonly note: string;
+}
+
+export type PunchRecord = Omit<
+  PunchItem,
+  'project' | 'inspectionCode' | 'assignee' | 'isOverdue' | 'history' | 'createdBy'
+> & {
+  readonly assigneeId: string | null;
+  readonly createdById: string;
+  readonly history: readonly PunchHistoryRecord[];
+};
+
 export interface DbSchema {
   readonly users: UserRecord[];
   readonly projects: ProjectRecord[];
@@ -146,4 +191,6 @@ export interface DbSchema {
   readonly costEntries: CostEntryRecord[];
   readonly changeOrders: ChangeOrderRecord[];
   readonly payments: PaymentRecord[];
+  readonly inspections: InspectionRecord[];
+  readonly punchItems: PunchRecord[];
 }

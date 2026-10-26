@@ -37,6 +37,8 @@ export const NAV_SECTIONS: readonly NavSection[] = [
       { label: 'Tiến độ', icon: 'view_timeline', path: 'schedule', description: 'Biểu đồ Gantt tiến độ thi công' },
       // CLIENT vẫn vào được nhưng chỉ thấy nhật ký đã duyệt (lọc ở BE).
       { label: 'Nhật ký công trường', icon: 'menu_book', path: 'site-diaries', description: 'Báo cáo thi công hằng ngày và ảnh hiện trường' },
+      // CLIENT xem phiếu đã nghiệm thu và punch list (lọc ở BE), không ghi được.
+      { label: 'Chất lượng', icon: 'fact_check', path: 'quality', description: 'Nghiệm thu, punch list và duyệt nhiều cấp' },
       { label: 'Vật tư', icon: 'inventory_2', path: 'materials', description: 'Nhập, xuất, tồn kho vật tư', roles: FIELD_TEAM },
       { label: 'Nhân sự', icon: 'engineering', path: 'workforce', description: 'Nhân công, tổ đội và chấm công', roles: MANAGERS },
     ],

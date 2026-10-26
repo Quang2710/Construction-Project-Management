@@ -5,10 +5,12 @@ import {
   CostEntryRecord,
   CostItemRecord,
   DbSchema,
+  InspectionRecord,
   MaterialRecord,
   PaymentRecord,
   MaterialRequestRecord,
   ProjectRecord,
+  PunchRecord,
   StockRecord,
   StockTransactionRecord,
   SiteDiaryRecord,
@@ -20,7 +22,7 @@ import {
 
 const STORAGE_KEY = 'cpm.mock-db';
 /** Tăng version khi đổi cấu trúc DbSchema để buộc seed lại dữ liệu cũ trong localStorage. */
-const SCHEMA_VERSION = 6;
+const SCHEMA_VERSION = 7;
 
 interface PersistedDb {
   readonly version: number;
@@ -164,6 +166,16 @@ class MockDatabase {
   readonly payments = new Collection<PaymentRecord>(
     () => this.data.payments,
     (payments) => this.commit({ ...this.data, payments }),
+  );
+
+  readonly inspections = new Collection<InspectionRecord>(
+    () => this.data.inspections,
+    (inspections) => this.commit({ ...this.data, inspections }),
+  );
+
+  readonly punchItems = new Collection<PunchRecord>(
+    () => this.data.punchItems,
+    (punchItems) => this.commit({ ...this.data, punchItems }),
   );
 
   constructor() {
